@@ -1,5 +1,6 @@
 @import './base.css';
-@import "tailwindcss"
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 #app {
   max-width: 1280px;
@@ -7,7 +8,6 @@
   padding: 2rem;
   font-weight: normal;
 }
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -1,18 +1,26 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
+
+const handleLogout = async () => {
+  await authStore.logout()
+}
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
+      <nav v-if="authStore.isAuthenticated">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
+        <span class="user-info">Welcome, {{ authStore.user?.username }}!</span>
+        <button @click="handleLogout" class="logout-btn">Logout</button>
+      </nav>
+      <nav v-else>
+        <RouterLink to="/login">Login</RouterLink>
+        <RouterLink to="/register">Register</RouterLink>
       </nav>
     </div>
   </header>
@@ -54,6 +62,27 @@ nav a {
 
 nav a:first-of-type {
   border: 0;
+}
+
+.user-info {
+  display: inline-block;
+  padding: 0 1rem;
+  font-weight: 500;
+}
+
+.logout-btn {
+  display: inline-block;
+  padding: 0 1rem;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.logout-btn:hover {
+  opacity: 0.7;
 }
 
 @media (min-width: 1024px) {
