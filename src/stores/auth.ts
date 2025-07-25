@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response: ApiResponse<PublicUser> = await api.post('/auth/register', credentials)
 
       if (response.success && response.data) {
-        user.value = response.data
+        // Don't set user automatically - require separate login
         return true
       } else {
         error.value = response.error || 'Registration failed'

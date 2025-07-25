@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 const handleLogout = async () => {
   await authStore.logout()
+  router.push('/login')
 }
 </script>
 
@@ -17,10 +19,6 @@ const handleLogout = async () => {
         <RouterLink to="/about">About</RouterLink>
         <span class="user-info">Welcome, {{ authStore.user?.username }}!</span>
         <button @click="handleLogout" class="logout-btn">Logout</button>
-      </nav>
-      <nav v-else>
-        <RouterLink to="/login">Login</RouterLink>
-        <RouterLink to="/register">Register</RouterLink>
       </nav>
     </div>
   </header>

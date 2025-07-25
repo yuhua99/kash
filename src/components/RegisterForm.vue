@@ -38,7 +38,7 @@ const handleSubmit = async (e: Event) => {
   })
 
   if (success) {
-    router.push('/')
+    router.push('/login')
   }
 }
 </script>
