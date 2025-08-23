@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import StatsCards from '@/components/StatsCards.vue'
 import TransactionsTable from '@/components/TransactionsTable.vue'
+import { useRecordsStore } from '@/stores/records'
+import { useCategoriesStore } from '@/stores/categories'
 
 // Enhanced transaction interface
 interface Transaction {
@@ -15,113 +19,28 @@ interface Transaction {
   type: 'income' | 'expense'
 }
 
-// Sample data with more realistic transactions
-const transactions = ref<Transaction[]>([
-  {
-    id: '1',
-    date: '2025-08-22',
-    description: 'Grocery Store',
-    amount: -85.32,
-    category: 'Food',
-    type: 'expense',
-  },
-  {
-    id: '2',
-    date: '2025-08-20',
-    description: 'Salary Deposit',
-    amount: 3500.0,
-    category: 'Income',
-    type: 'income',
-  },
-  {
-    id: '3',
-    date: '2025-08-19',
-    description: 'Electric Bill',
-    amount: -127.45,
-    category: 'Utilities',
-    type: 'expense',
-  },
-  {
-    id: '4',
-    date: '2025-08-18',
-    description: 'Coffee Shop',
-    amount: -12.5,
-    category: 'Food',
-    type: 'expense',
-  },
-  {
-    id: '5',
-    date: '2025-08-17',
-    description: 'Gas Station',
-    amount: -45.0,
-    category: 'Transportation',
-    type: 'expense',
-  },
-  {
-    id: '6',
-    date: '2025-08-16',
-    description: 'Freelance Work',
-    amount: 750.0,
-    category: 'Income',
-    type: 'income',
-  },
-  {
-    id: '7',
-    date: '2025-08-15',
-    description: 'Restaurant',
-    amount: -65.8,
-    category: 'Food',
-    type: 'expense',
-  },
-  {
-    id: '8',
-    date: '2025-08-14',
-    description: 'Internet Bill',
-    amount: -89.99,
-    category: 'Utilities',
-    type: 'expense',
-  },
-])
+// Stores
+const recordsStore = useRecordsStore()
+const categoriesStore = useCategoriesStore()
 
 // Filter states
 const selectedCategory = ref<string>('all')
 const searchQuery = ref('')
 
-// Categories
-const categories = [
-  'Food',
-  'Utilities',
-  'Transportation',
-  'Income',
-  'Entertainment',
-  'Healthcare',
-  'Shopping',
-]
+// Computed values from stores
+const totalBalance = computed(() => recordsStore.totalBalance)
+const monthlyIncome = computed(() => recordsStore.monthlyIncome)
+const monthlyExpenses = computed(() => recordsStore.monthlyExpenses)
+const savingsRate = computed(() => recordsStore.savingsRate)
 
-// Computed values
-const totalBalance = computed(() => {
-  return transactions.value.reduce((sum, t) => sum + t.amount, 0)
-})
+// Categories from store (for future use if needed)
 
-const monthlyIncome = computed(() => {
-  return transactions.value.filter((t) => t.type === 'income').reduce((sum, t) => sum + t.amount, 0)
-})
-
-const monthlyExpenses = computed(() => {
-  return Math.abs(
-    transactions.value.filter((t) => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0),
-  )
-})
-
-const savingsRate = computed(() => {
-  return monthlyIncome.value > 0
-    ? ((monthlyIncome.value - monthlyExpenses.value) / monthlyIncome.value) * 100
-    : 0
-})
+// Loading state
+const isLoading = computed(() => recordsStore.isLoading || categoriesStore.isLoading)
 
 // Filtered transactions
 const filteredTransactions = computed(() => {
-  return transactions.value
+  return recordsStore.transactions
     .filter((transaction) => {
       const matchesCategory =
         selectedCategory.value === 'all' || transaction.category === selectedCategory.value
@@ -135,36 +54,129 @@ const filteredTransactions = computed(() => {
 })
 
 // Functions
-const addTransaction = (newTransaction: Omit<Transaction, 'id'>) => {
-  transactions.value.push({
-    id: Date.now().toString(),
-    ...newTransaction,
-  })
+const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
+  // Find the category ID for the given category name
+  const category = categoriesStore.categories.find((cat) => cat.name === newTransaction.category)
+  if (!category) {
+    console.error('Category not found:', newTransaction.category)
+    return
+  }
+
+  const payload = {
+    name: newTransaction.description,
+    amount: newTransaction.amount,
+    category_id: category.id,
+  }
+
+  await recordsStore.createRecord(payload)
 }
 
-const deleteTransaction = (id: string) => {
-  transactions.value = transactions.value.filter((t) => t.id !== id)
+const deleteTransaction = async (id: string) => {
+  await recordsStore.deleteRecord(id)
 }
+
+// Load data function
+const loadData = async () => {
+  // Load categories first, then records (records need categories for display)
+  await categoriesStore.fetchCategories()
+  await recordsStore.fetchRecords()
+}
+
+// Load data on component mount
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <template>
   <main class="p-6 space-y-8">
-    <DashboardHeader
-      v-model:search-query="searchQuery"
-      v-model:selected-category="selectedCategory"
-      :categories="categories"
-      @add-transaction="addTransaction"
-    />
-    <StatsCards
-      :total-balance="totalBalance"
-      :monthly-income="monthlyIncome"
-      :monthly-expenses="monthlyExpenses"
-      :savings-rate="savingsRate"
-    />
-    <Separator />
-    <TransactionsTable
-      :transactions="filteredTransactions"
-      @delete-transaction="deleteTransaction"
-    />
+    <!-- Error State -->
+    <div
+      v-if="recordsStore.error || categoriesStore.error"
+      class="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded"
+    >
+      <p v-if="recordsStore.error">Records Error: {{ recordsStore.error }}</p>
+      <p v-if="categoriesStore.error">Categories Error: {{ categoriesStore.error }}</p>
+      <div class="mt-2 space-x-2">
+        <button
+          @click="(recordsStore.clearError(), categoriesStore.clearError())"
+          class="text-red-700 underline text-sm"
+        >
+          Dismiss
+        </button>
+        <button @click="loadData" class="text-red-700 underline text-sm">Retry</button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="isLoading" class="space-y-8">
+      <!-- Dashboard Header Skeleton -->
+      <div class="flex items-center justify-between">
+        <div>
+          <Skeleton class="h-8 w-64 mb-2" />
+          <Skeleton class="h-4 w-48" />
+        </div>
+        <div class="flex items-center gap-4">
+          <Skeleton class="h-10 w-64" />
+          <Skeleton class="h-10 w-48" />
+          <Skeleton class="h-10 w-40" />
+        </div>
+      </div>
+
+      <!-- Stats Cards Skeleton -->
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card v-for="i in 4" :key="i">
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Skeleton class="h-4 w-24" />
+            <Skeleton class="h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton class="h-8 w-20 mb-1" />
+            <Skeleton class="h-3 w-32" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <Separator />
+
+      <!-- Transactions Table Skeleton -->
+      <Card>
+        <CardHeader>
+          <Skeleton class="h-6 w-32 mb-2" />
+          <Skeleton class="h-4 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div class="space-y-4">
+            <div v-for="i in 5" :key="i" class="flex items-center space-x-4">
+              <Skeleton class="h-4 w-20" />
+              <Skeleton class="h-4 w-40" />
+              <Skeleton class="h-4 w-24" />
+              <Skeleton class="h-4 w-16" />
+              <Skeleton class="h-4 w-8" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- Main Content -->
+    <div v-else>
+      <DashboardHeader
+        v-model:search-query="searchQuery"
+        v-model:selected-category="selectedCategory"
+        @add-transaction="addTransaction"
+      />
+      <StatsCards
+        :total-balance="totalBalance"
+        :monthly-income="monthlyIncome"
+        :monthly-expenses="monthlyExpenses"
+        :savings-rate="savingsRate"
+      />
+      <Separator />
+      <TransactionsTable
+        :transactions="filteredTransactions"
+        @delete-transaction="deleteTransaction"
+      />
+    </div>
   </main>
 </template>

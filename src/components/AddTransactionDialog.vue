@@ -19,10 +19,11 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useCategoriesStore } from '@/stores/categories'
 
-interface Props {
-  categories: string[]
-}
+const categoriesStore = useCategoriesStore()
+
+// Props interface removed since we get categories from the store
 
 interface Transaction {
   description: string
@@ -36,7 +37,6 @@ interface Emits {
   (e: 'addTransaction', transaction: Transaction): void
 }
 
-defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const showDialog = ref(false)
@@ -112,8 +112,12 @@ const addTransaction = () => {
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem v-for="category in categories" :key="category" :value="category">
-                {{ category }}
+              <SelectItem
+                v-for="category in categoriesStore.categories"
+                :key="category.id"
+                :value="category.name"
+              >
+                {{ category.name }}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -142,4 +146,3 @@ const addTransaction = () => {
     </DialogContent>
   </Dialog>
 </template>
-

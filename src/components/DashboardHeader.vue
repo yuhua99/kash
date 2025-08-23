@@ -10,17 +10,28 @@ import {
 } from '@/components/ui/select'
 import { Plus, Filter } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
+import { useCategoriesStore } from '@/stores/categories'
+
+const categoriesStore = useCategoriesStore()
 
 interface Props {
   searchQuery: string
   selectedCategory: string
-  categories: string[]
+}
+
+interface Transaction {
+  id: string
+  date: string
+  description: string
+  amount: number
+  category: string
+  type: 'income' | 'expense'
 }
 
 interface Emits {
   (e: 'update:searchQuery', value: string): void
   (e: 'update:selectedCategory', value: string): void
-  (e: 'addTransaction', transaction: any): void
+  (e: 'addTransaction', transaction: Omit<Transaction, 'id'>): void
 }
 
 defineProps<Props>()
@@ -39,7 +50,7 @@ defineEmits<Emits>()
       <div class="relative">
         <Input
           :model-value="searchQuery"
-          @update:model-value="$emit('update:searchQuery', $event)"
+          @update:model-value="(value) => $emit('update:searchQuery', value as string)"
           placeholder="Search transactions..."
           class="w-64"
         />
@@ -48,7 +59,7 @@ defineEmits<Emits>()
       <!-- Category Filter -->
       <Select
         :model-value="selectedCategory"
-        @update:model-value="$emit('update:selectedCategory', $event)"
+        @update:model-value="(value) => $emit('update:selectedCategory', value as string)"
       >
         <SelectTrigger class="w-48">
           <Filter class="h-4 w-4 mr-2" />
@@ -56,17 +67,18 @@ defineEmits<Emits>()
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Categories</SelectItem>
-          <SelectItem v-for="category in categories" :key="category" :value="category">
-            {{ category }}
+          <SelectItem
+            v-for="category in categoriesStore.categories"
+            :key="category.id"
+            :value="category.name"
+          >
+            {{ category.name }}
           </SelectItem>
         </SelectContent>
       </Select>
 
       <!-- Add Transaction Dialog -->
-      <AddTransactionDialog
-        :categories="categories"
-        @add-transaction="$emit('addTransaction', $event)"
-      >
+      <AddTransactionDialog @add-transaction="$emit('addTransaction', $event)">
         <Button>
           <Plus class="h-4 w-4 mr-2" />
           Add Transaction
@@ -75,4 +87,3 @@ defineEmits<Emits>()
     </div>
   </div>
 </template>
-

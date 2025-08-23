@@ -59,4 +59,3 @@ defineProps<Props>()
     </Card>
   </div>
 </template>
-

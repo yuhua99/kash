@@ -39,8 +39,10 @@ interface Emits {
 defineProps<Props>()
 defineEmits<Emits>()
 
-const getCategoryVariant = (category: string) => {
-  const variants: Record<string, string> = {
+const getCategoryVariant = (
+  category: string,
+): 'default' | 'destructive' | 'outline' | 'secondary' => {
+  const variants: Record<string, 'default' | 'destructive' | 'outline' | 'secondary'> = {
     Food: 'default',
     Utilities: 'secondary',
     Transportation: 'outline',
@@ -131,4 +133,3 @@ const getCategoryVariant = (category: string) => {
     </CardContent>
   </Card>
 </template>
-
