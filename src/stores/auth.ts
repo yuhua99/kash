@@ -83,6 +83,31 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const checkAuthStatus = async (): Promise<boolean> => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<PublicUser> = await api.get('/auth/me')
+
+      if (response.success && response.data) {
+        user.value = response.data
+        return true
+      } else {
+        // Not authenticated or session expired
+        user.value = null
+        return false
+      }
+    } catch (err) {
+      // Network error or server error
+      user.value = null
+      console.warn('Auth check failed:', err instanceof Error ? err.message : 'Unknown error')
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const clearError = () => {
     error.value = null
   }
@@ -95,6 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
+    checkAuthStatus,
     clearError,
   }
 })

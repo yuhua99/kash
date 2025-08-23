@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -8,6 +9,7 @@ import StatsCards from '@/components/StatsCards.vue'
 import TransactionsTable from '@/components/TransactionsTable.vue'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
+import { useAuthStore } from '@/stores/auth'
 
 // Enhanced transaction interface
 interface Transaction {
@@ -19,7 +21,9 @@ interface Transaction {
   type: 'income' | 'expense'
 }
 
-// Stores
+// Stores and router
+const router = useRouter()
+const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
 const categoriesStore = useCategoriesStore()
 
@@ -36,7 +40,9 @@ const savingsRate = computed(() => recordsStore.savingsRate)
 // Categories from store (for future use if needed)
 
 // Loading state
-const isLoading = computed(() => recordsStore.isLoading || categoriesStore.isLoading)
+const isLoading = computed(
+  () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
+)
 
 // Filtered transactions
 const filteredTransactions = computed(() => {
@@ -77,6 +83,14 @@ const deleteTransaction = async (id: string) => {
 
 // Load data function
 const loadData = async () => {
+  // First check if we have a valid session
+  const isAuthenticated = await authStore.checkAuthStatus()
+
+  if (!isAuthenticated) {
+    console.warn('User not authenticated, skipping data load')
+    return
+  }
+
   // Load categories first, then records (records need categories for display)
   await categoriesStore.fetchCategories()
   await recordsStore.fetchRecords()
@@ -92,14 +106,15 @@ onMounted(() => {
   <main class="p-6 space-y-8">
     <!-- Error State -->
     <div
-      v-if="recordsStore.error || categoriesStore.error"
+      v-if="authStore.error || recordsStore.error || categoriesStore.error"
       class="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded"
     >
+      <p v-if="authStore.error">Authentication Error: {{ authStore.error }}</p>
       <p v-if="recordsStore.error">Records Error: {{ recordsStore.error }}</p>
       <p v-if="categoriesStore.error">Categories Error: {{ categoriesStore.error }}</p>
       <div class="mt-2 space-x-2">
         <button
-          @click="(recordsStore.clearError(), categoriesStore.clearError())"
+          @click="(authStore.clearError(), recordsStore.clearError(), categoriesStore.clearError())"
           class="text-red-700 underline text-sm"
         >
           Dismiss
@@ -157,6 +172,20 @@ onMounted(() => {
           </div>
         </CardContent>
       </Card>
+    </div>
+
+    <!-- Not Authenticated State -->
+    <div v-else-if="!authStore.isAuthenticated" class="flex items-center justify-center py-12">
+      <div class="text-center">
+        <h2 class="text-xl font-semibold mb-2">Authentication Required</h2>
+        <p class="text-muted-foreground mb-4">Please log in to access your budget dashboard.</p>
+        <button
+          @click="router.push('/login')"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Go to Login
+        </button>
+      </div>
     </div>
 
     <!-- Main Content -->
