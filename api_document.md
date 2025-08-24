@@ -151,7 +151,8 @@ Create a new expense record.
 {
   "name": "string",        // max 255 characters, required
   "amount": number,        // non-zero number, required
-  "category_id": "string"  // valid category ID, required
+  "category_id": "string", // valid category ID, required
+  "timestamp": number      // Unix timestamp, required
 }
 ```
 
@@ -167,7 +168,7 @@ Create a new expense record.
 ```
 
 **Error Responses:**
-- `400 Bad Request`: Invalid input (empty name, zero amount, invalid category ID)
+- `400 Bad Request`: Invalid input (empty name, zero amount, invalid category ID, missing timestamp)
 - `401 Unauthorized`: Not authenticated
 - `404 Not Found`: Category doesn't exist
 - `500 Internal Server Error`: Server error
@@ -177,7 +178,7 @@ Create a new expense record.
 curl -X POST http://localhost:3000/records \
   -H "Content-Type: application/json" \
   -b cookies.txt \
-  -d '{"name": "Grocery shopping", "amount": 45.67, "category_id": "category-uuid"}'
+  -d '{"name": "Grocery shopping", "amount": 45.67, "category_id": "category-uuid", "timestamp": 1703980800}'
 ```
 
 ### 2. Get Records

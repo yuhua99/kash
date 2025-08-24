@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -18,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Edit, Trash2, MoreHorizontal } from 'lucide-vue-next'
+import AddTransactionDialog from './AddTransactionDialog.vue'
 
 interface Transaction {
   id: string
@@ -34,10 +36,24 @@ interface Props {
 
 interface Emits {
   (e: 'deleteTransaction', id: string): void
+  (e: 'editTransaction', transaction: Transaction): void
 }
 
 defineProps<Props>()
-defineEmits<Emits>()
+const emit = defineEmits<Emits>()
+
+const editDialogOpen = ref(false)
+const editingTransaction = ref<Transaction | null>(null)
+
+const openEditDialog = (transaction: Transaction) => {
+  editingTransaction.value = transaction
+  editDialogOpen.value = true
+}
+
+const handleEditTransaction = (transaction: Transaction) => {
+  editingTransaction.value = null
+  emit('editTransaction', transaction)
+}
 
 const getCategoryVariant = (
   category: string,
@@ -107,7 +123,7 @@ const getCategoryVariant = (
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem @click="openEditDialog(transaction)">
                     <Edit class="h-4 w-4 mr-2" />
                     Edit
                   </DropdownMenuItem>
@@ -131,5 +147,12 @@ const getCategoryVariant = (
         <p class="text-sm text-muted-foreground">Try adjusting your search or filters</p>
       </div>
     </CardContent>
+
+    <!-- Edit Transaction Dialog -->
+    <AddTransactionDialog
+      v-model:open="editDialogOpen"
+      :edit-transaction="editingTransaction"
+      @edit-transaction="handleEditTransaction"
+    />
   </Card>
 </template>

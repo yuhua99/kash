@@ -72,6 +72,7 @@ const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
     name: newTransaction.description,
     amount: newTransaction.amount,
     category_id: category.id,
+    timestamp: Math.floor(new Date(newTransaction.date).getTime() / 1000),
   }
 
   await recordsStore.createRecord(payload)
@@ -79,6 +80,24 @@ const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
 
 const deleteTransaction = async (id: string) => {
   await recordsStore.deleteRecord(id)
+}
+
+const editTransaction = async (transaction: Transaction) => {
+  // Find the category ID for the given category name
+  const category = categoriesStore.categories.find((cat) => cat.name === transaction.category)
+  if (!category) {
+    console.error('Category not found:', transaction.category)
+    return
+  }
+
+  const payload = {
+    name: transaction.description,
+    amount: transaction.amount,
+    category_id: category.id,
+    timestamp: Math.floor(new Date(transaction.date).getTime() / 1000),
+  }
+
+  await recordsStore.updateRecord(transaction.id, payload)
 }
 
 // Load data function
@@ -205,6 +224,7 @@ onMounted(() => {
       <TransactionsTable
         :transactions="filteredTransactions"
         @delete-transaction="deleteTransaction"
+        @edit-transaction="editTransaction"
       />
     </div>
   </main>

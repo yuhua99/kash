@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -23,9 +23,7 @@ import { useCategoriesStore } from '@/stores/categories'
 
 const categoriesStore = useCategoriesStore()
 
-// Props interface removed since we get categories from the store
-
-interface Transaction {
+interface TransactionBase {
   description: string
   amount: number
   category: string
@@ -33,14 +31,37 @@ interface Transaction {
   date: string
 }
 
-interface Emits {
-  (e: 'addTransaction', transaction: Transaction): void
+interface TransactionWithId extends TransactionBase {
+  id: string
 }
 
+interface Props {
+  editTransaction?: TransactionWithId | null
+  open?: boolean
+}
+
+interface Emits {
+  (e: 'addTransaction', transaction: TransactionBase): void
+  (e: 'editTransaction', transaction: TransactionWithId): void
+  (e: 'update:open', value: boolean): void
+}
+
+const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+const isEditMode = computed(
+  () => props.editTransaction !== null && props.editTransaction !== undefined,
+)
+const dialogTitle = computed(() => (isEditMode.value ? 'Edit Transaction' : 'Add New Transaction'))
+const dialogDescription = computed(() =>
+  isEditMode.value
+    ? 'Update the details of your transaction.'
+    : 'Add a new income or expense transaction to your budget.',
+)
+const submitButtonText = computed(() => (isEditMode.value ? 'Save Changes' : 'Add Transaction'))
+
 const showDialog = ref(false)
-const newTransaction = ref({
+const transactionForm = ref({
   description: '',
   amount: '',
   category: '',
@@ -48,28 +69,78 @@ const newTransaction = ref({
   date: new Date().toISOString().split('T')[0],
 })
 
-const addTransaction = () => {
-  const amount = parseFloat(newTransaction.value.amount)
-  if (!amount || !newTransaction.value.description || !newTransaction.value.category) return
-
-  const transaction: Transaction = {
-    description: newTransaction.value.description,
-    amount: newTransaction.value.type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
-    category: newTransaction.value.category,
-    type: newTransaction.value.type,
-    date: newTransaction.value.date,
-  }
-
-  emit('addTransaction', transaction)
-
-  // Reset form
-  newTransaction.value = {
+const resetForm = () => {
+  transactionForm.value = {
     description: '',
     amount: '',
     category: '',
     type: 'expense',
     date: new Date().toISOString().split('T')[0],
   }
+}
+
+// Watch for external open prop changes
+watch(
+  () => props.open,
+  (newValue) => {
+    if (newValue !== undefined) {
+      showDialog.value = newValue
+    }
+  },
+)
+
+// Watch for edit transaction changes and populate form
+watch(
+  () => props.editTransaction,
+  (editTransaction) => {
+    if (editTransaction) {
+      transactionForm.value = {
+        description: editTransaction.description,
+        amount: Math.abs(editTransaction.amount).toString(),
+        category: editTransaction.category,
+        type: editTransaction.type,
+        date: editTransaction.date,
+      }
+    } else {
+      // Reset form for add mode
+      resetForm()
+    }
+  },
+  { immediate: true },
+)
+
+// Watch showDialog changes and emit to parent
+watch(showDialog, (newValue) => {
+  if (props.open !== undefined) {
+    emit('update:open', newValue)
+  }
+})
+
+const handleSubmit = () => {
+  const amount = parseFloat(transactionForm.value.amount)
+  if (!amount || !transactionForm.value.description || !transactionForm.value.category) return
+
+  const transaction = {
+    description: transactionForm.value.description,
+    amount: transactionForm.value.type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
+    category: transactionForm.value.category,
+    type: transactionForm.value.type,
+    date: transactionForm.value.date,
+  }
+
+  if (isEditMode.value && props.editTransaction) {
+    emit('editTransaction', { ...transaction, id: props.editTransaction.id! })
+  } else {
+    emit('addTransaction', transaction)
+  }
+
+  // Reset form and close dialog
+  resetForm()
+  showDialog.value = false
+}
+
+const handleCancel = () => {
+  resetForm()
   showDialog.value = false
 }
 </script>
@@ -81,9 +152,9 @@ const addTransaction = () => {
     </DialogTrigger>
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Add New Transaction</DialogTitle>
+        <DialogTitle>{{ dialogTitle }}</DialogTitle>
         <DialogDescription>
-          Add a new income or expense transaction to your budget.
+          {{ dialogDescription }}
         </DialogDescription>
       </DialogHeader>
       <div class="grid gap-4 py-4">
@@ -91,7 +162,7 @@ const addTransaction = () => {
           <Label for="description">Description</Label>
           <Input
             id="description"
-            v-model="newTransaction.description"
+            v-model="transactionForm.description"
             placeholder="Transaction description"
           />
         </div>
@@ -99,7 +170,7 @@ const addTransaction = () => {
           <Label for="amount">Amount</Label>
           <Input
             id="amount"
-            v-model="newTransaction.amount"
+            v-model="transactionForm.amount"
             type="number"
             step="0.01"
             placeholder="0.00"
@@ -107,7 +178,7 @@ const addTransaction = () => {
         </div>
         <div class="grid gap-2">
           <Label for="category">Category</Label>
-          <Select v-model="newTransaction.category">
+          <Select v-model="transactionForm.category">
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -124,7 +195,7 @@ const addTransaction = () => {
         </div>
         <div class="grid gap-2">
           <Label for="type">Type</Label>
-          <Select v-model="newTransaction.type">
+          <Select v-model="transactionForm.type">
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -136,12 +207,12 @@ const addTransaction = () => {
         </div>
         <div class="grid gap-2">
           <Label for="date">Date</Label>
-          <Input id="date" v-model="newTransaction.date" type="date" />
+          <Input id="date" v-model="transactionForm.date" type="date" />
         </div>
       </div>
       <DialogFooter>
-        <Button variant="outline" @click="showDialog = false"> Cancel </Button>
-        <Button @click="addTransaction"> Add Transaction </Button>
+        <Button variant="outline" @click="handleCancel"> Cancel </Button>
+        <Button @click="handleSubmit">{{ submitButtonText }}</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

@@ -24,6 +24,7 @@ interface CreateRecordPayload {
   name: string
   amount: number
   category_id: string
+  timestamp: number
 }
 
 interface UpdateRecordPayload {
