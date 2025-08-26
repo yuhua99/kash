@@ -8,8 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Filter, Tag } from 'lucide-vue-next'
-import AddTransactionDialog from './AddTransactionDialog.vue'
+import { Filter, Tag } from 'lucide-vue-next'
 import CategoryDialog from './CategoryDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
 
@@ -20,19 +19,9 @@ interface Props {
   selectedCategory: string
 }
 
-interface Transaction {
-  id: string
-  date: string
-  description: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-}
-
 interface Emits {
   (e: 'update:searchQuery', value: string): void
   (e: 'update:selectedCategory', value: string): void
-  (e: 'addTransaction', transaction: Omit<Transaction, 'id'>): void
 }
 
 defineProps<Props>()
@@ -86,13 +75,6 @@ defineEmits<Emits>()
         </Button>
       </CategoryDialog>
 
-      <!-- Add Transaction Dialog -->
-      <AddTransactionDialog @add-transaction="$emit('addTransaction', $event)">
-        <Button>
-          <Plus class="h-4 w-4 mr-2" />
-          Add Transaction
-        </Button>
-      </AddTransactionDialog>
     </div>
   </div>
 </template>

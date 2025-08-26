@@ -23,6 +23,10 @@ import { useCategoriesStore } from '@/stores/categories'
 
 const categoriesStore = useCategoriesStore()
 
+const isDarkMode = computed(() => {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+})
+
 interface TransactionBase {
   description: string
   amount: number
@@ -188,7 +192,15 @@ const handleCancel = () => {
                 :key="category.id"
                 :value="category.name"
               >
-                {{ category.name }}
+                <div class="flex items-center space-x-2">
+                  <div
+                    class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                    :style="{
+                      backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
+                    }"
+                  ></div>
+                  <span>{{ category.name }}</span>
+                </div>
               </SelectItem>
             </SelectContent>
           </Select>

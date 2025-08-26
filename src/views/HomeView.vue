@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import DashboardHeader from '@/components/DashboardHeader.vue'
 import StatsCards from '@/components/StatsCards.vue'
 import TrendDisplay from '@/components/TrendDisplay.vue'
 import SpendingByCategory from '@/components/SpendingByCategory.vue'
 import RecentTransactions from '@/components/RecentTransactions.vue'
 import QuickAddTransaction from '@/components/QuickAddTransaction.vue'
-import TransactionsTable from '@/components/TransactionsTable.vue'
 import CategoryManagement from '@/components/CategoryManagement.vue'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
@@ -32,9 +30,6 @@ const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
 const categoriesStore = useCategoriesStore()
 
-// Filter states
-const selectedCategory = ref<string>('all')
-const searchQuery = ref('')
 
 // Computed values from stores
 const totalBalance = computed(() => recordsStore.totalBalance)
@@ -49,20 +44,12 @@ const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
 )
 
-// Filtered transactions
-const filteredTransactions = computed(() => {
-  return recordsStore.transactions
-    .filter((transaction) => {
-      const matchesCategory =
-        selectedCategory.value === 'all' || transaction.category === selectedCategory.value
-      const matchesSearch =
-        !searchQuery.value ||
-        transaction.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        transaction.category.toLowerCase().includes(searchQuery.value.toLowerCase())
-      return matchesCategory && matchesSearch
-    })
+// All transactions sorted by date (most recent first)
+const sortedTransactions = computed(() => {
+  return [...recordsStore.transactions]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 })
+
 
 // Functions
 const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
@@ -83,27 +70,6 @@ const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
   await recordsStore.createRecord(payload)
 }
 
-const deleteTransaction = async (id: string) => {
-  await recordsStore.deleteRecord(id)
-}
-
-const editTransaction = async (transaction: Transaction) => {
-  // Find the category ID for the given category name
-  const category = categoriesStore.categories.find((cat) => cat.name === transaction.category)
-  if (!category) {
-    console.error('Category not found:', transaction.category)
-    return
-  }
-
-  const payload = {
-    name: transaction.description,
-    amount: transaction.amount,
-    category_id: category.id,
-    timestamp: Math.floor(new Date(transaction.date).getTime() / 1000),
-  }
-
-  await recordsStore.updateRecord(transaction.id, payload)
-}
 
 // Load data function
 const loadData = async () => {
@@ -119,6 +85,7 @@ const loadData = async () => {
   await categoriesStore.fetchCategories()
   await recordsStore.fetchRecords()
 }
+
 
 // Load data on component mount
 onMounted(() => {
@@ -213,42 +180,33 @@ onMounted(() => {
     </div>
 
     <!-- Main Content -->
-    <div v-else class="space-y-6">
-      <!-- 1. Summary Cards -->
-      <StatsCards
-        :total-balance="totalBalance"
-        :monthly-income="monthlyIncome"
-        :monthly-expenses="monthlyExpenses"
-        :savings-rate="savingsRate"
-      />
-
-      <!-- 2. Trend Display -->
-      <TrendDisplay :monthly-income="monthlyIncome" :monthly-expenses="monthlyExpenses" />
-
-      <!-- 3. Spending by Category and Recent Transactions -->
-      <div class="grid gap-6 md:grid-cols-2">
-        <SpendingByCategory :transactions="filteredTransactions" />
-        <RecentTransactions :transactions="filteredTransactions" @view-all="() => {}" />
-      </div>
-
-      <!-- Legacy components (keep for now) -->
-      <Separator />
-      <DashboardHeader
-        v-model:search-query="searchQuery"
-        v-model:selected-category="selectedCategory"
-        @add-transaction="addTransaction"
-      />
-      <div class="grid gap-8 lg:grid-cols-2">
-        <CategoryManagement />
-        <TransactionsTable
-          :transactions="filteredTransactions"
-          @delete-transaction="deleteTransaction"
-          @edit-transaction="editTransaction"
+    <div v-else class="space-y-8">
+      <!-- Dashboard Overview -->
+      <div class="space-y-6">
+        <!-- Summary Cards -->
+        <StatsCards
+          :total-balance="totalBalance"
+          :monthly-income="monthlyIncome"
+          :monthly-expenses="monthlyExpenses"
+          :savings-rate="savingsRate"
         />
+
+        <!-- Trend Display -->
+        <TrendDisplay :monthly-income="monthlyIncome" :monthly-expenses="monthlyExpenses" />
+
+        <!-- Spending Analysis -->
+        <div class="grid gap-6 md:grid-cols-2">
+          <SpendingByCategory :transactions="sortedTransactions" />
+          <RecentTransactions :transactions="sortedTransactions" />
+        </div>
       </div>
 
-      <!-- 5. Quick Add Floating Button -->
+      <!-- Category Management -->
+      <CategoryManagement />
+
+      <!-- Quick Add Floating Button -->
       <QuickAddTransaction @add-transaction="addTransaction" />
     </div>
+
   </main>
 </template>

@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DonutChart } from '@/components/ui/chart-donut'
+import { useCategoriesStore } from '@/stores/categories'
 
 interface Props {
   transactions: Array<{
@@ -23,6 +24,11 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const categoriesStore = useCategoriesStore()
+
+const isDarkMode = computed(() => {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+})
 
 const categorySpending = computed(() => {
   const categoryMap = new Map<string, number>()
@@ -47,9 +53,9 @@ const categorySpending = computed(() => {
 
 // Chart data for donut chart
 const chartData = computed(() => {
-  return categorySpending.value.map(item => ({
+  return categorySpending.value.map((item) => ({
     name: item.category,
-    value: item.amount
+    value: item.amount,
   }))
 })
 </script>
@@ -73,7 +79,7 @@ const chartData = computed(() => {
           />
           <div v-else class="text-center text-muted-foreground">No expenses found</div>
         </div>
-        
+
         <!-- Text Legend/Table -->
         <Table>
           <TableHeader>
@@ -85,7 +91,20 @@ const chartData = computed(() => {
           </TableHeader>
           <TableBody>
             <TableRow v-for="item in categorySpending" :key="item.category">
-              <TableCell class="font-medium">{{ item.category }}</TableCell>
+              <TableCell class="font-medium">
+                <div class="flex items-center space-x-2">
+                  <div
+                    class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                    :style="{
+                      backgroundColor: categoriesStore.getCategoryColorByName(
+                        item.category,
+                        isDarkMode,
+                      ),
+                    }"
+                  ></div>
+                  <span>{{ item.category }}</span>
+                </div>
+              </TableCell>
               <TableCell class="text-right">${{ item.amount.toFixed(2) }}</TableCell>
               <TableCell class="text-right">{{ item.percentage.toFixed(1) }}%</TableCell>
             </TableRow>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -18,6 +18,10 @@ const categoriesStore = useCategoriesStore()
 const editDialogCategory = ref<{ id: string; name: string } | null>(null)
 const showEditDialog = ref(false)
 const showAddDialog = ref(false)
+
+const isDarkMode = computed(() => {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+})
 
 onMounted(() => {
   if (categoriesStore.categories.length === 0) {
@@ -87,6 +91,12 @@ const onCategorySaved = (savedCategory: { id: string; name: string }) => {
           class="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
         >
           <div class="flex items-center space-x-3">
+            <div
+              class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+              :style="{
+                backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
+              }"
+            ></div>
             <Badge variant="secondary">{{ category.name }}</Badge>
           </div>
 

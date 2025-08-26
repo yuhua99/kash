@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Edit, Trash2, MoreHorizontal } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
+import { useCategoriesStore } from '@/stores/categories'
 
 interface Transaction {
   id: string
@@ -41,9 +42,14 @@ interface Emits {
 
 defineProps<Props>()
 const emit = defineEmits<Emits>()
+const categoriesStore = useCategoriesStore()
 
 const editDialogOpen = ref(false)
 const editingTransaction = ref<Transaction | null>(null)
+
+const isDarkMode = computed(() => {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+})
 
 const openEditDialog = (transaction: Transaction) => {
   editingTransaction.value = transaction
@@ -99,9 +105,20 @@ const getCategoryVariant = (
               {{ transaction.description }}
             </TableCell>
             <TableCell>
-              <Badge :variant="getCategoryVariant(transaction.category)">
-                {{ transaction.category }}
-              </Badge>
+              <div class="flex items-center space-x-2">
+                <div
+                  class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                  :style="{
+                    backgroundColor: categoriesStore.getCategoryColorByName(
+                      transaction.category,
+                      isDarkMode,
+                    ),
+                  }"
+                ></div>
+                <Badge :variant="getCategoryVariant(transaction.category)">
+                  {{ transaction.category }}
+                </Badge>
+              </div>
             </TableCell>
             <TableCell class="text-right font-mono">
               <span

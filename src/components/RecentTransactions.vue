@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
+import { useCategoriesStore } from '@/stores/categories'
 
 interface Transaction {
   id: string
@@ -25,9 +25,11 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{
-  viewAll: []
-}>()
+const categoriesStore = useCategoriesStore()
+
+const isDarkMode = computed(() => {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+})
 
 const recentTransactions = computed(() => {
   return props.transactions.slice(0, 5)
@@ -49,10 +51,7 @@ const formatAmount = (amount: number, type: 'income' | 'expense') => {
 <template>
   <Card>
     <CardHeader>
-      <div class="flex items-center justify-between">
-        <CardTitle>Recent Transactions</CardTitle>
-        <Button variant="link" @click="emit('viewAll')" class="p-0 h-auto">View all</Button>
-      </div>
+      <CardTitle>Recent Transactions</CardTitle>
     </CardHeader>
     <CardContent>
       <div class="overflow-x-auto">
@@ -68,7 +67,20 @@ const formatAmount = (amount: number, type: 'income' | 'expense') => {
           <TableBody>
             <TableRow v-for="transaction in recentTransactions" :key="transaction.id">
               <TableCell>{{ formatDate(transaction.date) }}</TableCell>
-              <TableCell>{{ transaction.category }}</TableCell>
+              <TableCell>
+                <div class="flex items-center space-x-2">
+                  <div
+                    class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                    :style="{
+                      backgroundColor: categoriesStore.getCategoryColorByName(
+                        transaction.category,
+                        isDarkMode,
+                      ),
+                    }"
+                  ></div>
+                  <span>{{ transaction.category }}</span>
+                </div>
+              </TableCell>
               <TableCell>{{ transaction.description }}</TableCell>
               <TableCell
                 class="text-right font-medium"
