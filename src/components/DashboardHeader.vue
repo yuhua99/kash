@@ -74,7 +74,6 @@ defineEmits<Emits>()
           Add Category
         </Button>
       </CategoryDialog>
-
     </div>
   </div>
 </template>

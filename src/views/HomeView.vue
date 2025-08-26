@@ -30,7 +30,6 @@ const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
 const categoriesStore = useCategoriesStore()
 
-
 // Computed values from stores
 const totalBalance = computed(() => recordsStore.totalBalance)
 const monthlyIncome = computed(() => recordsStore.monthlyIncome)
@@ -46,10 +45,10 @@ const isLoading = computed(
 
 // All transactions sorted by date (most recent first)
 const sortedTransactions = computed(() => {
-  return [...recordsStore.transactions]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  return [...recordsStore.transactions].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )
 })
-
 
 // Functions
 const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
@@ -70,7 +69,6 @@ const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
   await recordsStore.createRecord(payload)
 }
 
-
 // Load data function
 const loadData = async () => {
   // First check if we have a valid session
@@ -86,7 +84,6 @@ const loadData = async () => {
   await recordsStore.fetchRecords()
 }
 
-
 // Load data on component mount
 onMounted(() => {
   loadData()
@@ -94,7 +91,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="p-6 space-y-8">
+  <div class="space-y-8">
     <!-- Error State -->
     <div
       v-if="authStore.error || recordsStore.error || categoriesStore.error"
@@ -207,6 +204,5 @@ onMounted(() => {
       <!-- Quick Add Floating Button -->
       <QuickAddTransaction @add-transaction="addTransaction" />
     </div>
-
-  </main>
+  </div>
 </template>
