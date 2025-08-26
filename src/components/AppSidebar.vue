@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
-import { Home, PanelsTopLeft } from 'lucide-vue-next'
+import { Home, CreditCard, PanelsTopLeft } from 'lucide-vue-next'
 import {
   Sidebar,
   SidebarContent,
@@ -20,7 +20,11 @@ const navigation = [
     href: '/',
     icon: Home,
   },
-  // Future navigation items can be added here
+  {
+    name: 'Transactions',
+    href: '/transactions',
+    icon: CreditCard,
+  },
 ]
 
 // Check if a route is current
