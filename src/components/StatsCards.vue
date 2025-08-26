@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, TrendingUp, TrendingDown } from 'lucide-vue-next'
+import { Badge } from '@/components/ui/badge'
 
 interface Props {
   totalBalance: number
@@ -13,48 +13,36 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <Card>
-      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Total Balance</CardTitle>
-        <DollarSign class="h-4 w-4 text-muted-foreground" />
+      <CardHeader class="pb-2">
+        <CardTitle class="text-sm font-medium">Income (This Month)</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold">${{ totalBalance.toFixed(2) }}</div>
-        <p class="text-xs text-muted-foreground">Current account balance</p>
+        <div class="text-2xl font-bold text-emerald-600">${{ monthlyIncome.toFixed(2) }}</div>
+        <Badge variant="outline" class="text-xs mt-1">Income up 8% vs last month</Badge>
       </CardContent>
     </Card>
 
     <Card>
-      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Monthly Income</CardTitle>
-        <TrendingUp class="h-4 w-4 text-green-600" />
+      <CardHeader class="pb-2">
+        <CardTitle class="text-sm font-medium">Expense (This Month)</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold text-green-600">${{ monthlyIncome.toFixed(2) }}</div>
-        <p class="text-xs text-muted-foreground">Total income this month</p>
+        <div class="text-2xl font-bold text-rose-600">${{ monthlyExpenses.toFixed(2) }}</div>
+        <Badge variant="outline" class="text-xs mt-1">Spending up 12% vs last month</Badge>
       </CardContent>
     </Card>
 
     <Card>
-      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Monthly Expenses</CardTitle>
-        <TrendingDown class="h-4 w-4 text-red-600" />
+      <CardHeader class="pb-2">
+        <CardTitle class="text-sm font-medium">Net Balance (This Month)</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold text-red-600">${{ monthlyExpenses.toFixed(2) }}</div>
-        <p class="text-xs text-muted-foreground">Total expenses this month</p>
-      </CardContent>
-    </Card>
-
-    <Card>
-      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Savings Rate</CardTitle>
-        <TrendingUp class="h-4 w-4 text-blue-600" />
-      </CardHeader>
-      <CardContent>
-        <div class="text-2xl font-bold text-blue-600">{{ savingsRate.toFixed(1) }}%</div>
-        <p class="text-xs text-muted-foreground">Of total income saved</p>
+        <div class="text-2xl font-bold text-slate-700">
+          ${{ (monthlyIncome - monthlyExpenses).toFixed(2) }}
+        </div>
+        <Badge variant="outline" class="text-xs mt-1">Net down $240 vs last month</Badge>
       </CardContent>
     </Card>
   </div>

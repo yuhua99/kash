@@ -6,6 +6,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import StatsCards from '@/components/StatsCards.vue'
+import TrendDisplay from '@/components/TrendDisplay.vue'
+import SpendingByCategory from '@/components/SpendingByCategory.vue'
+import RecentTransactions from '@/components/RecentTransactions.vue'
+import QuickAddTransaction from '@/components/QuickAddTransaction.vue'
 import TransactionsTable from '@/components/TransactionsTable.vue'
 import CategoryManagement from '@/components/CategoryManagement.vue'
 import { useRecordsStore } from '@/stores/records'
@@ -209,19 +213,31 @@ onMounted(() => {
     </div>
 
     <!-- Main Content -->
-    <div v-else>
-      <DashboardHeader
-        v-model:search-query="searchQuery"
-        v-model:selected-category="selectedCategory"
-        @add-transaction="addTransaction"
-      />
+    <div v-else class="space-y-6">
+      <!-- 1. Summary Cards -->
       <StatsCards
         :total-balance="totalBalance"
         :monthly-income="monthlyIncome"
         :monthly-expenses="monthlyExpenses"
         :savings-rate="savingsRate"
       />
+
+      <!-- 2. Trend Display -->
+      <TrendDisplay :monthly-income="monthlyIncome" :monthly-expenses="monthlyExpenses" />
+
+      <!-- 3. Spending by Category and Recent Transactions -->
+      <div class="grid gap-6 md:grid-cols-2">
+        <SpendingByCategory :transactions="filteredTransactions" />
+        <RecentTransactions :transactions="filteredTransactions" @view-all="() => {}" />
+      </div>
+
+      <!-- Legacy components (keep for now) -->
       <Separator />
+      <DashboardHeader
+        v-model:search-query="searchQuery"
+        v-model:selected-category="selectedCategory"
+        @add-transaction="addTransaction"
+      />
       <div class="grid gap-8 lg:grid-cols-2">
         <CategoryManagement />
         <TransactionsTable
@@ -230,6 +246,9 @@ onMounted(() => {
           @edit-transaction="editTransaction"
         />
       </div>
+
+      <!-- 5. Quick Add Floating Button -->
+      <QuickAddTransaction @add-transaction="addTransaction" />
     </div>
   </main>
 </template>
