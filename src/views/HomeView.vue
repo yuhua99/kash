@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import StatsCards from '@/components/StatsCards.vue'
 import TransactionsTable from '@/components/TransactionsTable.vue'
+import CategoryManagement from '@/components/CategoryManagement.vue'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
@@ -221,11 +222,14 @@ onMounted(() => {
         :savings-rate="savingsRate"
       />
       <Separator />
-      <TransactionsTable
-        :transactions="filteredTransactions"
-        @delete-transaction="deleteTransaction"
-        @edit-transaction="editTransaction"
-      />
+      <div class="grid gap-8 lg:grid-cols-2">
+        <CategoryManagement />
+        <TransactionsTable
+          :transactions="filteredTransactions"
+          @delete-transaction="deleteTransaction"
+          @edit-transaction="editTransaction"
+        />
+      </div>
     </div>
   </main>
 </template>

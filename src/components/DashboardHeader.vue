@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { Plus, Filter, Tag } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
-import AddCategoryDialog from './AddCategoryDialog.vue'
+import CategoryDialog from './CategoryDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
 
 const categoriesStore = useCategoriesStore()
@@ -79,12 +79,12 @@ defineEmits<Emits>()
       </Select>
 
       <!-- Add Category Dialog -->
-      <AddCategoryDialog>
+      <CategoryDialog>
         <Button variant="outline">
           <Tag class="h-4 w-4 mr-2" />
           Add Category
         </Button>
-      </AddCategoryDialog>
+      </CategoryDialog>
 
       <!-- Add Transaction Dialog -->
       <AddTransactionDialog @add-transaction="$emit('addTransaction', $event)">
