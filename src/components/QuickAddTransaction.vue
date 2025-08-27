@@ -23,7 +23,7 @@ import { useCategoriesStore } from '@/stores/categories'
 import { Plus, CalendarIcon } from 'lucide-vue-next'
 
 interface Transaction {
-  description: string
+  name: string
   amount: number
   category: string
   date: string
@@ -47,7 +47,7 @@ const form = ref({
   type: 'expense' as 'income' | 'expense',
   category: '',
   date: new Date(),
-  description: '',
+  name: '',
 })
 
 // Calendar state
@@ -67,16 +67,16 @@ const resetForm = () => {
     type: 'expense',
     category: '',
     date: new Date(),
-    description: '',
+    name: '',
   }
 }
 
 const handleSubmit = () => {
   const amount = parseFloat(form.value.amount)
-  if (!amount || !form.value.category || !form.value.description) return
+  if (!amount || !form.value.category || !form.value.name) return
 
   const transaction = {
-    description: form.value.description,
+    name: form.value.name,
     amount: form.value.type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
     category: form.value.category,
     date: form.value.date.toISOString().split('T')[0],
@@ -180,10 +180,10 @@ const handleDateSelect = (date: Date | undefined) => {
 
         <!-- Description -->
         <div class="space-y-2">
-          <Label for="description">Description</Label>
+          <Label for="name">Description</Label>
           <Input
-            id="description"
-            v-model="form.description"
+            id="name"
+            v-model="form.name"
             placeholder="Transaction description"
           />
         </div>
@@ -193,7 +193,7 @@ const handleDateSelect = (date: Date | undefined) => {
           <Button variant="outline" @click="isOpen = false">Cancel</Button>
           <Button
             @click="handleSubmit"
-            :disabled="!form.amount || !form.category || !form.description"
+            :disabled="!form.amount || !form.category || !form.name"
           >
             Save
           </Button>

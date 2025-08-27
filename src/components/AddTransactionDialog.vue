@@ -10,25 +10,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useCategoriesStore } from '@/stores/categories'
-
-const categoriesStore = useCategoriesStore()
-
-const isDarkMode = computed(() => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-})
+import TransactionForm from './TransactionForm.vue'
 
 interface TransactionBase {
-  description: string
+  name: string
   amount: number
   category: string
   type: 'income' | 'expense'
@@ -65,23 +50,7 @@ const dialogDescription = computed(() =>
 const submitButtonText = computed(() => (isEditMode.value ? 'Save Changes' : 'Add Transaction'))
 
 const showDialog = ref(false)
-const transactionForm = ref({
-  description: '',
-  amount: '',
-  category: '',
-  type: 'expense' as 'income' | 'expense',
-  date: new Date().toISOString().split('T')[0],
-})
-
-const resetForm = () => {
-  transactionForm.value = {
-    description: '',
-    amount: '',
-    category: '',
-    type: 'expense',
-    date: new Date().toISOString().split('T')[0],
-  }
-}
+const transactionFormRef = ref<InstanceType<typeof TransactionForm>>()
 
 // Watch for external open prop changes
 watch(
@@ -93,26 +62,6 @@ watch(
   },
 )
 
-// Watch for edit transaction changes and populate form
-watch(
-  () => props.editTransaction,
-  (editTransaction) => {
-    if (editTransaction) {
-      transactionForm.value = {
-        description: editTransaction.description,
-        amount: Math.abs(editTransaction.amount).toString(),
-        category: editTransaction.category,
-        type: editTransaction.type,
-        date: editTransaction.date,
-      }
-    } else {
-      // Reset form for add mode
-      resetForm()
-    }
-  },
-  { immediate: true },
-)
-
 // Watch showDialog changes and emit to parent
 watch(showDialog, (newValue) => {
   if (props.open !== undefined) {
@@ -121,31 +70,26 @@ watch(showDialog, (newValue) => {
 })
 
 const handleSubmit = () => {
-  const amount = parseFloat(transactionForm.value.amount)
-  if (!amount || !transactionForm.value.description || !transactionForm.value.category) return
+  transactionFormRef.value?.handleSubmit()
+}
 
-  const transaction = {
-    description: transactionForm.value.description,
-    amount: transactionForm.value.type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
-    category: transactionForm.value.category,
-    type: transactionForm.value.type,
-    date: transactionForm.value.date,
-  }
+const handleAddTransaction = (transaction: TransactionBase) => {
+  emit('addTransaction', transaction)
+  handleClose()
+}
 
-  if (isEditMode.value && props.editTransaction) {
-    emit('editTransaction', { ...transaction, id: props.editTransaction.id! })
-  } else {
-    emit('addTransaction', transaction)
-  }
+const handleUpdateTransaction = (transaction: TransactionWithId) => {
+  emit('editTransaction', transaction)
+  handleClose()
+}
 
-  // Reset form and close dialog
-  resetForm()
+const handleClose = () => {
+  transactionFormRef.value?.resetForm()
   showDialog.value = false
 }
 
 const handleCancel = () => {
-  resetForm()
-  showDialog.value = false
+  handleClose()
 }
 </script>
 
@@ -161,66 +105,13 @@ const handleCancel = () => {
           {{ dialogDescription }}
         </DialogDescription>
       </DialogHeader>
-      <div class="grid gap-4 py-4">
-        <div class="grid gap-2">
-          <Label for="description">Description</Label>
-          <Input
-            id="description"
-            v-model="transactionForm.description"
-            placeholder="Transaction description"
-          />
-        </div>
-        <div class="grid gap-2">
-          <Label for="amount">Amount</Label>
-          <Input
-            id="amount"
-            v-model="transactionForm.amount"
-            type="number"
-            step="0.01"
-            placeholder="0.00"
-          />
-        </div>
-        <div class="grid gap-2">
-          <Label for="category">Category</Label>
-          <Select v-model="transactionForm.category">
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="category in categoriesStore.categories"
-                :key="category.id"
-                :value="category.name"
-              >
-                <div class="flex items-center space-x-2">
-                  <div
-                    class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
-                    :style="{
-                      backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
-                    }"
-                  ></div>
-                  <span>{{ category.name }}</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div class="grid gap-2">
-          <Label for="type">Type</Label>
-          <Select v-model="transactionForm.type">
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div class="grid gap-2">
-          <Label for="date">Date</Label>
-          <Input id="date" v-model="transactionForm.date" type="date" />
-        </div>
+      <div class="py-4">
+        <TransactionForm
+          ref="transactionFormRef"
+          :transaction="editTransaction"
+          @submit="handleAddTransaction"
+          @update="handleUpdateTransaction"
+        />
       </div>
       <DialogFooter>
         <Button variant="outline" @click="handleCancel"> Cancel </Button>

@@ -13,7 +13,7 @@ import { useAuthStore } from '@/stores/auth'
 interface Transaction {
   id: string
   date: string
-  description: string
+  name: string
   amount: number
   category: string
   type: 'income' | 'expense'
@@ -42,7 +42,7 @@ const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
   }
 
   const payload = {
-    name: newTransaction.description,
+    name: newTransaction.name,
     amount: newTransaction.amount,
     category_id: category.id,
     timestamp: Math.floor(new Date(newTransaction.date).getTime() / 1000),

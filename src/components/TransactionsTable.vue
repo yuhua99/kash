@@ -25,7 +25,7 @@ import { useCategoriesStore } from '@/stores/categories'
 interface Transaction {
   id: string
   date: string
-  description: string
+  name: string
   amount: number
   category: string
   type: 'income' | 'expense'
@@ -102,7 +102,7 @@ const getCategoryVariant = (
               {{ new Date(transaction.date).toLocaleDateString() }}
             </TableCell>
             <TableCell class="font-medium">
-              {{ transaction.description }}
+              {{ transaction.name }}
             </TableCell>
             <TableCell>
               <div class="flex items-center space-x-2">

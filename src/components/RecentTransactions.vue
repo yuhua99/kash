@@ -14,7 +14,7 @@ import { useCategoriesStore } from '@/stores/categories'
 interface Transaction {
   id: string
   date: string
-  description: string
+  name: string
   amount: number
   category: string
   type: 'income' | 'expense'
@@ -81,7 +81,7 @@ const formatAmount = (amount: number, type: 'income' | 'expense') => {
                   <span>{{ transaction.category }}</span>
                 </div>
               </TableCell>
-              <TableCell>{{ transaction.description }}</TableCell>
+              <TableCell>{{ transaction.name }}</TableCell>
               <TableCell
                 class="text-right font-medium"
                 :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'"
