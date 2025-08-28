@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import CategorySelect from '@/components/CategorySelect.vue'
+import CategorySelect from '@/components/categories/CategorySelect.vue'
 import { useFormValidation } from '@/composables/useFormValidation'
 
 export interface TransactionFormData {

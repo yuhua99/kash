@@ -1,12 +1,12 @@
 import { computed, type Ref } from 'vue'
 
 export interface ValidationRule {
-  test: (value: any) => boolean
+  test: (value: unknown) => boolean
   message: string
 }
 
 export interface FieldValidation {
-  value: Ref<any>
+  value: Ref<unknown>
   rules?: ValidationRule[]
   required?: boolean
 }
@@ -86,7 +86,7 @@ export function useFormValidation() {
     }),
 
     email: (message = 'Must be a valid email address'): ValidationRule => ({
-      test: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+      test: (value) => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
       message,
     }),
   }

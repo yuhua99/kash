@@ -4,14 +4,14 @@ import { useRouter } from 'vue-router'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import TransactionsTable from '@/components/TransactionsTable.vue'
-import AddTransactionDialog from '@/components/AddTransactionDialog.vue'
+import TransactionsTable from '@/components/transactions/TransactionsTable.vue'
+import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
-import type { TransactionBase } from '@/components/TransactionForm.vue'
+import type { TransactionBase } from '@/components/transactions/TransactionForm.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

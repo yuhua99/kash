@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import type { ApiResponse } from '@/lib/api'
 
-export interface ApiRequestOptions {
-  onSuccess?: (data: any) => void
+export interface ApiRequestOptions<T = unknown> {
+  onSuccess?: (data: T) => void
   onError?: (error: string) => void
 }
 
@@ -19,7 +19,7 @@ export function useApiRequest() {
 
   const executeRequest = async <T>(
     requestFn: () => Promise<ApiResponse<T>>,
-    options: ApiRequestOptions = {},
+    options: ApiRequestOptions<T> = {},
   ): Promise<T | null> => {
     isLoading.value = true
     error.value = null
@@ -48,7 +48,7 @@ export function useApiRequest() {
 
   const executeVoidRequest = async (
     requestFn: () => Promise<ApiResponse<void>>,
-    options: ApiRequestOptions = {},
+    options: ApiRequestOptions<void> = {},
   ): Promise<boolean> => {
     isLoading.value = true
     error.value = null

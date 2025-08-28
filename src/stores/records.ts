@@ -15,7 +15,7 @@ interface ApiRecord {
 interface Transaction {
   id: string
   date: string
-  description: string
+  name: string
   amount: number
   category: string
   type: 'income' | 'expense'
@@ -53,7 +53,7 @@ export const useRecordsStore = defineStore('records', () => {
     return {
       id: record.id,
       date,
-      description: record.name,
+      name: record.name,
       amount: record.amount,
       category: categoryName,
       type: record.amount >= 0 ? 'income' : 'expense',

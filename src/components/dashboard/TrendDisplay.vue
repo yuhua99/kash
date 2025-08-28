@@ -65,7 +65,9 @@ const chartData = computed(() => {
         index="period"
         :categories="['income', 'expenses']"
         :colors="['hsl(var(--emerald-600))', 'hsl(var(--rose-600))']"
-        :y-formatter="(value: number) => `$${value.toFixed(0)}`"
+        :y-formatter="
+          (value: number | Date) => `$${typeof value === 'number' ? value.toFixed(0) : '0'}`
+        "
         class="h-80"
       />
     </CardContent>

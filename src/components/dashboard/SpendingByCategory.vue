@@ -16,7 +16,7 @@ interface Props {
   transactions: Array<{
     id: string
     date: string
-    description: string
+    name: string
     amount: number
     category: string
     type: 'income' | 'expense'

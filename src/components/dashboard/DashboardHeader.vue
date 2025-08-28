@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Filter, Tag } from 'lucide-vue-next'
-import CategoryDialog from './CategoryDialog.vue'
+import CategoryDialog from '@/components/categories/CategoryDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
 
 const categoriesStore = useCategoriesStore()

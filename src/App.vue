@@ -3,7 +3,7 @@ import { RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/ui/button'
 import { LogOut } from 'lucide-vue-next'
-import AppSidebar from '@/components/AppSidebar.vue'
+import AppSidebar from '@/components/layout/AppSidebar.vue'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 
 const authStore = useAuthStore()

@@ -28,7 +28,7 @@ const isDarkMode = computed(() => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
 })
 
-const handleValueChange = (value: any) => {
+const handleValueChange = (value: unknown) => {
   if (typeof value === 'string') {
     emit('update:modelValue', value)
   }

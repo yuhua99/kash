@@ -1,6 +1,6 @@
 import { ref, watch, computed } from 'vue'
 
-export interface DialogOptions<T = any> {
+export interface DialogOptions<T = unknown> {
   onOpen?: (editItem?: T) => void
   onClose?: () => void
 }
@@ -8,7 +8,7 @@ export interface DialogOptions<T = any> {
 /**
  * Composable for standardized dialog state management with external prop synchronization
  */
-export function useDialog<T = any>(options: DialogOptions<T> = {}) {
+export function useDialog<T = unknown>(options: DialogOptions<T> = {}) {
   const isOpen = ref(false)
   const editItem = ref<T | null>(null)
 
