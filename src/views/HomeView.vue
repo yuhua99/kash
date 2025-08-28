@@ -8,21 +8,15 @@ import StatsCards from '@/components/StatsCards.vue'
 import TrendDisplay from '@/components/TrendDisplay.vue'
 import SpendingByCategory from '@/components/SpendingByCategory.vue'
 import RecentTransactions from '@/components/RecentTransactions.vue'
-import QuickAddTransaction from '@/components/QuickAddTransaction.vue'
+import AddTransactionDialog from '@/components/AddTransactionDialog.vue'
 import CategoryManagement from '@/components/CategoryManagement.vue'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-vue-next'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
 
-// Enhanced transaction interface
-interface Transaction {
-  id: string
-  date: string
-  name: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-}
+import type { TransactionBase } from '@/components/TransactionForm.vue'
 
 // Stores and router
 const router = useRouter()
@@ -51,7 +45,7 @@ const sortedTransactions = computed(() => {
 })
 
 // Functions
-const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
+const addTransaction = async (newTransaction: TransactionBase) => {
   // Find the category ID for the given category name
   const category = categoriesStore.categories.find((cat) => cat.name === newTransaction.category)
   if (!category) {
@@ -189,7 +183,14 @@ onMounted(() => {
       <CategoryManagement />
 
       <!-- Quick Add Floating Button -->
-      <QuickAddTransaction @add-transaction="addTransaction" />
+      <AddTransactionDialog @add-transaction="addTransaction">
+        <Button
+          size="icon"
+          class="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+        >
+          <Plus class="h-6 w-6" />
+        </Button>
+      </AddTransactionDialog>
     </div>
   </div>
 </template>

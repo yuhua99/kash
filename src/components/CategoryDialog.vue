@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCategoriesStore } from '@/stores/categories'
+import { useDialog } from '@/composables/useDialog'
 
 const categoriesStore = useCategoriesStore()
 
@@ -34,16 +35,6 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const isEditMode = computed(() => props.editCategory !== null && props.editCategory !== undefined)
-const dialogTitle = computed(() => (isEditMode.value ? 'Edit Category' : 'Add New Category'))
-const dialogDescription = computed(() =>
-  isEditMode.value
-    ? 'Update the name of your category.'
-    : 'Create a new category for organizing your transactions.',
-)
-const submitButtonText = computed(() => (isEditMode.value ? 'Save Changes' : 'Add Category'))
-
-const showDialog = ref(false)
 const categoryForm = ref({
   name: '',
 })
@@ -54,45 +45,33 @@ const resetForm = () => {
   }
 }
 
-// Watch for external open prop changes
-watch(
-  () => props.open,
-  (newValue) => {
-    if (newValue !== undefined) {
-      showDialog.value = newValue
-      // If opening in edit mode, make sure form is populated
-      if (newValue && props.editCategory) {
-        categoryForm.value = {
-          name: props.editCategory.name,
-        }
-      }
-    }
-  },
-  { immediate: true },
-)
-
-// Watch for edit category changes and populate form
-watch(
-  () => props.editCategory,
-  (editCategory) => {
-    if (editCategory) {
+const { isOpen, editItem, isEditMode, setupExternalControl } = useDialog<Category>({
+  onOpen: (category) => {
+    if (category) {
       categoryForm.value = {
-        name: editCategory.name,
+        name: category.name,
       }
     } else {
-      // Reset form for add mode
       resetForm()
     }
   },
-  { immediate: true },
+  onClose: resetForm,
+})
+
+// Setup external prop synchronization
+setupExternalControl(
+  () => props.open,
+  () => props.editCategory,
+  (event, value) => emit(event, value),
 )
 
-// Watch showDialog changes and emit to parent
-watch(showDialog, (newValue) => {
-  if (props.open !== undefined) {
-    emit('update:open', newValue)
-  }
-})
+const dialogTitle = computed(() => (isEditMode.value ? 'Edit Category' : 'Add New Category'))
+const dialogDescription = computed(() =>
+  isEditMode.value
+    ? 'Update the name of your category.'
+    : 'Create a new category for organizing your transactions.',
+)
+const submitButtonText = computed(() => (isEditMode.value ? 'Save Changes' : 'Add Category'))
 
 const handleSubmit = async () => {
   if (!categoryForm.value.name.trim()) return
@@ -101,10 +80,10 @@ const handleSubmit = async () => {
     name: categoryForm.value.name.trim(),
   }
 
-  if (isEditMode.value && props.editCategory) {
-    const success = await categoriesStore.updateCategory(props.editCategory.id, categoryData)
+  if (isEditMode.value && editItem.value) {
+    const success = await categoriesStore.updateCategory(editItem.value.id, categoryData)
     if (success) {
-      emit('categorySaved', { ...categoryData, id: props.editCategory.id })
+      emit('categorySaved', { ...categoryData, id: editItem.value.id })
     }
   } else {
     const newCategory = await categoriesStore.createCategory(categoryData)
@@ -115,19 +94,17 @@ const handleSubmit = async () => {
 
   // Reset form and close dialog only if operation was successful
   if (!categoriesStore.error) {
-    resetForm()
-    showDialog.value = false
+    isOpen.value = false
   }
 }
 
 const handleCancel = () => {
-  resetForm()
-  showDialog.value = false
+  isOpen.value = false
 }
 </script>
 
 <template>
-  <Dialog v-model:open="showDialog">
+  <Dialog v-model:open="isOpen">
     <DialogTrigger v-if="$slots.default" as-child>
       <slot />
     </DialogTrigger>

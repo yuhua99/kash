@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { api, type ApiResponse } from '@/lib/api'
+import { api } from '@/lib/api'
+import { useApiRequest } from '@/composables/useApiRequest'
 import { getCategoryColor as getColorFromId } from '@/lib/categoryColors'
 
 interface Category {
@@ -25,8 +26,7 @@ interface CategoriesResponse {
 
 export const useCategoriesStore = defineStore('categories', () => {
   const categories = ref<Category[]>([])
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
+  const { isLoading, error, clearError, executeRequest } = useApiRequest()
 
   const categoriesMap = computed(() => {
     const map = new Map<string, string>()
@@ -62,98 +62,46 @@ export const useCategoriesStore = defineStore('categories', () => {
   }
 
   const fetchCategories = async (): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
+    const data = await executeRequest(() => api.get<CategoriesResponse>('/categories'), {
+      onSuccess: (response) => {
+        categories.value = response.categories
+      },
+    })
 
-    try {
-      const response: ApiResponse<CategoriesResponse> = await api.get('/categories')
-
-      if (response.success && response.data) {
-        categories.value = response.data.categories
-        return true
-      } else {
-        error.value = response.error || 'Failed to fetch categories'
-        return false
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return false
-    } finally {
-      isLoading.value = false
-    }
+    return !!data
   }
 
   const createCategory = async (payload: CreateCategoryPayload): Promise<Category | null> => {
-    isLoading.value = true
-    error.value = null
+    const data = await executeRequest(() => api.post<Category>('/categories', payload), {
+      onSuccess: (newCategory) => {
+        categories.value.push(newCategory)
+      },
+    })
 
-    try {
-      const response: ApiResponse<Category> = await api.post('/categories', payload)
-
-      if (response.success && response.data) {
-        categories.value.push(response.data)
-        return response.data
-      } else {
-        error.value = response.error || 'Failed to create category'
-        return null
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return null
-    } finally {
-      isLoading.value = false
-    }
+    return data
   }
 
   const updateCategory = async (id: string, payload: UpdateCategoryPayload): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response: ApiResponse<Category> = await api.put(`/categories/${id}`, payload)
-
-      if (response.success && response.data) {
+    const data = await executeRequest(() => api.put<Category>(`/categories/${id}`, payload), {
+      onSuccess: (updatedCategory) => {
         const index = categories.value.findIndex((cat) => cat.id === id)
         if (index !== -1) {
-          categories.value[index] = response.data
+          categories.value[index] = updatedCategory
         }
-        return true
-      } else {
-        error.value = response.error || 'Failed to update category'
-        return false
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return false
-    } finally {
-      isLoading.value = false
-    }
+      },
+    })
+
+    return !!data
   }
 
   const deleteCategory = async (id: string): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response: ApiResponse<void> = await api.delete(`/categories/${id}`)
-
-      if (response.success) {
+    const success = await executeRequest(() => api.delete<void>(`/categories/${id}`), {
+      onSuccess: () => {
         categories.value = categories.value.filter((cat) => cat.id !== id)
-        return true
-      } else {
-        error.value = response.error || 'Failed to delete category'
-        return false
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
+      },
+    })
 
-  const clearError = () => {
-    error.value = null
+    return success !== null
   }
 
   return {

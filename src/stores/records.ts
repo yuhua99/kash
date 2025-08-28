@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { api, type ApiResponse } from '@/lib/api'
+import { api } from '@/lib/api'
+import { useApiRequest } from '@/composables/useApiRequest'
 import { useCategoriesStore } from './categories'
 
 interface ApiRecord {
@@ -41,8 +42,7 @@ interface RecordsResponse {
 
 export const useRecordsStore = defineStore('records', () => {
   const records = ref<ApiRecord[]>([])
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
+  const { isLoading, error, clearError, executeRequest } = useApiRequest()
 
   const categoriesStore = useCategoriesStore()
 
@@ -93,109 +93,57 @@ export const useRecordsStore = defineStore('records', () => {
     end_time?: number
     limit?: number
   }): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
+    let endpoint = '/records'
+    const params = new URLSearchParams()
 
-    try {
-      let endpoint = '/records'
-      const params = new URLSearchParams()
+    if (filters?.start_time) params.append('start_time', filters.start_time.toString())
+    if (filters?.end_time) params.append('end_time', filters.end_time.toString())
+    if (filters?.limit) params.append('limit', filters.limit.toString())
 
-      if (filters?.start_time) params.append('start_time', filters.start_time.toString())
-      if (filters?.end_time) params.append('end_time', filters.end_time.toString())
-      if (filters?.limit) params.append('limit', filters.limit.toString())
-
-      if (params.toString()) {
-        endpoint += `?${params.toString()}`
-      }
-
-      const response: ApiResponse<RecordsResponse> = await api.get(endpoint)
-
-      if (response.success && response.data) {
-        records.value = response.data.records
-        return true
-      } else {
-        error.value = response.error || 'Failed to fetch records'
-        return false
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return false
-    } finally {
-      isLoading.value = false
+    if (params.toString()) {
+      endpoint += `?${params.toString()}`
     }
+
+    const data = await executeRequest(() => api.get<RecordsResponse>(endpoint), {
+      onSuccess: (response) => {
+        records.value = response.records
+      },
+    })
+
+    return !!data
   }
 
   const createRecord = async (payload: CreateRecordPayload): Promise<ApiRecord | null> => {
-    isLoading.value = true
-    error.value = null
+    const data = await executeRequest(() => api.post<ApiRecord>('/records', payload), {
+      onSuccess: (newRecord) => {
+        records.value.unshift(newRecord) // Add to beginning for chronological order
+      },
+    })
 
-    try {
-      const response: ApiResponse<ApiRecord> = await api.post('/records', payload)
-
-      if (response.success && response.data) {
-        records.value.unshift(response.data) // Add to beginning for chronological order
-        return response.data
-      } else {
-        error.value = response.error || 'Failed to create record'
-        return null
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return null
-    } finally {
-      isLoading.value = false
-    }
+    return data
   }
 
   const updateRecord = async (id: string, payload: UpdateRecordPayload): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response: ApiResponse<ApiRecord> = await api.put(`/records/${id}`, payload)
-
-      if (response.success && response.data) {
+    const data = await executeRequest(() => api.put<ApiRecord>(`/records/${id}`, payload), {
+      onSuccess: (updatedRecord) => {
         const index = records.value.findIndex((record) => record.id === id)
         if (index !== -1) {
-          records.value[index] = response.data
+          records.value[index] = updatedRecord
         }
-        return true
-      } else {
-        error.value = response.error || 'Failed to update record'
-        return false
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return false
-    } finally {
-      isLoading.value = false
-    }
+      },
+    })
+
+    return !!data
   }
 
   const deleteRecord = async (id: string): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response: ApiResponse<void> = await api.delete(`/records/${id}`)
-
-      if (response.success) {
+    const success = await executeRequest(() => api.delete<void>(`/records/${id}`), {
+      onSuccess: () => {
         records.value = records.value.filter((record) => record.id !== id)
-        return true
-      } else {
-        error.value = response.error || 'Failed to delete record'
-        return false
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
+      },
+    })
 
-  const clearError = () => {
-    error.value = null
+    return success !== null
   }
 
   return {

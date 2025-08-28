@@ -5,19 +5,13 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import TransactionsTable from '@/components/TransactionsTable.vue'
-import QuickAddTransaction from '@/components/QuickAddTransaction.vue'
+import AddTransactionDialog from '@/components/AddTransactionDialog.vue'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-vue-next'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
-
-interface Transaction {
-  id: string
-  date: string
-  name: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-}
+import type { TransactionBase } from '@/components/TransactionForm.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -34,7 +28,7 @@ const sortedTransactions = computed(() => {
   )
 })
 
-const addTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
+const addTransaction = async (newTransaction: TransactionBase) => {
   const category = categoriesStore.categories.find((cat) => cat.name === newTransaction.category)
   if (!category) {
     console.error('Category not found:', newTransaction.category)
@@ -133,7 +127,14 @@ onMounted(() => {
       </Card>
 
       <!-- Quick Add Floating Button -->
-      <QuickAddTransaction @add-transaction="addTransaction" />
+      <AddTransactionDialog @add-transaction="addTransaction">
+        <Button
+          size="icon"
+          class="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+        >
+          <Plus class="h-6 w-6" />
+        </Button>
+      </AddTransactionDialog>
     </div>
   </div>
 </template>

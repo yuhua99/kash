@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -10,19 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import TransactionForm from './TransactionForm.vue'
-
-interface TransactionBase {
-  name: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-  date: string
-}
-
-interface TransactionWithId extends TransactionBase {
-  id: string
-}
+import TransactionForm, {
+  type TransactionBase,
+  type TransactionWithId,
+} from './TransactionForm.vue'
+import { useDialog } from '@/composables/useDialog'
 
 interface Props {
   editTransaction?: TransactionWithId | null
@@ -38,9 +30,21 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const isEditMode = computed(
-  () => props.editTransaction !== null && props.editTransaction !== undefined,
+const transactionFormRef = ref<InstanceType<typeof TransactionForm>>()
+
+const { isOpen, isEditMode, setupExternalControl } = useDialog<TransactionWithId>({
+  onClose: () => {
+    transactionFormRef.value?.resetForm()
+  },
+})
+
+// Setup external prop synchronization
+setupExternalControl(
+  () => props.open,
+  () => props.editTransaction,
+  (event, value) => emit(event, value),
 )
+
 const dialogTitle = computed(() => (isEditMode.value ? 'Edit Transaction' : 'Add New Transaction'))
 const dialogDescription = computed(() =>
   isEditMode.value
@@ -49,52 +53,27 @@ const dialogDescription = computed(() =>
 )
 const submitButtonText = computed(() => (isEditMode.value ? 'Save Changes' : 'Add Transaction'))
 
-const showDialog = ref(false)
-const transactionFormRef = ref<InstanceType<typeof TransactionForm>>()
-
-// Watch for external open prop changes
-watch(
-  () => props.open,
-  (newValue) => {
-    if (newValue !== undefined) {
-      showDialog.value = newValue
-    }
-  },
-)
-
-// Watch showDialog changes and emit to parent
-watch(showDialog, (newValue) => {
-  if (props.open !== undefined) {
-    emit('update:open', newValue)
-  }
-})
-
 const handleSubmit = () => {
   transactionFormRef.value?.handleSubmit()
 }
 
 const handleAddTransaction = (transaction: TransactionBase) => {
   emit('addTransaction', transaction)
-  handleClose()
+  isOpen.value = false
 }
 
 const handleUpdateTransaction = (transaction: TransactionWithId) => {
   emit('editTransaction', transaction)
-  handleClose()
-}
-
-const handleClose = () => {
-  transactionFormRef.value?.resetForm()
-  showDialog.value = false
+  isOpen.value = false
 }
 
 const handleCancel = () => {
-  handleClose()
+  isOpen.value = false
 }
 </script>
 
 <template>
-  <Dialog v-model:open="showDialog">
+  <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
       <slot />
     </DialogTrigger>
@@ -109,6 +88,7 @@ const handleCancel = () => {
         <TransactionForm
           ref="transactionFormRef"
           :transaction="editTransaction"
+          mode="full"
           @submit="handleAddTransaction"
           @update="handleUpdateTransaction"
         />

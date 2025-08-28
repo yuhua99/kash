@@ -9,15 +9,10 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useCategoriesStore } from '@/stores/categories'
+import CategorySelect from '@/components/CategorySelect.vue'
+import { useFormValidation } from '@/composables/useFormValidation'
 
-const categoriesStore = useCategoriesStore()
-
-const isDarkMode = computed(() => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-})
-
-interface TransactionFormData {
+export interface TransactionFormData {
   name: string
   amount: string
   category: string
@@ -25,7 +20,7 @@ interface TransactionFormData {
   date: string
 }
 
-interface TransactionBase {
+export interface TransactionBase {
   name: string
   amount: number
   category: string
@@ -33,25 +28,34 @@ interface TransactionBase {
   date: string
 }
 
-interface TransactionWithId extends TransactionBase {
+export interface TransactionWithId extends TransactionBase {
   id: string
 }
 
 interface Props {
   transaction?: TransactionWithId | null
   modelValue?: TransactionFormData
+  mode?: 'full' | 'quick'
+  showActions?: boolean
 }
 
 interface Emits {
   (e: 'update:modelValue', value: TransactionFormData): void
   (e: 'submit', transaction: TransactionBase): void
   (e: 'update', transaction: TransactionWithId): void
+  (e: 'cancel'): void
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  mode: 'full',
+  showActions: false,
+})
 const emit = defineEmits<Emits>()
 
+const { transactionValidation } = useFormValidation()
+
 const isEditMode = computed(() => props.transaction !== null && props.transaction !== undefined)
+const isQuickMode = computed(() => props.mode === 'quick')
 
 const defaultFormData: TransactionFormData = {
   name: '',
@@ -76,7 +80,10 @@ watch(
         date: transaction.date,
       }
     } else {
-      formData.value = { ...defaultFormData }
+      formData.value = {
+        ...defaultFormData,
+        date: new Date().toISOString().split('T')[0],
+      }
     }
     emit('update:modelValue', formData.value)
   },
@@ -104,13 +111,19 @@ watch(
 )
 
 const resetForm = () => {
-  formData.value = { ...defaultFormData }
+  formData.value = {
+    ...defaultFormData,
+    date: new Date().toISOString().split('T')[0],
+  }
   emit('update:modelValue', formData.value)
 }
 
 const isFormValid = computed(() => {
-  const amount = parseFloat(formData.value.amount)
-  return !!(amount && formData.value.name && formData.value.category)
+  return transactionValidation.isValidTransactionForm({
+    name: formData.value.name,
+    amount: formData.value.amount,
+    category: formData.value.category,
+  })
 })
 
 const handleSubmit = () => {
@@ -122,7 +135,7 @@ const handleSubmit = () => {
     amount: formData.value.type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
     category: formData.value.category,
     type: formData.value.type,
-    date: formData.value.date,
+    date: formData.value.date as string,
   }
 
   if (isEditMode.value && props.transaction) {
@@ -130,6 +143,10 @@ const handleSubmit = () => {
   } else {
     emit('submit', transaction)
   }
+}
+
+const handleCancel = () => {
+  emit('cancel')
 }
 
 defineExpose({
@@ -140,45 +157,19 @@ defineExpose({
 </script>
 
 <template>
-  <div class="grid gap-4">
-    <div class="grid gap-2">
-      <Label for="name">Description</Label>
-      <Input id="name" v-model="formData.name" placeholder="Transaction description" />
-    </div>
-    <div class="grid gap-2">
+  <div :class="isQuickMode ? 'space-y-4' : 'grid gap-4'">
+    <!-- Amount -->
+    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
       <Label for="amount">Amount</Label>
       <Input id="amount" v-model="formData.amount" type="number" step="0.01" placeholder="0.00" />
     </div>
-    <div class="grid gap-2">
-      <Label for="category">Category</Label>
-      <Select v-model="formData.category">
-        <SelectTrigger>
-          <SelectValue placeholder="Select category" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem
-            v-for="category in categoriesStore.categories"
-            :key="category.id"
-            :value="category.name"
-          >
-            <div class="flex items-center space-x-2">
-              <div
-                class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
-                :style="{
-                  backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
-                }"
-              ></div>
-              <span>{{ category.name }}</span>
-            </div>
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-    <div class="grid gap-2">
+
+    <!-- Type -->
+    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
       <Label for="type">Type</Label>
       <Select v-model="formData.type">
         <SelectTrigger>
-          <SelectValue />
+          <SelectValue placeholder="Select type" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="income">Income</SelectItem>
@@ -186,9 +177,31 @@ defineExpose({
         </SelectContent>
       </Select>
     </div>
-    <div class="grid gap-2">
+
+    <!-- Category -->
+    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
+      <Label for="category">Category</Label>
+      <CategorySelect v-model="formData.category" />
+    </div>
+
+    <!-- Date -->
+    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
       <Label for="date">Date</Label>
       <Input id="date" v-model="formData.date" type="date" />
+    </div>
+
+    <!-- Description -->
+    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
+      <Label for="name">Description</Label>
+      <Input id="name" v-model="formData.name" placeholder="Transaction description" />
+    </div>
+
+    <!-- Actions (for quick mode or when showActions is true) -->
+    <div v-if="showActions" :class="isQuickMode ? 'flex justify-end gap-2 pt-4' : 'flex gap-2'">
+      <Button variant="outline" @click="handleCancel">Cancel</Button>
+      <Button @click="handleSubmit" :disabled="!isFormValid">
+        {{ isEditMode ? 'Save Changes' : 'Save' }}
+      </Button>
     </div>
   </div>
 </template>

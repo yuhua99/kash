@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { api, type ApiResponse } from '@/lib/api'
+import { api } from '@/lib/api'
+import { useApiRequest } from '@/composables/useApiRequest'
 
 interface PublicUser {
   id: string
@@ -19,97 +20,55 @@ interface RegisterPayload {
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<PublicUser | null>(null)
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
+  const { isLoading, error, clearError, executeRequest } = useApiRequest()
 
   const isAuthenticated = computed(() => user.value !== null)
 
   const login = async (credentials: LoginPayload): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response: ApiResponse<PublicUser> = await api.post('/auth/login', credentials)
-
-      if (response.success && response.data) {
-        user.value = response.data
-        return true
-      } else {
-        error.value = response.error || 'Login failed'
-        return false
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return false
-    } finally {
-      isLoading.value = false
-    }
+    const data = await executeRequest(() => api.post<PublicUser>('/auth/login', credentials), {
+      onSuccess: (userData) => {
+        user.value = userData
+      },
+    })
+    return !!data
   }
 
   const register = async (credentials: RegisterPayload): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response: ApiResponse<PublicUser> = await api.post('/auth/register', credentials)
-
-      if (response.success && response.data) {
-        // Don't set user automatically - require separate login
-        return true
-      } else {
-        error.value = response.error || 'Registration failed'
-        return false
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Network error occurred'
-      return false
-    } finally {
-      isLoading.value = false
-    }
+    const data = await executeRequest(
+      () => api.post<PublicUser>('/auth/register', credentials),
+      // Don't set user automatically - require separate login
+    )
+    return !!data
   }
 
   const logout = async (): Promise<void> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      await api.post('/auth/logout')
-    } catch (err) {
-      // Even if logout fails on server, clear local state
-      console.warn('Logout request failed:', err)
-    } finally {
-      user.value = null
-      isLoading.value = false
-    }
+    await executeRequest(() => api.post<void>('/auth/logout'), {
+      onError: (err) => {
+        // Even if logout fails on server, clear local state
+        console.warn('Logout request failed:', err)
+      },
+    })
+    // Always clear local state regardless of server response
+    user.value = null
   }
 
   const checkAuthStatus = async (): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response: ApiResponse<PublicUser> = await api.get('/auth/me')
-
-      if (response.success && response.data) {
-        user.value = response.data
-        return true
-      } else {
-        // Not authenticated or session expired
+    const data = await executeRequest(() => api.get<PublicUser>('/auth/me'), {
+      onSuccess: (userData) => {
+        user.value = userData
+      },
+      onError: (err) => {
+        // Network error or server error
         user.value = null
-        return false
-      }
-    } catch (err) {
-      // Network error or server error
-      user.value = null
-      console.warn('Auth check failed:', err instanceof Error ? err.message : 'Unknown error')
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
+        console.warn('Auth check failed:', err)
+      },
+    })
 
-  const clearError = () => {
-    error.value = null
+    if (!data) {
+      user.value = null
+    }
+
+    return !!data
   }
 
   return {
