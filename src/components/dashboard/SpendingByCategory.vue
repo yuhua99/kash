@@ -35,7 +35,7 @@ const isDarkMode = computed(() => {
       <CardTitle>Spending by Category</CardTitle>
     </CardHeader>
     <CardContent>
-      <div class="grid md:grid-cols-2 gap-4">
+      <div class="grid gap-6">
         <!-- Donut Chart -->
         <div class="flex items-center justify-center">
           <DonutChart
@@ -44,43 +44,45 @@ const isDarkMode = computed(() => {
             index="name"
             category="value"
             :value-formatter="currencyFormatter"
-            class="h-48"
+            class="h-64 w-64"
           />
-          <div v-else class="text-center text-muted-foreground">No expenses found</div>
+          <div v-else class="text-center text-muted-foreground h-64 flex items-center justify-center">No expenses found</div>
         </div>
 
-        <!-- Text Legend/Table -->
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Category</TableHead>
-              <TableHead class="text-right">Amount</TableHead>
-              <TableHead class="text-right">%</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="item in categorySpending" :key="item.category">
-              <TableCell class="font-medium">
-                <div class="flex items-center space-x-2">
-                  <div
-                    class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
-                    :style="{
-                      backgroundColor: getCategoryColorByName(item.category, isDarkMode),
-                    }"
-                  ></div>
-                  <span>{{ item.category }}</span>
-                </div>
-              </TableCell>
-              <TableCell class="text-right">${{ item.amount.toFixed(2) }}</TableCell>
-              <TableCell class="text-right">{{ item.percentage.toFixed(1) }}%</TableCell>
-            </TableRow>
-            <TableRow v-if="categorySpending.length === 0">
-              <TableCell colspan="3" class="text-center text-muted-foreground"
-                >No expenses found</TableCell
-              >
-            </TableRow>
-          </TableBody>
-        </Table>
+        <!-- Category Legend -->
+        <div class="space-y-2">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Category</TableHead>
+                <TableHead class="text-right">Amount</TableHead>
+                <TableHead class="text-right">%</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="item in categorySpending" :key="item.category" class="hover:bg-muted/50">
+                <TableCell>
+                  <div class="flex items-center space-x-3">
+                    <div
+                      class="w-3 h-3 rounded-full flex-shrink-0"
+                      :style="{
+                        backgroundColor: getCategoryColorByName(item.category, isDarkMode),
+                      }"
+                    ></div>
+                    <span class="font-medium">{{ item.category }}</span>
+                  </div>
+                </TableCell>
+                <TableCell class="text-right font-medium">${{ item.amount.toFixed(2) }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{ item.percentage.toFixed(1) }}%</TableCell>
+              </TableRow>
+              <TableRow v-if="categorySpending.length === 0">
+                <TableCell colspan="3" class="text-center text-muted-foreground py-6">
+                  No expenses found
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </CardContent>
   </Card>

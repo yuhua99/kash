@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import DashboardHeader from '@/components/dashboard/DashboardHeader.vue'
 import StatsCards from '@/components/dashboard/StatsCards.vue'
 import TrendDisplay from '@/components/dashboard/TrendDisplay.vue'
 import SpendingByCategory from '@/components/dashboard/SpendingByCategory.vue'
@@ -162,8 +163,11 @@ onMounted(() => {
 
     <!-- Main Content -->
     <div v-else-if="authStore.isAuthenticated" class="space-y-8">
+      <!-- Dashboard Header -->
+      <DashboardHeader />
+
       <!-- Dashboard Overview -->
-      <div class="space-y-6">
+      <div class="space-y-8">
         <!-- Summary Cards -->
         <StatsCards
           :total-balance="totalBalance"
@@ -172,18 +176,25 @@ onMounted(() => {
           :savings-rate="savingsRate"
         />
 
-        <!-- Trend Display -->
-        <TrendDisplay :monthly-income="monthlyIncome" :monthly-expenses="monthlyExpenses" />
+        <!-- Charts and Analysis -->
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div class="col-span-4">
+            <TrendDisplay :monthly-income="monthlyIncome" :monthly-expenses="monthlyExpenses" />
+          </div>
+          <div class="col-span-3">
+            <RecentTransactions :transactions="sortedTransactions" />
+          </div>
+        </div>
 
-        <!-- Spending Analysis -->
-        <div class="grid gap-6 md:grid-cols-2">
-          <SpendingByCategory :transactions="sortedTransactions" />
-          <RecentTransactions :transactions="sortedTransactions" />
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div class="col-span-4">
+            <SpendingByCategory :transactions="sortedTransactions" />
+          </div>
+          <div class="col-span-3">
+            <CategoryManagement />
+          </div>
         </div>
       </div>
-
-      <!-- Category Management -->
-      <CategoryManagement />
 
       <!-- Quick Add Floating Button -->
       <AddTransactionDialog @add-transaction="addTransaction">

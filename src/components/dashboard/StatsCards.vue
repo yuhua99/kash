@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { DollarSign, TrendingUp, TrendingDown } from 'lucide-vue-next'
 
 interface Props {
   totalBalance: number
@@ -13,36 +13,48 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <!-- Income Card -->
     <Card>
-      <CardHeader class="pb-2">
-        <CardTitle class="text-sm font-medium">Income (This Month)</CardTitle>
+      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle class="text-sm font-medium">Total Income</CardTitle>
+        <DollarSign class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold text-emerald-600">${{ monthlyIncome.toFixed(2) }}</div>
-        <Badge variant="outline" class="text-xs mt-1">Income up 8% vs last month</Badge>
+        <div class="text-2xl font-bold">${{ monthlyIncome.toFixed(2) }}</div>
+        <p class="text-xs text-muted-foreground">
+          +20.1% from last month
+        </p>
       </CardContent>
     </Card>
 
+    <!-- Expenses Card -->
     <Card>
-      <CardHeader class="pb-2">
-        <CardTitle class="text-sm font-medium">Expense (This Month)</CardTitle>
+      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle class="text-sm font-medium">Total Expenses</CardTitle>
+        <TrendingDown class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold text-rose-600">${{ monthlyExpenses.toFixed(2) }}</div>
-        <Badge variant="outline" class="text-xs mt-1">Spending up 12% vs last month</Badge>
+        <div class="text-2xl font-bold">${{ monthlyExpenses.toFixed(2) }}</div>
+        <p class="text-xs text-muted-foreground">
+          +180.1% from last month
+        </p>
       </CardContent>
     </Card>
 
+    <!-- Net Balance Card -->
     <Card>
-      <CardHeader class="pb-2">
-        <CardTitle class="text-sm font-medium">Net Balance (This Month)</CardTitle>
+      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle class="text-sm font-medium">Net Balance</CardTitle>
+        <TrendingUp class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold text-slate-700">
+        <div class="text-2xl font-bold">
           ${{ (monthlyIncome - monthlyExpenses).toFixed(2) }}
         </div>
-        <Badge variant="outline" class="text-xs mt-1">Net down $240 vs last month</Badge>
+        <p class="text-xs text-muted-foreground">
+          +19% from last month
+        </p>
       </CardContent>
     </Card>
   </div>

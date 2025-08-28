@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 import CategorySelect from '@/components/categories/CategorySelect.vue'
 import { useFormValidation } from '@/composables/useFormValidation'
 import type { TransactionFormData, TransactionBase, TransactionWithId } from '@/types'

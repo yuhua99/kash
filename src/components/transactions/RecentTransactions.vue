@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { useCategoriesStore } from '@/stores/categories'
 
 interface Transaction {
@@ -35,12 +27,6 @@ const recentTransactions = computed(() => {
   return props.transactions.slice(0, 5)
 })
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })
-}
 
 const formatAmount = (amount: number, type: 'income' | 'expense') => {
   const formattedAmount = Math.abs(amount).toFixed(2)
@@ -50,52 +36,41 @@ const formatAmount = (amount: number, type: 'income' | 'expense') => {
 
 <template>
   <Card>
-    <CardHeader>
-      <CardTitle>Recent Transactions</CardTitle>
+    <CardHeader class="flex flex-row items-center">
+      <div class="grid gap-2">
+        <CardTitle>Recent Transactions</CardTitle>
+        <p class="text-sm text-muted-foreground">
+          You made {{ recentTransactions.length }} transactions this month.
+        </p>
+      </div>
     </CardHeader>
     <CardContent>
-      <div class="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead class="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="transaction in recentTransactions" :key="transaction.id">
-              <TableCell>{{ formatDate(transaction.date) }}</TableCell>
-              <TableCell>
-                <div class="flex items-center space-x-2">
-                  <div
-                    class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
-                    :style="{
-                      backgroundColor: categoriesStore.getCategoryColorByName(
-                        transaction.category,
-                        isDarkMode,
-                      ),
-                    }"
-                  ></div>
-                  <span>{{ transaction.category }}</span>
-                </div>
-              </TableCell>
-              <TableCell>{{ transaction.name }}</TableCell>
-              <TableCell
-                class="text-right font-medium"
-                :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'"
-              >
-                {{ formatAmount(transaction.amount, transaction.type) }}
-              </TableCell>
-            </TableRow>
-            <TableRow v-if="recentTransactions.length === 0">
-              <TableCell colspan="4" class="text-center text-muted-foreground"
-                >No transactions found</TableCell
-              >
-            </TableRow>
-          </TableBody>
-        </Table>
+      <div class="space-y-8">
+        <div v-for="transaction in recentTransactions" :key="transaction.id" class="flex items-center">
+          <div
+            class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-medium text-white"
+            :style="{
+              backgroundColor: categoriesStore.getCategoryColorByName(
+                transaction.category,
+                isDarkMode,
+              ),
+            }"
+          >
+            {{ transaction.category.charAt(0).toUpperCase() }}
+          </div>
+          <div class="ml-4 space-y-1">
+            <p class="text-sm font-medium leading-none">{{ transaction.name }}</p>
+            <p class="text-sm text-muted-foreground">
+              {{ transaction.category }}
+            </p>
+          </div>
+          <div class="ml-auto font-medium" :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'">
+            {{ formatAmount(transaction.amount, transaction.type) }}
+          </div>
+        </div>
+        <div v-if="recentTransactions.length === 0" class="flex items-center justify-center py-6">
+          <p class="text-sm text-muted-foreground">No recent transactions</p>
+        </div>
       </div>
     </CardContent>
   </Card>

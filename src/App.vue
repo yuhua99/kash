@@ -21,10 +21,10 @@ const handleLogout = async () => {
     <AppSidebar />
     <SidebarInset>
       <!-- Header with Sidebar Trigger and Logout -->
-      <header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <header class="flex h-16 shrink-0 items-center gap-2 px-4">
         <SidebarTrigger class="-ml-1" />
         <div class="ml-auto">
-          <Button variant="outline" size="sm" @click="handleLogout">
+          <Button variant="ghost" size="sm" @click="handleLogout">
             <LogOut class="h-4 w-4 mr-2" />
             Logout
           </Button>
@@ -32,7 +32,7 @@ const handleLogout = async () => {
       </header>
 
       <!-- Page Content -->
-      <div class="flex flex-1 flex-col gap-4 p-4">
+      <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
         <RouterView />
       </div>
     </SidebarInset>
