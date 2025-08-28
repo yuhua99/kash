@@ -12,42 +12,45 @@ import AddTransactionDialog from '@/components/transactions/AddTransactionDialog
 import CategoryManagement from '@/components/categories/CategoryManagement.vue'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
-import { useRecordsStore } from '@/stores/records'
-import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
+import { useTransactions } from '@/composables/useTransactions'
+import { useCategories } from '@/composables/useCategories'
+import type { TransactionBase } from '@/types'
 
-import type { TransactionBase } from '@/components/transactions/TransactionForm.vue'
-
-// Stores and router
+// Router and stores
 const router = useRouter()
 const authStore = useAuthStore()
-const recordsStore = useRecordsStore()
-const categoriesStore = useCategoriesStore()
+const {
+  sortedTransactions,
+  totalBalance,
+  monthlyIncome,
+  monthlyExpenses,
+  savingsRate,
+  isLoading: transactionsLoading,
+  error: transactionsError,
+  fetchRecords,
+  createRecord,
+  clearError: clearTransactionsError,
+} = useTransactions()
 
-// Computed values from stores
-const totalBalance = computed(() => recordsStore.totalBalance)
-const monthlyIncome = computed(() => recordsStore.monthlyIncome)
-const monthlyExpenses = computed(() => recordsStore.monthlyExpenses)
-const savingsRate = computed(() => recordsStore.savingsRate)
+const {
+  fetchCategories,
+  isLoading: categoriesLoading,
+  error: categoriesError,
+  clearError: clearCategoriesError,
+  getCategoryByName,
+} = useCategories()
 
-// Categories from store (for future use if needed)
-
-// Loading state
+// Combined loading state
 const isLoading = computed(
-  () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
+  () => authStore.isLoading || transactionsLoading.value || categoriesLoading.value,
 )
-
-// All transactions sorted by date (most recent first)
-const sortedTransactions = computed(() => {
-  return [...recordsStore.transactions].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  )
-})
 
 // Functions
 const addTransaction = async (newTransaction: TransactionBase) => {
-  // Find the category ID for the given category name
-  const category = categoriesStore.categories.find((cat) => cat.name === newTransaction.category)
+  // Find the category by name
+  const category = getCategoryByName(newTransaction.category)
+
   if (!category) {
     console.error('Category not found:', newTransaction.category)
     return
@@ -60,7 +63,7 @@ const addTransaction = async (newTransaction: TransactionBase) => {
     timestamp: Math.floor(new Date(newTransaction.date).getTime() / 1000),
   }
 
-  await recordsStore.createRecord(payload)
+  await createRecord(payload)
 }
 
 // Load data function
@@ -75,8 +78,8 @@ const loadData = async () => {
   }
 
   // Load categories first, then records (records need categories for display)
-  await categoriesStore.fetchCategories()
-  await recordsStore.fetchRecords()
+  await fetchCategories()
+  await fetchRecords()
 }
 
 // Load data on component mount
@@ -89,15 +92,15 @@ onMounted(() => {
   <div class="space-y-8">
     <!-- Error State -->
     <div
-      v-if="authStore.error || recordsStore.error || categoriesStore.error"
+      v-if="authStore.error || transactionsError || categoriesError"
       class="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded"
     >
       <p v-if="authStore.error">Authentication Error: {{ authStore.error }}</p>
-      <p v-if="recordsStore.error">Records Error: {{ recordsStore.error }}</p>
-      <p v-if="categoriesStore.error">Categories Error: {{ categoriesStore.error }}</p>
+      <p v-if="transactionsError">Records Error: {{ transactionsError }}</p>
+      <p v-if="categoriesError">Categories Error: {{ categoriesError }}</p>
       <div class="mt-2 space-x-2">
         <button
-          @click="(authStore.clearError(), recordsStore.clearError(), categoriesStore.clearError())"
+          @click="(authStore.clearError(), clearTransactionsError(), clearCategoriesError())"
           class="text-red-700 underline text-sm"
         >
           Dismiss

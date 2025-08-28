@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, toRef } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
@@ -10,53 +10,22 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DonutChart } from '@/components/ui/chart-donut'
-import { useCategoriesStore } from '@/stores/categories'
+import { useCategories } from '@/composables/useCategories'
+import { useChartData } from '@/composables/useChartData'
+import type { Transaction } from '@/types'
 
 interface Props {
-  transactions: Array<{
-    id: string
-    date: string
-    name: string
-    amount: number
-    category: string
-    type: 'income' | 'expense'
-  }>
+  transactions: Transaction[]
 }
 
 const props = defineProps<Props>()
-const categoriesStore = useCategoriesStore()
+const { getCategoryColorByName } = useCategories()
+const { categorySpending, donutChartData, currencyFormatter } = useChartData(
+  toRef(props, 'transactions'),
+)
 
 const isDarkMode = computed(() => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
-})
-
-const categorySpending = computed(() => {
-  const categoryMap = new Map<string, number>()
-
-  // Only count expenses for category breakdown
-  const expenses = props.transactions.filter((t) => t.type === 'expense')
-  const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0)
-
-  expenses.forEach((transaction) => {
-    const current = categoryMap.get(transaction.category) || 0
-    categoryMap.set(transaction.category, current + Math.abs(transaction.amount))
-  })
-
-  return Array.from(categoryMap.entries())
-    .map(([category, amount]) => ({
-      category,
-      amount,
-      percentage: totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0,
-    }))
-    .sort((a, b) => b.amount - a.amount)
-})
-
-// Chart data for donut chart
-const chartData = computed(() => {
-  return categorySpending.value.map((item) => ({
-    name: item.category,
-    value: item.amount,
-  }))
 })
 </script>
 
@@ -70,11 +39,11 @@ const chartData = computed(() => {
         <!-- Donut Chart -->
         <div class="flex items-center justify-center">
           <DonutChart
-            v-if="chartData.length > 0"
-            :data="chartData"
+            v-if="donutChartData.length > 0"
+            :data="donutChartData"
             index="name"
             category="value"
-            :value-formatter="(value: number) => `$${value.toFixed(0)}`"
+            :value-formatter="currencyFormatter"
             class="h-48"
           />
           <div v-else class="text-center text-muted-foreground">No expenses found</div>
@@ -96,10 +65,7 @@ const chartData = computed(() => {
                   <div
                     class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
                     :style="{
-                      backgroundColor: categoriesStore.getCategoryColorByName(
-                        item.category,
-                        isDarkMode,
-                      ),
+                      backgroundColor: getCategoryColorByName(item.category, isDarkMode),
                     }"
                   ></div>
                   <span>{{ item.category }}</span>
