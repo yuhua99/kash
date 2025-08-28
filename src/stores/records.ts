@@ -3,42 +3,13 @@ import { defineStore } from 'pinia'
 import { api } from '@/lib/api'
 import { useApiRequest } from '@/composables/useApiRequest'
 import { useCategoriesStore } from './categories'
-
-interface ApiRecord {
-  id: string
-  name: string
-  amount: number
-  category_id: string
-  timestamp: number
-}
-
-interface Transaction {
-  id: string
-  date: string
-  name: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-}
-
-interface CreateRecordPayload {
-  name: string
-  amount: number
-  category_id: string
-  timestamp: number
-}
-
-interface UpdateRecordPayload {
-  name?: string
-  amount?: number
-  category_id?: string
-  timestamp?: number
-}
-
-interface RecordsResponse {
-  records: ApiRecord[]
-  total_count: number
-}
+import type {
+  ApiRecord,
+  Transaction,
+  CreateRecordPayload,
+  UpdateRecordPayload,
+  RecordsResponse,
+} from '@/types'
 
 export const useRecordsStore = defineStore('records', () => {
   const records = ref<ApiRecord[]>([])

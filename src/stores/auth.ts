@@ -2,21 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '@/lib/api'
 import { useApiRequest } from '@/composables/useApiRequest'
-
-interface PublicUser {
-  id: string
-  username: string
-}
-
-interface LoginPayload {
-  username: string
-  password: string
-}
-
-interface RegisterPayload {
-  username: string
-  password: string
-}
+import type { PublicUser, LoginPayload, RegisterPayload } from '@/types'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<PublicUser | null>(null)

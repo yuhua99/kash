@@ -3,26 +3,12 @@ import { defineStore } from 'pinia'
 import { api } from '@/lib/api'
 import { useApiRequest } from '@/composables/useApiRequest'
 import { getCategoryColor as getColorFromId } from '@/lib/categoryColors'
-
-interface Category {
-  id: string
-  name: string
-}
-
-interface CreateCategoryPayload {
-  name: string
-}
-
-interface UpdateCategoryPayload {
-  name: string
-}
-
-interface CategoriesResponse {
-  categories: Category[]
-  total_count: number
-  limit: number
-  offset: number
-}
+import type {
+  Category,
+  CreateCategoryPayload,
+  UpdateCategoryPayload,
+  CategoriesResponse,
+} from '@/types'
 
 export const useCategoriesStore = defineStore('categories', () => {
   const categories = ref<Category[]>([])

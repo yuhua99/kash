@@ -11,26 +11,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import CategorySelect from '@/components/categories/CategorySelect.vue'
 import { useFormValidation } from '@/composables/useFormValidation'
+import type { TransactionFormData, TransactionBase, TransactionWithId } from '@/types'
 
-export interface TransactionFormData {
-  name: string
-  amount: string
-  category: string
-  type: 'income' | 'expense'
-  date: string
-}
-
-export interface TransactionBase {
-  name: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-  date: string
-}
-
-export interface TransactionWithId extends TransactionBase {
-  id: string
-}
+// Re-export for backward compatibility
+export type { TransactionFormData, TransactionBase, TransactionWithId }
 
 interface Props {
   transaction?: TransactionWithId | null

@@ -1,13 +1,4 @@
-interface ApiResponse<T = unknown> {
-  data?: T
-  error?: string
-  success: boolean
-}
-
-interface RequestOptions {
-  headers?: Record<string, string>
-  body?: unknown
-}
+import type { ApiResponse, RequestOptions } from '@/types'
 
 class ApiClient {
   private baseURL: string
