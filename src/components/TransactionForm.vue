@@ -80,7 +80,7 @@ watch(
     }
     emit('update:modelValue', formData.value)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // Watch for external form data changes
@@ -91,7 +91,7 @@ watch(
       formData.value = { ...newValue }
     }
   },
-  { deep: true }
+  { deep: true },
 )
 
 // Watch form data changes and emit updates
@@ -100,7 +100,7 @@ watch(
   (newValue) => {
     emit('update:modelValue', newValue)
   },
-  { deep: true }
+  { deep: true },
 )
 
 const resetForm = () => {
@@ -143,21 +143,11 @@ defineExpose({
   <div class="grid gap-4">
     <div class="grid gap-2">
       <Label for="name">Description</Label>
-      <Input
-        id="name"
-        v-model="formData.name"
-        placeholder="Transaction description"
-      />
+      <Input id="name" v-model="formData.name" placeholder="Transaction description" />
     </div>
     <div class="grid gap-2">
       <Label for="amount">Amount</Label>
-      <Input
-        id="amount"
-        v-model="formData.amount"
-        type="number"
-        step="0.01"
-        placeholder="0.00"
-      />
+      <Input id="amount" v-model="formData.amount" type="number" step="0.01" placeholder="0.00" />
     </div>
     <div class="grid gap-2">
       <Label for="category">Category</Label>

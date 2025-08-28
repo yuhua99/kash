@@ -181,20 +181,13 @@ const handleDateSelect = (date: Date | undefined) => {
         <!-- Description -->
         <div class="space-y-2">
           <Label for="name">Description</Label>
-          <Input
-            id="name"
-            v-model="form.name"
-            placeholder="Transaction description"
-          />
+          <Input id="name" v-model="form.name" placeholder="Transaction description" />
         </div>
 
         <!-- Actions -->
         <div class="flex justify-end gap-2 pt-4">
           <Button variant="outline" @click="isOpen = false">Cancel</Button>
-          <Button
-            @click="handleSubmit"
-            :disabled="!form.amount || !form.category || !form.name"
-          >
+          <Button @click="handleSubmit" :disabled="!form.amount || !form.category || !form.name">
             Save
           </Button>
         </div>

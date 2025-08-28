@@ -75,7 +75,8 @@ const loadData = async () => {
   const isAuthenticated = await authStore.checkAuthStatus()
 
   if (!isAuthenticated) {
-    console.warn('User not authenticated, skipping data load')
+    console.warn('User not authenticated, redirecting to login')
+    router.push('/login')
     return
   }
 
@@ -162,22 +163,8 @@ onMounted(() => {
       </Card>
     </div>
 
-    <!-- Not Authenticated State -->
-    <div v-else-if="!authStore.isAuthenticated" class="flex items-center justify-center py-12">
-      <div class="text-center">
-        <h2 class="text-xl font-semibold mb-2">Authentication Required</h2>
-        <p class="text-muted-foreground mb-4">Please log in to access your budget dashboard.</p>
-        <button
-          @click="router.push('/login')"
-          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Go to Login
-        </button>
-      </div>
-    </div>
-
     <!-- Main Content -->
-    <div v-else class="space-y-8">
+    <div v-else-if="authStore.isAuthenticated" class="space-y-8">
       <!-- Dashboard Overview -->
       <div class="space-y-6">
         <!-- Summary Cards -->
