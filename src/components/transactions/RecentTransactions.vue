@@ -27,7 +27,6 @@ const recentTransactions = computed(() => {
   return props.transactions.slice(0, 5)
 })
 
-
 const formatAmount = (amount: number, type: 'income' | 'expense') => {
   const formattedAmount = Math.abs(amount).toFixed(2)
   return type === 'income' ? `+$${formattedAmount}` : `-$${formattedAmount}`
@@ -46,7 +45,11 @@ const formatAmount = (amount: number, type: 'income' | 'expense') => {
     </CardHeader>
     <CardContent>
       <div class="space-y-8">
-        <div v-for="transaction in recentTransactions" :key="transaction.id" class="flex items-center">
+        <div
+          v-for="transaction in recentTransactions"
+          :key="transaction.id"
+          class="flex items-center"
+        >
           <div
             class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-medium text-white"
             :style="{
@@ -64,7 +67,10 @@ const formatAmount = (amount: number, type: 'income' | 'expense') => {
               {{ transaction.category }}
             </p>
           </div>
-          <div class="ml-auto font-medium" :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'">
+          <div
+            class="ml-auto font-medium"
+            :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'"
+          >
             {{ formatAmount(transaction.amount, transaction.type) }}
           </div>
         </div>

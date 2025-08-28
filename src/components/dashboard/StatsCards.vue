@@ -22,9 +22,7 @@ defineProps<Props>()
       </CardHeader>
       <CardContent>
         <div class="text-2xl font-bold">${{ monthlyIncome.toFixed(2) }}</div>
-        <p class="text-xs text-muted-foreground">
-          +20.1% from last month
-        </p>
+        <p class="text-xs text-muted-foreground">+20.1% from last month</p>
       </CardContent>
     </Card>
 
@@ -36,9 +34,7 @@ defineProps<Props>()
       </CardHeader>
       <CardContent>
         <div class="text-2xl font-bold">${{ monthlyExpenses.toFixed(2) }}</div>
-        <p class="text-xs text-muted-foreground">
-          +180.1% from last month
-        </p>
+        <p class="text-xs text-muted-foreground">+180.1% from last month</p>
       </CardContent>
     </Card>
 
@@ -49,12 +45,8 @@ defineProps<Props>()
         <TrendingUp class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold">
-          ${{ (monthlyIncome - monthlyExpenses).toFixed(2) }}
-        </div>
-        <p class="text-xs text-muted-foreground">
-          +19% from last month
-        </p>
+        <div class="text-2xl font-bold">${{ (monthlyIncome - monthlyExpenses).toFixed(2) }}</div>
+        <p class="text-xs text-muted-foreground">+19% from last month</p>
       </CardContent>
     </Card>
   </div>

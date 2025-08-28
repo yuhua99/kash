@@ -46,7 +46,12 @@ const isDarkMode = computed(() => {
             :value-formatter="currencyFormatter"
             class="h-64 w-64"
           />
-          <div v-else class="text-center text-muted-foreground h-64 flex items-center justify-center">No expenses found</div>
+          <div
+            v-else
+            class="text-center text-muted-foreground h-64 flex items-center justify-center"
+          >
+            No expenses found
+          </div>
         </div>
 
         <!-- Category Legend -->
@@ -60,7 +65,11 @@ const isDarkMode = computed(() => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="item in categorySpending" :key="item.category" class="hover:bg-muted/50">
+              <TableRow
+                v-for="item in categorySpending"
+                :key="item.category"
+                class="hover:bg-muted/50"
+              >
                 <TableCell>
                   <div class="flex items-center space-x-3">
                     <div
@@ -73,7 +82,9 @@ const isDarkMode = computed(() => {
                   </div>
                 </TableCell>
                 <TableCell class="text-right font-medium">${{ item.amount.toFixed(2) }}</TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ item.percentage.toFixed(1) }}%</TableCell>
+                <TableCell class="text-right text-muted-foreground"
+                  >{{ item.percentage.toFixed(1) }}%</TableCell
+                >
               </TableRow>
               <TableRow v-if="categorySpending.length === 0">
                 <TableCell colspan="3" class="text-center text-muted-foreground py-6">

@@ -9,14 +9,16 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   title: 'Dashboard',
-  subtitle: 'Welcome to your personal budget tracker'
+  subtitle: 'Welcome to your personal budget tracker',
 })
 </script>
 
 <template>
   <div class="flex flex-col space-y-6">
     <!-- Page Header -->
-    <div class="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+    <div
+      class="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0"
+    >
       <div>
         <h2 class="text-3xl font-bold tracking-tight">{{ title }}</h2>
         <p class="text-muted-foreground">{{ subtitle }}</p>
