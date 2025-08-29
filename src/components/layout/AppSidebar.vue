@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { Home, ChevronUp, CreditCard, PanelsTopLeft, User2 } from 'lucide-vue-next'
 import {
@@ -18,9 +18,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from '@/components/ui/sidebar'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 
 const navigation = [
@@ -39,6 +41,11 @@ const navigation = [
 // Check if a route is current
 const isCurrentRoute = (href: string) => {
   return route.path === href
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/login')
 }
 </script>
 
@@ -97,13 +104,14 @@ const isCurrentRoute = (href: string) => {
               <DropdownMenuItem>
                 <span>Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span>Sign out</span>
+              <DropdownMenuItem @click="handleLogout">
+                <span>logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>
+    <SidebarRail />
   </Sidebar>
 </template>
