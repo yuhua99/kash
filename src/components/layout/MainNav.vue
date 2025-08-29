@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { Home, CreditCard } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -10,24 +8,14 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
 
-const router = useRouter()
-const authStore = useAuthStore()
-
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
-
 const navigation = [
   {
     name: 'Dashboard',
     href: '/',
-    icon: Home,
   },
   {
     name: 'Transactions',
     href: '/transactions',
-    icon: CreditCard,
   },
 ]
 </script>
