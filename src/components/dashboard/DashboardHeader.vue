@@ -20,7 +20,7 @@ withDefaults(defineProps<Props>(), {
       class="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0"
     >
       <div>
-        <h2 class="text-3xl font-bold tracking-tight">{{ title }}</h2>
+        <h2 class="text-2xl font-bold tracking-tight">{{ title }}</h2>
         <p class="text-muted-foreground">{{ subtitle }}</p>
       </div>
       <div class="flex items-center space-x-2">
