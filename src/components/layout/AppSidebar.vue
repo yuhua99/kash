@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
-import { Home, CreditCard, PanelsTopLeft } from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/auth'
+import { Home, ChevronUp, CreditCard, PanelsTopLeft, User2 } from 'lucide-vue-next'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -13,6 +21,7 @@ import {
 } from '@/components/ui/sidebar'
 
 const route = useRoute()
+const authStore = useAuthStore()
 
 const navigation = [
   {
@@ -34,7 +43,7 @@ const isCurrentRoute = (href: string) => {
 </script>
 
 <template>
-  <Sidebar>
+  <Sidebar collapsible="icon">
     <SidebarHeader>
       <SidebarMenu>
         <SidebarMenuItem>
@@ -70,5 +79,31 @@ const isCurrentRoute = (href: string) => {
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarContent>
+    <SidebarFooter>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton>
+                <User2 />
+                {{ authStore.user?.username || 'Unknown user' }}
+                <ChevronUp class="ml-auto" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" class="w-56">
+              <DropdownMenuItem>
+                <span>Account</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <span>Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <span>Sign out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarFooter>
   </Sidebar>
 </template>
