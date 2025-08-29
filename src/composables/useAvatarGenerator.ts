@@ -111,4 +111,3 @@ export function useAvatarGenerator(config: AvatarConfig) {
     avatarDataUrl,
   }
 }
-

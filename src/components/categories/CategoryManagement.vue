@@ -23,11 +23,7 @@ const isDarkMode = computed(() => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
 })
 
-onMounted(() => {
-  if (categoriesStore.categories.length === 0) {
-    categoriesStore.fetchCategories()
-  }
-})
+// Categories are loaded by parent component, no need to fetch here
 
 const handleEditCategory = (category: { id: string; name: string }) => {
   editDialogCategory.value = category
