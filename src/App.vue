@@ -1,21 +1,18 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import AppSidebar from '@/components/layout/AppSidebar.vue'
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import MainNav from '@/components/layout/MainNav.vue'
 
 const authStore = useAuthStore()
 </script>
 
 <template>
   <!-- Authenticated Layout -->
-  <SidebarProvider v-if="authStore.isAuthenticated">
-    <AppSidebar />
+  <div v-if="authStore.isAuthenticated" class="flex flex-1 flex-col gap-4 p-4">
+    <MainNav />
     <!-- Page Content -->
-    <div class="flex flex-1 flex-col gap-4 p-4">
-      <RouterView />
-    </div>
-  </SidebarProvider>
+    <RouterView />
+  </div>
 
   <!-- Unauthenticated Layout -->
   <div v-else class="min-h-screen bg-background">
