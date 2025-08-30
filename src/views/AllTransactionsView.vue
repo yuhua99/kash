@@ -13,9 +13,9 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import TransactionsTable from '@/components/transactions/TransactionsTable.vue'
-import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
+import TransactionHeader from '@/components/transactions/TransactionHeader.vue'
 import { Button } from '@/components/ui/button'
-import { Plus, Search, Filter, Download } from 'lucide-vue-next'
+import { Search, Filter } from 'lucide-vue-next'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
@@ -149,24 +149,10 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div class="space-y-1">
-        <h1 class="text-2xl font-bold tracking-tight">All Transactions</h1>
-        <p class="text-muted-foreground">View and manage all your financial transactions</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <Button variant="outline" size="sm" @click="exportTransactions">
-          <Download class="h-4 w-4 mr-2" />
-          Export
-        </Button>
-        <AddTransactionDialog @add-transaction="addTransaction">
-          <Button size="sm">
-            <Plus class="h-4 w-4 mr-2" />
-            Add Transaction
-          </Button>
-        </AddTransactionDialog>
-      </div>
-    </div>
+    <TransactionHeader
+      @add-transaction="addTransaction"
+      @export-transactions="exportTransactions"
+    />
 
     <!-- Error State -->
     <div

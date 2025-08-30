@@ -4,12 +4,10 @@ import { CalendarDays } from 'lucide-vue-next'
 
 interface Props {
   title?: string
-  subtitle?: string
 }
 
 withDefaults(defineProps<Props>(), {
   title: 'Dashboard',
-  subtitle: 'Welcome to your personal budget tracker',
 })
 </script>
 
@@ -21,7 +19,6 @@ withDefaults(defineProps<Props>(), {
     >
       <div>
         <h2 class="text-2xl font-bold tracking-tight">{{ title }}</h2>
-        <p class="text-muted-foreground">{{ subtitle }}</p>
       </div>
       <div class="flex items-center space-x-2">
         <Button variant="outline" size="sm">
