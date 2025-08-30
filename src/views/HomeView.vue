@@ -10,7 +10,6 @@ import TrendDisplay from '@/components/dashboard/TrendDisplay.vue'
 import SpendingByCategory from '@/components/dashboard/SpendingByCategory.vue'
 import RecentTransactions from '@/components/transactions/RecentTransactions.vue'
 import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
-import CategoryManagement from '@/components/categories/CategoryManagement.vue'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
@@ -186,13 +185,8 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <div class="col-span-4">
-            <SpendingByCategory :transactions="sortedTransactions" />
-          </div>
-          <div class="col-span-3">
-            <CategoryManagement />
-          </div>
+        <div class="grid gap-4 md:grid-cols-1">
+          <SpendingByCategory :transactions="sortedTransactions" />
         </div>
       </div>
 

@@ -17,6 +17,10 @@ const navigation = [
     name: 'Transactions',
     href: '/transactions',
   },
+  {
+    name: 'Categories',
+    href: '/categories',
+  },
 ]
 </script>
 
