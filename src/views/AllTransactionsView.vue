@@ -20,6 +20,7 @@ import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
 import type { TransactionBase } from '@/components/transactions/TransactionForm.vue'
+import type { Transaction } from '@/types'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -93,6 +94,27 @@ const addTransaction = async (newTransaction: TransactionBase) => {
   }
 
   await recordsStore.createRecord(payload)
+}
+
+const editTransaction = async (transaction: Transaction) => {
+  const category = categoriesStore.categories.find((cat) => cat.name === transaction.category)
+  if (!category) {
+    console.error('Category not found:', transaction.category)
+    return
+  }
+
+  const payload = {
+    name: transaction.name,
+    amount: transaction.amount,
+    category_id: category.id,
+    timestamp: Math.floor(new Date(transaction.date).getTime() / 1000),
+  }
+
+  await recordsStore.updateRecord(transaction.id, payload)
+}
+
+const deleteTransaction = async (id: string) => {
+  await recordsStore.deleteRecord(id)
 }
 
 const loadData = async () => {
@@ -289,7 +311,11 @@ onMounted(() => {
           </div>
         </CardHeader>
         <CardContent class="px-6 pb-6">
-          <TransactionsTable :transactions="filteredAndSortedTransactions" />
+          <TransactionsTable
+            :transactions="filteredAndSortedTransactions"
+            @edit-transaction="editTransaction"
+            @delete-transaction="deleteTransaction"
+          />
         </CardContent>
       </Card>
     </div>
