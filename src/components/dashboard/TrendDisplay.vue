@@ -2,8 +2,7 @@
 import { ref, computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LineChart } from '@/components/ui/chart-line'
-import { CurveType } from '@unovis/ts'
+import { BarChart } from '@/components/ui/chart-bar'
 import { useChartData } from '@/composables/useChartData'
 import type { Transaction } from '@/types'
 import TrendTooltip from './TrendTooltip.vue'
@@ -19,6 +18,7 @@ const transactionsRef = computed(() => props.transactions)
 const { monthlyTrendData } = useChartData(transactionsRef)
 
 const selectedPeriod = ref('monthly')
+const selectedDataType = ref('income')
 
 // Helper function to get all days in current month
 const getCurrentMonthDays = () => {
@@ -111,38 +111,60 @@ const processedMonthlyData = computed(() => {
   }))
 })
 
-// Chart data formatted for Unovis LineChart
+// Chart data formatted for single data series
 const chartData = computed(() => {
+  let baseData
   if (selectedPeriod.value === 'daily') {
-    return dailyTrendData.value
+    baseData = dailyTrendData.value
   } else if (selectedPeriod.value === 'weekly') {
-    return weeklyTrendData.value
+    baseData = weeklyTrendData.value
   } else {
-    return processedMonthlyData.value
+    baseData = processedMonthlyData.value
   }
+
+  // Transform data to show only selected data type
+  return baseData.map((item) => ({
+    period: item.period,
+    value: selectedDataType.value === 'income' ? item.income : item.expenses,
+  }))
 })
+
+// Chart configuration based on selected data type
+const chartCategories = computed(() => ['value' as keyof { period: string; value: number }])
+const chartColors = computed(() => [selectedDataType.value === 'income' ? '#059669' : '#dc2626'])
 </script>
 
 <template>
   <Card>
     <CardHeader>
       <div class="flex items-center justify-between">
-        <CardTitle>Income/Expense Trend</CardTitle>
-        <Tabs v-model="selectedPeriod" class="w-auto">
-          <TabsList class="grid w-full grid-cols-3">
-            <TabsTrigger value="daily">Daily</TabsTrigger>
-            <TabsTrigger value="weekly">Weekly</TabsTrigger>
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <CardTitle>{{ selectedDataType === 'income' ? 'Income' : 'Expense' }} Trend</CardTitle>
+        <div class="flex items-center gap-4">
+          <!-- Data Type Tabs -->
+          <Tabs v-model="selectedDataType" class="w-auto">
+            <TabsList class="grid w-full grid-cols-2">
+              <TabsTrigger value="income">Income</TabsTrigger>
+              <TabsTrigger value="expenses">Expenses</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <!-- Period Tabs -->
+          <Tabs v-model="selectedPeriod" class="w-auto">
+            <TabsList class="grid w-full grid-cols-3">
+              <TabsTrigger value="daily">Daily</TabsTrigger>
+              <TabsTrigger value="weekly">Weekly</TabsTrigger>
+              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
     </CardHeader>
     <CardContent class="p-4">
-      <LineChart
+      <BarChart
         :data="chartData"
         index="period"
-        :categories="['income', 'expenses']"
-        :colors="['#059669', '#dc2626']"
+        :categories="chartCategories"
+        :colors="chartColors"
         :y-formatter="
           (value: number | Date) => {
             if (typeof value === 'number') {
@@ -151,8 +173,8 @@ const chartData = computed(() => {
             return '$0'
           }
         "
-        :curve-type="CurveType.MonotoneX"
         :custom-tooltip="TrendTooltip"
+        :rounded-corners="4"
         class="h-80"
       />
     </CardContent>
