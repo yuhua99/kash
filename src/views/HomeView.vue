@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -20,6 +20,9 @@ import type { TransactionBase } from '@/types'
 // Router and stores
 const router = useRouter()
 const authStore = useAuthStore()
+
+// Period selection state
+const selectedPeriod = ref('this-month')
 const {
   sortedTransactions,
   totalBalance,
@@ -80,6 +83,11 @@ const loadData = async () => {
   // Load categories first, then records (records need categories for display)
   await fetchCategories()
   await fetchRecords()
+}
+
+// Handle period change from DashboardHeader
+const handlePeriodChange = (period: string) => {
+  selectedPeriod.value = period
 }
 
 // Load data on component mount
@@ -163,7 +171,7 @@ onMounted(() => {
     <!-- Main Content -->
     <div v-else-if="authStore.isAuthenticated" class="space-y-8">
       <!-- Dashboard Header -->
-      <DashboardHeader />
+      <DashboardHeader @period-change="handlePeriodChange" />
 
       <!-- Dashboard Overview -->
       <div class="space-y-8">
@@ -178,7 +186,7 @@ onMounted(() => {
         <!-- Charts and Analysis -->
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <div class="col-span-4">
-            <TrendDisplay :transactions="sortedTransactions" />
+            <TrendDisplay :transactions="sortedTransactions" :period="selectedPeriod" />
           </div>
           <div class="col-span-3">
             <RecentTransactions :transactions="sortedTransactions" />

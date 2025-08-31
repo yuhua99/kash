@@ -3,22 +3,36 @@ import { ref, computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BarChart } from '@/components/ui/chart-bar'
-import { useChartData } from '@/composables/useChartData'
 import type { Transaction } from '@/types'
 import TrendTooltip from './TrendTooltip.vue'
 
+enum DataType {
+  INCOME = 'income',
+  EXPENSES = 'expenses',
+}
+
 interface Props {
   transactions: Transaction[]
+  period: string
 }
 
 const props = defineProps<Props>()
 
-// Process transaction data using the chart data composable
-const transactionsRef = computed(() => props.transactions)
-const { monthlyTrendData } = useChartData(transactionsRef)
+const selectedDataType = ref<DataType>(DataType.EXPENSES)
 
-const selectedPeriod = ref('monthly')
-const selectedDataType = ref('income')
+// Map dashboard period to chart granularity
+const chartPeriod = computed(() => {
+  switch (props.period) {
+    case 'this-month':
+      return 'daily'
+    case 'this-half-year':
+      return 'weekly'
+    case 'this-year':
+      return 'monthly'
+    default:
+      return 'monthly'
+  }
+})
 
 // Helper function to get all days in current month
 const getCurrentMonthDays = () => {
@@ -44,8 +58,13 @@ const getLastNWeeks = (n: number) => {
     weekStart.setDate(weekStart.getDate() - i * 7 - today.getDay())
     const weekEnd = new Date(weekStart)
     weekEnd.setDate(weekStart.getDate() + 6)
+
+    // Format week label as "Week of MM/DD"
+    const weekStartMonth = (weekStart.getMonth() + 1).toString().padStart(2, '0')
+    const weekStartDay = weekStart.getDate().toString().padStart(2, '0')
+
     weeks.push({
-      label: `Week ${n - i}`,
+      label: `${weekStartMonth}/${weekStartDay}`,
       start: weekStart.toISOString().split('T')[0],
       end: weekEnd.toISOString().split('T')[0],
     })
@@ -79,11 +98,11 @@ const dailyTrendData = computed(() => {
   })
 })
 
-// Process weekly data (last 4 weeks)
+// Process weekly data (last 26 weeks for half year)
 const weeklyTrendData = computed(() => {
-  const last4Weeks = getLastNWeeks(4)
+  const last26Weeks = getLastNWeeks(26)
 
-  return last4Weeks.map((week) => {
+  return last26Weeks.map((week) => {
     const weekTransactions = props.transactions.filter(
       (t) => t.date >= week.start && t.date <= week.end,
     )
@@ -102,21 +121,54 @@ const weeklyTrendData = computed(() => {
   })
 })
 
-// Process monthly data - transform the existing monthlyTrendData format
+// Process monthly data - show 12 months for this year
 const processedMonthlyData = computed(() => {
-  return monthlyTrendData.value.slice(-6).map((item) => ({
-    period: new Date(item.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
-    income: item.income,
-    expenses: item.expenses,
-  }))
+  // Create a more comprehensive monthly aggregation directly from transactions
+  const monthlyData = new Map<string, { income: number; expenses: number }>()
+
+  // Generate the last 12 months
+  const months = []
+  const today = new Date()
+
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date(today.getFullYear(), today.getMonth() - i, 1)
+    const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`
+    const monthLabel = date.toLocaleDateString('en-US', { month: 'short' })
+
+    months.push({ monthKey, monthLabel })
+    monthlyData.set(monthKey, { income: 0, expenses: 0 })
+  }
+
+  // Aggregate transaction data by month
+  props.transactions.forEach((transaction) => {
+    const monthKey = transaction.date.substring(0, 7) // YYYY-MM format
+    const current = monthlyData.get(monthKey)
+
+    if (current) {
+      if (transaction.type === 'income') {
+        current.income += transaction.amount
+      } else {
+        current.expenses += Math.abs(transaction.amount)
+      }
+    }
+  })
+
+  return months.map(({ monthKey, monthLabel }) => {
+    const data = monthlyData.get(monthKey) || { income: 0, expenses: 0 }
+    return {
+      period: monthLabel,
+      income: data.income,
+      expenses: data.expenses,
+    }
+  })
 })
 
 // Chart data formatted for single data series
 const chartData = computed(() => {
   let baseData
-  if (selectedPeriod.value === 'daily') {
+  if (chartPeriod.value === 'daily') {
     baseData = dailyTrendData.value
-  } else if (selectedPeriod.value === 'weekly') {
+  } else if (chartPeriod.value === 'weekly') {
     baseData = weeklyTrendData.value
   } else {
     baseData = processedMonthlyData.value
@@ -125,38 +177,31 @@ const chartData = computed(() => {
   // Transform data to show only selected data type
   return baseData.map((item) => ({
     period: item.period,
-    value: selectedDataType.value === 'income' ? item.income : item.expenses,
+    value: selectedDataType.value === DataType.INCOME ? item.income : item.expenses,
   }))
 })
 
 // Chart configuration based on selected data type
 const chartCategories = computed(() => ['value' as keyof { period: string; value: number }])
-const chartColors = computed(() => [selectedDataType.value === 'income' ? '#059669' : '#dc2626'])
+const chartColors = computed(() => [
+  selectedDataType.value === DataType.INCOME ? '#059669' : '#dc2626',
+])
 </script>
 
 <template>
   <Card>
     <CardHeader>
       <div class="flex items-center justify-between">
-        <CardTitle>{{ selectedDataType === 'income' ? 'Income' : 'Expense' }} Trend</CardTitle>
-        <div class="flex items-center gap-4">
-          <!-- Data Type Tabs -->
-          <Tabs v-model="selectedDataType" class="w-auto">
-            <TabsList class="grid w-full grid-cols-2">
-              <TabsTrigger value="income">Income</TabsTrigger>
-              <TabsTrigger value="expenses">Expenses</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <!-- Period Tabs -->
-          <Tabs v-model="selectedPeriod" class="w-auto">
-            <TabsList class="grid w-full grid-cols-3">
-              <TabsTrigger value="daily">Daily</TabsTrigger>
-              <TabsTrigger value="weekly">Weekly</TabsTrigger>
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        <CardTitle
+          >{{ selectedDataType === DataType.INCOME ? 'Income' : 'Expense' }} Trend</CardTitle
+        >
+        <!-- Data Type Tabs -->
+        <Tabs v-model="selectedDataType" class="w-auto">
+          <TabsList class="grid w-full grid-cols-2">
+            <TabsTrigger :value="DataType.INCOME">Income</TabsTrigger>
+            <TabsTrigger :value="DataType.EXPENSES">Expenses</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
     </CardHeader>
     <CardContent class="p-4">
@@ -165,6 +210,7 @@ const chartColors = computed(() => [selectedDataType.value === 'income' ? '#0596
         index="period"
         :categories="chartCategories"
         :colors="chartColors"
+        :show-legend="false"
         :y-formatter="
           (value: number | Date) => {
             if (typeof value === 'number') {
