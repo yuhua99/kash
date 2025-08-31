@@ -3,44 +3,122 @@ import { ref, computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LineChart } from '@/components/ui/chart-line'
+import { CurveType } from '@unovis/ts'
+import { useChartData } from '@/composables/useChartData'
+import type { Transaction } from '@/types'
+import TrendTooltip from './TrendTooltip.vue'
 
 interface Props {
-  monthlyIncome: number
-  monthlyExpenses: number
+  transactions: Transaction[]
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+
+// Process transaction data using the chart data composable
+const transactionsRef = computed(() => props.transactions)
+const { monthlyTrendData } = useChartData(transactionsRef)
 
 const selectedPeriod = ref('monthly')
+
+// Helper function to get all days in current month
+const getCurrentMonthDays = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = today.getMonth()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const days = []
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day)
+    days.push(date.toISOString().split('T')[0])
+  }
+  return days
+}
+
+// Helper function to get last N weeks
+const getLastNWeeks = (n: number) => {
+  const weeks = []
+  const today = new Date()
+  for (let i = n - 1; i >= 0; i--) {
+    const weekStart = new Date(today)
+    weekStart.setDate(weekStart.getDate() - i * 7 - today.getDay())
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6)
+    weeks.push({
+      label: `Week ${n - i}`,
+      start: weekStart.toISOString().split('T')[0],
+      end: weekEnd.toISOString().split('T')[0],
+    })
+  }
+  return weeks
+}
+
+// Process daily data (entire current month)
+const dailyTrendData = computed(() => {
+  const currentMonthDays = getCurrentMonthDays()
+
+  return currentMonthDays.map((date) => {
+    const dayTransactions = props.transactions.filter((t) => t.date === date)
+    const income = dayTransactions
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0)
+    const expenses = dayTransactions
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+
+    // Format date as MM/DD (e.g., "08/31")
+    const dateObj = new Date(date)
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+    const day = dateObj.getDate().toString().padStart(2, '0')
+
+    return {
+      period: `${month}/${day}`,
+      income,
+      expenses,
+    }
+  })
+})
+
+// Process weekly data (last 4 weeks)
+const weeklyTrendData = computed(() => {
+  const last4Weeks = getLastNWeeks(4)
+
+  return last4Weeks.map((week) => {
+    const weekTransactions = props.transactions.filter(
+      (t) => t.date >= week.start && t.date <= week.end,
+    )
+    const income = weekTransactions
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0)
+    const expenses = weekTransactions
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+
+    return {
+      period: week.label,
+      income,
+      expenses,
+    }
+  })
+})
+
+// Process monthly data - transform the existing monthlyTrendData format
+const processedMonthlyData = computed(() => {
+  return monthlyTrendData.value.slice(-6).map((item) => ({
+    period: new Date(item.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+    income: item.income,
+    expenses: item.expenses,
+  }))
+})
 
 // Chart data formatted for Unovis LineChart
 const chartData = computed(() => {
   if (selectedPeriod.value === 'daily') {
-    return [
-      { period: 'Mon', income: 120, expenses: 45 },
-      { period: 'Tue', income: 0, expenses: 80 },
-      { period: 'Wed', income: 300, expenses: 120 },
-      { period: 'Thu', income: 0, expenses: 95 },
-      { period: 'Fri', income: 450, expenses: 200 },
-      { period: 'Sat', income: 200, expenses: 150 },
-      { period: 'Sun', income: 100, expenses: 75 },
-    ]
+    return dailyTrendData.value
   } else if (selectedPeriod.value === 'weekly') {
-    return [
-      { period: 'Week 1', income: 1200, expenses: 800 },
-      { period: 'Week 2', income: 1100, expenses: 950 },
-      { period: 'Week 3', income: 1350, expenses: 750 },
-      { period: 'Week 4', income: 980, expenses: 900 },
-    ]
+    return weeklyTrendData.value
   } else {
-    return [
-      { period: 'Jan', income: 4500, expenses: 3200 },
-      { period: 'Feb', income: 4200, expenses: 3800 },
-      { period: 'Mar', income: 4800, expenses: 3100 },
-      { period: 'Apr', income: 4600, expenses: 3500 },
-      { period: 'May', income: 5100, expenses: 3900 },
-      { period: 'Jun', income: 4900, expenses: 3600 },
-    ]
+    return processedMonthlyData.value
   }
 })
 </script>
@@ -64,10 +142,17 @@ const chartData = computed(() => {
         :data="chartData"
         index="period"
         :categories="['income', 'expenses']"
-        :colors="['hsl(var(--emerald-600))', 'hsl(var(--rose-600))']"
+        :colors="['#059669', '#dc2626']"
         :y-formatter="
-          (value: number | Date) => `$${typeof value === 'number' ? value.toFixed(0) : '0'}`
+          (value: number | Date) => {
+            if (typeof value === 'number') {
+              return `$${value.toFixed(0)}`
+            }
+            return '$0'
+          }
         "
+        :curve-type="CurveType.MonotoneX"
+        :custom-tooltip="TrendTooltip"
         class="h-80"
       />
     </CardContent>

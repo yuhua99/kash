@@ -178,7 +178,7 @@ onMounted(() => {
         <!-- Charts and Analysis -->
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <div class="col-span-4">
-            <TrendDisplay :monthly-income="monthlyIncome" :monthly-expenses="monthlyExpenses" />
+            <TrendDisplay :transactions="sortedTransactions" />
           </div>
           <div class="col-span-3">
             <RecentTransactions :transactions="sortedTransactions" />
