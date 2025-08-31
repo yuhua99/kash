@@ -3,8 +3,10 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAvatarGenerator } from '@/composables/useAvatarGenerator'
+import { useTheme } from '@/composables/useTheme'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,9 +16,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Sun, Moon } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { isDark, toggleTheme } = useTheme()
 
 const { avatarDataUrl } = useAvatarGenerator({
   size: 32,
@@ -68,6 +72,17 @@ const handleLogout = async () => {
         <DropdownMenuItem> Profile </DropdownMenuItem>
         <DropdownMenuItem> Billing </DropdownMenuItem>
         <DropdownMenuItem> Settings </DropdownMenuItem>
+        <DropdownMenuItem
+          class="flex items-center justify-between"
+          @select="(event) => event.preventDefault()"
+        >
+          <div class="flex items-center gap-2">
+            <span>{{ isDark ? 'Dark' : 'Light' }} mode</span>
+            <Sun v-if="!isDark" class="h-4 w-4" />
+            <Moon v-else class="h-4 w-4" />
+          </div>
+          <Switch :model-value="isDark" @update:model-value="toggleTheme" />
+        </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem @click="handleLogout"> Log out </DropdownMenuItem>
