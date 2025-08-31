@@ -103,7 +103,10 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   /**
    * Format currency values for charts
    */
-  const currencyFormatter = (value: number): string => `$${value.toFixed(0)}`
+  const currencyFormatter = (value: number | string): string => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value
+    return isNaN(numValue) ? '$0' : `$${numValue.toFixed(0)}`
+  }
 
   /**
    * Format percentage values for charts

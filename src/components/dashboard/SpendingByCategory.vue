@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DonutChart } from '@/components/ui/chart-donut'
+import CategoryTooltip from './CategoryTooltip.vue'
 import { useCategories } from '@/composables/useCategories'
 import { useChartData } from '@/composables/useChartData'
 import type { Transaction } from '@/types'
@@ -27,6 +28,10 @@ const { categorySpending, donutChartData, currencyFormatter } = useChartData(
 const isDarkMode = computed(() => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
 })
+
+const chartColors = computed(() => {
+  return donutChartData.value.map((item) => getCategoryColorByName(item.name, isDarkMode.value))
+})
 </script>
 
 <template>
@@ -43,7 +48,9 @@ const isDarkMode = computed(() => {
             :data="donutChartData"
             index="name"
             category="value"
+            :colors="chartColors"
             :value-formatter="currencyFormatter"
+            :custom-tooltip="CategoryTooltip"
             class="h-64 w-64"
           />
           <div
