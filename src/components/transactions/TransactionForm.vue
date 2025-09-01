@@ -15,13 +15,11 @@ import { useFormValidation } from '@/composables/useFormValidation'
 import { useCategoriesStore } from '@/stores/categories'
 import type { TransactionFormData, TransactionBase, TransactionWithId } from '@/types'
 
-// Re-export for backward compatibility
 export type { TransactionFormData, TransactionBase, TransactionWithId }
 
 interface Props {
   transaction?: TransactionWithId | null
   modelValue?: TransactionFormData
-  mode?: 'full' | 'quick'
   showActions?: boolean
 }
 
@@ -33,7 +31,6 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  mode: 'full',
   showActions: false,
 })
 const emit = defineEmits<Emits>()
@@ -42,12 +39,7 @@ const { transactionValidation } = useFormValidation()
 const categoriesStore = useCategoriesStore()
 
 const isEditMode = computed(() => props.transaction !== null && props.transaction !== undefined)
-const isQuickMode = computed(() => props.mode === 'quick')
-
-// Compute category filter type based on transaction type
-const categoryFilterType = computed(() => {
-  return formData.value.type === 'income' ? 'income' : 'expense'
-})
+const categoryFilterType = computed(() => (formData.value.type === 'income' ? 'income' : 'expense'))
 
 const defaultFormData: TransactionFormData = {
   name: '',
@@ -59,63 +51,56 @@ const defaultFormData: TransactionFormData = {
 
 const formData = ref<TransactionFormData>({ ...defaultFormData })
 
-// Watch for transaction prop changes and populate form
+const initializeFormData = (transaction?: TransactionWithId | null) => {
+  if (transaction) {
+    formData.value = {
+      name: transaction.name,
+      amount: Math.abs(transaction.amount).toString(),
+      category: transaction.category,
+      type: transaction.type,
+      date: transaction.date,
+    }
+  } else {
+    formData.value = {
+      ...defaultFormData,
+      date: new Date().toISOString().split('T')[0],
+    }
+  }
+}
+
+const clearIncompatibleCategory = (
+  newType: 'income' | 'expense',
+  oldType: 'income' | 'expense',
+) => {
+  if (newType !== oldType && formData.value.category) {
+    const category = categoriesStore.categories.find((cat) => cat.name === formData.value.category)
+    if (category && (newType === 'income') !== category.is_income) {
+      formData.value.category = ''
+    }
+  }
+}
+
 watch(
   () => props.transaction,
   (transaction) => {
-    if (transaction) {
-      formData.value = {
-        name: transaction.name,
-        amount: Math.abs(transaction.amount).toString(),
-        category: transaction.category,
-        type: transaction.type,
-        date: transaction.date,
-      }
-    } else {
-      formData.value = {
-        ...defaultFormData,
-        date: new Date().toISOString().split('T')[0],
-      }
-    }
+    initializeFormData(transaction)
     emit('update:modelValue', formData.value)
   },
   { immediate: true },
 )
 
-// Watch for external form data changes
 watch(
   () => props.modelValue,
   (newValue) => {
-    if (newValue && newValue !== formData.value) {
+    if (newValue && JSON.stringify(newValue) !== JSON.stringify(formData.value)) {
       formData.value = { ...newValue }
     }
   },
   { deep: true },
 )
 
-// Watch for transaction type changes and clear category if incompatible
-watch(
-  () => formData.value.type,
-  (newType, oldType) => {
-    if (newType !== oldType && formData.value.category) {
-      // Find the category by name to check its is_income property
-      const category = categoriesStore.categories.find(
-        (cat) => cat.name === formData.value.category,
-      )
-      if (category) {
-        const isExpectedIncomeCategory = newType === 'income'
-        const isCategoryIncomeType = category.is_income
+watch(() => formData.value.type, clearIncompatibleCategory)
 
-        // Clear category if it doesn't match the expected type
-        if (isExpectedIncomeCategory !== isCategoryIncomeType) {
-          formData.value.category = ''
-        }
-      }
-    }
-  },
-)
-
-// Watch form data changes and emit updates
 watch(
   formData,
   (newValue) => {
@@ -124,14 +109,6 @@ watch(
   { deep: true },
 )
 
-const resetForm = () => {
-  formData.value = {
-    ...defaultFormData,
-    date: new Date().toISOString().split('T')[0],
-  }
-  emit('update:modelValue', formData.value)
-}
-
 const isFormValid = computed(() => {
   return transactionValidation.isValidTransactionForm({
     name: formData.value.name,
@@ -139,6 +116,11 @@ const isFormValid = computed(() => {
     category: formData.value.category,
   })
 })
+
+const resetForm = () => {
+  initializeFormData()
+  emit('update:modelValue', formData.value)
+}
 
 const handleSubmit = () => {
   if (!isFormValid.value) return
@@ -171,15 +153,13 @@ defineExpose({
 </script>
 
 <template>
-  <div :class="isQuickMode ? 'space-y-4' : 'grid gap-4'">
-    <!-- Amount -->
-    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
+  <div class="space-y-4">
+    <div class="space-y-2">
       <Label for="amount">Amount</Label>
       <Input id="amount" v-model="formData.amount" type="number" step="0.01" placeholder="0.00" />
     </div>
 
-    <!-- Type -->
-    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
+    <div class="space-y-2">
       <Label for="type">Type</Label>
       <Select v-model="formData.type">
         <SelectTrigger>
@@ -192,26 +172,22 @@ defineExpose({
       </Select>
     </div>
 
-    <!-- Category -->
-    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
+    <div class="space-y-2">
       <Label for="category">Category</Label>
       <CategorySelect v-model="formData.category" :filter-type="categoryFilterType" />
     </div>
 
-    <!-- Date -->
-    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
+    <div class="space-y-2">
       <Label for="date">Date</Label>
       <Input id="date" v-model="formData.date" type="date" />
     </div>
 
-    <!-- Description -->
-    <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
+    <div class="space-y-2">
       <Label for="name">Description</Label>
       <Input id="name" v-model="formData.name" placeholder="Transaction description" />
     </div>
 
-    <!-- Actions (for quick mode or when showActions is true) -->
-    <div v-if="showActions" :class="isQuickMode ? 'flex justify-end gap-2 pt-4' : 'flex gap-2'">
+    <div v-if="showActions" class="flex justify-end gap-2 pt-4">
       <Button variant="outline" @click="handleCancel">Cancel</Button>
       <Button @click="handleSubmit" :disabled="!isFormValid">
         {{ isEditMode ? 'Save Changes' : 'Save' }}
