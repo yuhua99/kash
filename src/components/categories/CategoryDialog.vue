@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { useCategoriesStore } from '@/stores/categories'
 import { useDialog } from '@/composables/useDialog'
 
@@ -20,6 +21,7 @@ const categoriesStore = useCategoriesStore()
 interface Category {
   id: string
   name: string
+  is_income: boolean
 }
 
 interface Props {
@@ -37,11 +39,13 @@ const emit = defineEmits<Emits>()
 
 const categoryForm = ref({
   name: '',
+  is_income: false,
 })
 
 const resetForm = () => {
   categoryForm.value = {
     name: '',
+    is_income: false,
   }
 }
 
@@ -50,6 +54,7 @@ const { isOpen, editItem, isEditMode, setupExternalControl } = useDialog<Categor
     if (category) {
       categoryForm.value = {
         name: category.name,
+        is_income: category.is_income,
       }
     } else {
       resetForm()
@@ -76,16 +81,25 @@ const submitButtonText = computed(() => (isEditMode.value ? 'Save Changes' : 'Ad
 const handleSubmit = async () => {
   if (!categoryForm.value.name.trim()) return
 
-  const categoryData = {
-    name: categoryForm.value.name.trim(),
-  }
-
   if (isEditMode.value && editItem.value) {
+    // For edit mode, only update the name (is_income cannot be modified per API)
+    const categoryData = {
+      name: categoryForm.value.name.trim(),
+    }
     const success = await categoriesStore.updateCategory(editItem.value.id, categoryData)
     if (success) {
-      emit('categorySaved', { ...categoryData, id: editItem.value.id })
+      emit('categorySaved', {
+        ...categoryData,
+        id: editItem.value.id,
+        is_income: editItem.value.is_income,
+      })
     }
   } else {
+    // For create mode, include is_income
+    const categoryData = {
+      name: categoryForm.value.name.trim(),
+      is_income: categoryForm.value.is_income,
+    }
     const newCategory = await categoriesStore.createCategory(categoryData)
     if (newCategory) {
       emit('categorySaved', newCategory)
@@ -124,10 +138,30 @@ const handleCancel = () => {
             placeholder="Enter category name"
             :class="categoriesStore.error ? 'border-red-500' : ''"
           />
-          <p v-if="categoriesStore.error" class="text-sm text-red-500">
-            {{ categoriesStore.error }}
+        </div>
+
+        <!-- Only show income toggle for create mode -->
+        <div v-if="!isEditMode" class="flex items-center justify-between">
+          <div class="grid gap-2">
+            <Label for="category-type">Category Type</Label>
+            <p class="text-sm text-muted-foreground">
+              {{ categoryForm.is_income ? 'Income category' : 'Expense category' }}
+            </p>
+          </div>
+          <Switch id="category-type" v-model:checked="categoryForm.is_income" />
+        </div>
+
+        <!-- Show read-only type for edit mode -->
+        <div v-else class="grid gap-2">
+          <Label>Category Type</Label>
+          <p class="text-sm text-muted-foreground">
+            {{ editItem?.is_income ? 'Income category' : 'Expense category' }} (cannot be changed)
           </p>
         </div>
+
+        <p v-if="categoriesStore.error" class="text-sm text-red-500">
+          {{ categoriesStore.error }}
+        </p>
       </div>
       <DialogFooter>
         <Button variant="outline" @click="handleCancel"> Cancel </Button>

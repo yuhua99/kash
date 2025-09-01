@@ -9,13 +9,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { MoreHorizontal, Edit, Trash2, Plus } from 'lucide-vue-next'
+import { MoreHorizontal, Edit, Trash2, Plus, TrendingUp, TrendingDown } from 'lucide-vue-next'
 import CategoryDialog from './CategoryDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
 
 const categoriesStore = useCategoriesStore()
 
-const editDialogCategory = ref<{ id: string; name: string } | null>(null)
+const editDialogCategory = ref<{ id: string; name: string; is_income: boolean } | null>(null)
 const showEditDialog = ref(false)
 const showAddDialog = ref(false)
 
@@ -25,7 +25,7 @@ const isDarkMode = computed(() => {
 
 // Categories are loaded by parent component, no need to fetch here
 
-const handleEditCategory = (category: { id: string; name: string }) => {
+const handleEditCategory = (category: { id: string; name: string; is_income: boolean }) => {
   editDialogCategory.value = category
   showEditDialog.value = true
 }
@@ -36,7 +36,7 @@ const handleDeleteCategory = async (categoryId: string) => {
   }
 }
 
-const onCategorySaved = (savedCategory: { id: string; name: string }) => {
+const onCategorySaved = (savedCategory: { id: string; name: string; is_income: boolean }) => {
   showEditDialog.value = false
   showAddDialog.value = false
   editDialogCategory.value = null
@@ -80,42 +80,101 @@ const onCategorySaved = (savedCategory: { id: string; name: string }) => {
         </CategoryDialog>
       </div>
 
-      <div v-else class="space-y-2">
-        <div
-          v-for="category in categoriesStore.categories"
-          :key="category.id"
-          class="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-        >
-          <div class="flex items-center space-x-3">
-            <div
-              class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
-              :style="{
-                backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
-              }"
-            ></div>
-            <Badge variant="secondary">{{ category.name }}</Badge>
+      <div v-else class="space-y-4">
+        <!-- Income Categories Section -->
+        <div v-if="categoriesStore.incomeCategories.length > 0">
+          <div class="flex items-center gap-2 mb-2">
+            <TrendingUp class="h-4 w-4 text-green-600" />
+            <h4 class="text-sm font-medium text-green-600">Income Categories</h4>
           </div>
+          <div class="space-y-2">
+            <div
+              v-for="category in categoriesStore.incomeCategories"
+              :key="category.id"
+              class="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+            >
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                  :style="{
+                    backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
+                  }"
+                ></div>
+                <Badge variant="secondary" class="border-green-200 bg-green-50 text-green-700">
+                  {{ category.name }}
+                </Badge>
+              </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-              <Button variant="ghost" size="sm">
-                <MoreHorizontal class="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem @click="handleEditCategory(category)">
-                <Edit class="h-4 w-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                @click="handleDeleteCategory(category.id)"
-                class="text-red-600 focus:text-red-600"
-              >
-                <Trash2 class="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="ghost" size="sm">
+                    <MoreHorizontal class="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem @click="handleEditCategory(category)">
+                    <Edit class="h-4 w-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    @click="handleDeleteCategory(category.id)"
+                    class="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 class="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expense Categories Section -->
+        <div v-if="categoriesStore.expenseCategories.length > 0">
+          <div class="flex items-center gap-2 mb-2">
+            <TrendingDown class="h-4 w-4 text-orange-600" />
+            <h4 class="text-sm font-medium text-orange-600">Expense Categories</h4>
+          </div>
+          <div class="space-y-2">
+            <div
+              v-for="category in categoriesStore.expenseCategories"
+              :key="category.id"
+              class="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+            >
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                  :style="{
+                    backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
+                  }"
+                ></div>
+                <Badge variant="secondary" class="border-orange-200 bg-orange-50 text-orange-700">
+                  {{ category.name }}
+                </Badge>
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="ghost" size="sm">
+                    <MoreHorizontal class="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem @click="handleEditCategory(category)">
+                    <Edit class="h-4 w-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    @click="handleDeleteCategory(category.id)"
+                    class="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 class="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
       </div>
     </CardContent>

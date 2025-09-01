@@ -69,7 +69,7 @@ CRUD operations for expense records. All endpoints require authentication.
 
 ## Categories Management
 
-CRUD operations for expense categories. All endpoints require authentication.
+CRUD operations for income and expense categories. All endpoints require authentication.
 
 ### Endpoints
 
@@ -84,7 +84,8 @@ CRUD operations for expense categories. All endpoints require authentication.
 ```json
 {
   "id": "uuid",
-  "name": "string"  // max 100 chars, case-insensitive unique per user
+  "name": "string",    // max 100 chars, case-insensitive unique per user
+  "is_income": boolean  // true for income categories, false for expense categories
 }
 ```
 
@@ -96,14 +97,17 @@ CRUD operations for expense categories. All endpoints require authentication.
 ### Example Response (GET)
 ```json
 {
-  "categories": [{"id": "uuid", "name": "Groceries"}],
+  "categories": [{"id": "uuid", "name": "Groceries", "is_income": false}],
   "total_count": 1,
   "limit": 100,
   "offset": 0
 }
 ```
 
-**Note**: Category deletion only allowed if no records reference it.
+**Notes**: 
+- Category deletion only allowed if no records reference it
+- The `is_income` field cannot be modified after category creation
+- Default value for `is_income` is `false` (expense category)
 
 ---
 
@@ -158,7 +162,8 @@ curl -X POST http://localhost:3000/auth/register -H "Content-Type: application/j
 curl -X POST http://localhost:3000/auth/login -H "Content-Type: application/json" -c cookies.txt -d '{"username":"user","password":"password123"}'
 
 # Create category and record
-curl -X POST http://localhost:3000/categories -H "Content-Type: application/json" -b cookies.txt -d '{"name":"Food"}'
+curl -X POST http://localhost:3000/categories -H "Content-Type: application/json" -b cookies.txt -d '{"name":"Food","is_income":false}'
+curl -X POST http://localhost:3000/categories -H "Content-Type: application/json" -b cookies.txt -d '{"name":"Salary","is_income":true}'
 curl -X POST http://localhost:3000/records -H "Content-Type: application/json" -b cookies.txt -d '{"name":"Lunch","amount":12.50,"category_id":"category-id","timestamp":1703980800}'
 
 # Retrieve data

@@ -5,10 +5,12 @@
 export interface Category {
   id: string
   name: string
+  is_income: boolean
 }
 
 export interface CreateCategoryPayload {
   name: string
+  is_income?: boolean
 }
 
 export interface UpdateCategoryPayload {

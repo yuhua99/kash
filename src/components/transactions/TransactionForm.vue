@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import CategorySelect from '@/components/categories/CategorySelect.vue'
 import { useFormValidation } from '@/composables/useFormValidation'
+import { useCategoriesStore } from '@/stores/categories'
 import type { TransactionFormData, TransactionBase, TransactionWithId } from '@/types'
 
 // Re-export for backward compatibility
@@ -38,9 +39,15 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>()
 
 const { transactionValidation } = useFormValidation()
+const categoriesStore = useCategoriesStore()
 
 const isEditMode = computed(() => props.transaction !== null && props.transaction !== undefined)
 const isQuickMode = computed(() => props.mode === 'quick')
+
+// Compute category filter type based on transaction type
+const categoryFilterType = computed(() => {
+  return formData.value.type === 'income' ? 'income' : 'expense'
+})
 
 const defaultFormData: TransactionFormData = {
   name: '',
@@ -84,6 +91,28 @@ watch(
     }
   },
   { deep: true },
+)
+
+// Watch for transaction type changes and clear category if incompatible
+watch(
+  () => formData.value.type,
+  (newType, oldType) => {
+    if (newType !== oldType && formData.value.category) {
+      // Find the category by name to check its is_income property
+      const category = categoriesStore.categories.find(
+        (cat) => cat.name === formData.value.category,
+      )
+      if (category) {
+        const isExpectedIncomeCategory = newType === 'income'
+        const isCategoryIncomeType = category.is_income
+
+        // Clear category if it doesn't match the expected type
+        if (isExpectedIncomeCategory !== isCategoryIncomeType) {
+          formData.value.category = ''
+        }
+      }
+    }
+  },
 )
 
 // Watch form data changes and emit updates
@@ -166,7 +195,7 @@ defineExpose({
     <!-- Category -->
     <div :class="isQuickMode ? 'space-y-2' : 'grid gap-2'">
       <Label for="category">Category</Label>
-      <CategorySelect v-model="formData.category" />
+      <CategorySelect v-model="formData.category" :filter-type="categoryFilterType" />
     </div>
 
     <!-- Date -->

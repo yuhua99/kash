@@ -82,10 +82,10 @@ const categoryStats = computed(() => {
 })
 
 // Dialog state
-const editDialogCategory = ref<{ id: string; name: string } | null>(null)
+const editDialogCategory = ref<{ id: string; name: string; is_income: boolean } | null>(null)
 const showEditDialog = ref(false)
 
-const handleEditCategory = (category: { id: string; name: string }) => {
+const handleEditCategory = (category: { id: string; name: string; is_income: boolean }) => {
   editDialogCategory.value = category
   showEditDialog.value = true
 }

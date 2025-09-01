@@ -30,6 +30,14 @@ export const useCategoriesStore = defineStore('categories', () => {
     return map
   })
 
+  const incomeCategories = computed(() => {
+    return categories.value.filter((category) => category.is_income)
+  })
+
+  const expenseCategories = computed(() => {
+    return categories.value.filter((category) => !category.is_income)
+  })
+
   const getCategoryName = (categoryId: string): string => {
     return categoriesMap.value.get(categoryId) || 'Unknown Category'
   }
@@ -96,6 +104,8 @@ export const useCategoriesStore = defineStore('categories', () => {
     error,
     categoriesMap,
     categoriesNameMap,
+    incomeCategories,
+    expenseCategories,
     getCategoryName,
     getCategoryId,
     getCategoryColor,

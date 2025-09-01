@@ -8,7 +8,7 @@ interface Props {
   }[]
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 // Format currency values - handle both formatted strings and numbers
 const formatCurrency = (value: number | string): string => {
@@ -27,12 +27,7 @@ const formatCurrency = (value: number | string): string => {
     <div class="flex items-center gap-2 min-w-0">
       <span class="w-3 h-3 flex-shrink-0">
         <svg width="100%" height="100%" viewBox="0 0 30 30">
-          <circle
-            cx="15"
-            cy="15"
-            r="6"
-            :fill="data[0].color"
-          />
+          <circle cx="15" cy="15" r="6" :fill="data[0].color" />
         </svg>
       </span>
       <span class="font-medium truncate">
