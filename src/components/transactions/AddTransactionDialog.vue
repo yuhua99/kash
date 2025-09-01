@@ -11,17 +11,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import TransactionForm from './TransactionForm.vue'
-import type { TransactionBase, TransactionWithId } from '@/types'
+import type { Transaction } from '@/types'
 import { useDialog } from '@/composables/useDialog'
 
 interface Props {
-  editTransaction?: TransactionWithId | null
+  editTransaction?: Transaction | null
   open?: boolean
 }
 
 interface Emits {
-  (e: 'addTransaction', transaction: TransactionBase): void
-  (e: 'editTransaction', transaction: TransactionWithId): void
+  (e: 'addTransaction', transaction: Transaction): void
+  (e: 'editTransaction', transaction: Transaction): void
   (e: 'update:open', value: boolean): void
 }
 
@@ -30,7 +30,7 @@ const emit = defineEmits<Emits>()
 
 const transactionFormRef = ref<InstanceType<typeof TransactionForm>>()
 
-const { isOpen, isEditMode, setupExternalControl } = useDialog<TransactionWithId>({
+const { isOpen, isEditMode, setupExternalControl } = useDialog<Transaction>({
   onClose: () => {
     transactionFormRef.value?.resetForm()
   },
@@ -55,12 +55,12 @@ const handleSubmit = () => {
   transactionFormRef.value?.handleSubmit()
 }
 
-const handleAddTransaction = (transaction: TransactionBase) => {
+const handleAddTransaction = (transaction: Transaction) => {
   emit('addTransaction', transaction)
   isOpen.value = false
 }
 
-const handleUpdateTransaction = (transaction: TransactionWithId) => {
+const handleUpdateTransaction = (transaction: Transaction) => {
   emit('editTransaction', transaction)
   isOpen.value = false
 }

@@ -19,7 +19,6 @@ import { Search, Filter } from 'lucide-vue-next'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
-import type { TransactionBase } from '@/types'
 import type { Transaction } from '@/types'
 
 const router = useRouter()
@@ -79,7 +78,7 @@ const filteredStats = computed(() => {
   }
 })
 
-const addTransaction = async (newTransaction: TransactionBase) => {
+const addTransaction = async (newTransaction: Transaction) => {
   const category = categoriesStore.categories.find((cat) => cat.name === newTransaction.category)
   if (!category) {
     console.error('Category not found:', newTransaction.category)

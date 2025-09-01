@@ -15,7 +15,7 @@ import { Plus } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useTransactions } from '@/composables/useTransactions'
 import { useCategories } from '@/composables/useCategories'
-import type { TransactionBase } from '@/types'
+import type { Transaction } from '@/types'
 
 // Router and stores
 const router = useRouter()
@@ -50,7 +50,7 @@ const isLoading = computed(
 )
 
 // Functions
-const addTransaction = async (newTransaction: TransactionBase) => {
+const addTransaction = async (newTransaction: Transaction) => {
   // Find the category by name
   const category = getCategoryByName(newTransaction.category)
 

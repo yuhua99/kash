@@ -2,15 +2,7 @@
 import { computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCategoriesStore } from '@/stores/categories'
-
-interface Transaction {
-  id: string
-  date: string
-  name: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-}
+import type { Transaction } from '@/types'
 
 interface Props {
   transactions: Transaction[]

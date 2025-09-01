@@ -20,15 +20,7 @@ import {
 import { Edit, Trash2, MoreHorizontal } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
-
-interface Transaction {
-  id: string
-  date: string
-  name: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-}
+import type { Transaction } from '@/types'
 
 interface Props {
   transactions: Transaction[]

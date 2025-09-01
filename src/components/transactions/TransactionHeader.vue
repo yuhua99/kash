@@ -2,14 +2,14 @@
 import { Button } from '@/components/ui/button'
 import { Download, Plus } from 'lucide-vue-next'
 import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
-import type { TransactionBase } from '@/types'
+import type { Transaction } from '@/types'
 
 interface Props {
   title?: string
 }
 
 interface Emits {
-  (e: 'add-transaction', transaction: TransactionBase): void
+  (e: 'add-transaction', transaction: Transaction): void
   (e: 'export-transactions'): void
 }
 

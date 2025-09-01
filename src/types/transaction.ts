@@ -14,44 +14,27 @@ export interface ApiRecord {
 }
 
 /**
- * Frontend transaction representation
+ * Main transaction interface
  */
 export interface Transaction {
   id: string
-  date: string
   name: string
   amount: number
   category: string
   type: 'income' | 'expense'
+  date: string
 }
 
 /**
- * Form data for transaction input
+ * Form data for transaction input (amount as string for form handling)
  */
 export interface TransactionFormData {
+  id: string
   name: string
   amount: string
   category: string
   type: 'income' | 'expense'
   date: string
-}
-
-/**
- * Base transaction data (without ID)
- */
-export interface TransactionBase {
-  name: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-  date: string
-}
-
-/**
- * Transaction with ID (for editing)
- */
-export interface TransactionWithId extends TransactionBase {
-  id: string
 }
 
 /**

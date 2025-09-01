@@ -13,18 +13,18 @@ import { Button } from '@/components/ui/button'
 import CategorySelect from '@/components/categories/CategorySelect.vue'
 import { useFormValidation } from '@/composables/useFormValidation'
 import { useCategoriesStore } from '@/stores/categories'
-import type { TransactionFormData, TransactionBase, TransactionWithId } from '@/types'
+import type { TransactionFormData, Transaction } from '@/types'
 
 interface Props {
-  transaction?: TransactionWithId | null
+  transaction?: Transaction | null
   modelValue?: TransactionFormData
   showActions?: boolean
 }
 
 interface Emits {
   (e: 'update:modelValue', value: TransactionFormData): void
-  (e: 'submit', transaction: TransactionBase): void
-  (e: 'update', transaction: TransactionWithId): void
+  (e: 'submit', transaction: Transaction): void
+  (e: 'update', transaction: Transaction): void
   (e: 'cancel'): void
 }
 
@@ -40,6 +40,7 @@ const isEditMode = computed(() => props.transaction !== null && props.transactio
 const categoryFilterType = computed(() => (formData.value.type === 'income' ? 'income' : 'expense'))
 
 const defaultFormData: TransactionFormData = {
+  id: '',
   name: '',
   amount: '',
   category: '',
@@ -49,9 +50,10 @@ const defaultFormData: TransactionFormData = {
 
 const formData = ref<TransactionFormData>({ ...defaultFormData })
 
-const initializeFormData = (transaction?: TransactionWithId | null) => {
-  if (transaction) {
+const initializeFormData = (transaction?: Transaction | null) => {
+  if (transaction && transaction.id) {
     formData.value = {
+      id: transaction.id,
       name: transaction.name,
       amount: Math.abs(transaction.amount).toString(),
       category: transaction.category,
@@ -124,7 +126,8 @@ const handleSubmit = () => {
   if (!isFormValid.value) return
 
   const amount = parseFloat(formData.value.amount)
-  const transaction = {
+  const transaction: Transaction = {
+    id: formData.value.id || '',
     name: formData.value.name,
     amount: formData.value.type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
     category: formData.value.category,
@@ -132,7 +135,7 @@ const handleSubmit = () => {
     date: formData.value.date as string,
   }
 
-  if (isEditMode.value && props.transaction) {
+  if (isEditMode.value && props.transaction?.id) {
     emit('update', { ...transaction, id: props.transaction.id })
   } else {
     emit('submit', transaction)
