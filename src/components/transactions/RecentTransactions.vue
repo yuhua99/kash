@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCategoriesStore } from '@/stores/categories'
 import type { Transaction } from '@/types'
+import { TransactionType } from '@/types'
 
 interface Props {
   transactions: Transaction[]
@@ -19,9 +20,9 @@ const recentTransactions = computed(() => {
   return props.transactions.slice(0, 5)
 })
 
-const formatAmount = (amount: number, type: 'income' | 'expense') => {
+const formatAmount = (amount: number, type: TransactionType) => {
   const formattedAmount = Math.abs(amount).toFixed(2)
-  return type === 'income' ? `+$${formattedAmount}` : `-$${formattedAmount}`
+  return type === TransactionType.INCOME ? `+$${formattedAmount}` : `-$${formattedAmount}`
 }
 </script>
 
@@ -61,7 +62,9 @@ const formatAmount = (amount: number, type: 'income' | 'expense') => {
           </div>
           <div
             class="ml-auto font-medium"
-            :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'"
+            :class="
+              transaction.type === TransactionType.INCOME ? 'text-emerald-600' : 'text-rose-600'
+            "
           >
             {{ formatAmount(transaction.amount, transaction.type) }}
           </div>

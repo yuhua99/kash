@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { useRecordsStore } from '@/stores/records'
 import type { Transaction, CreateRecordPayload, UpdateRecordPayload } from '@/types'
+import { TransactionType } from '@/types'
 
 /**
  * Transactions composable - provides a clean interface to transaction-related functionality
@@ -27,9 +28,13 @@ export function useTransactions() {
 
   const recentTransactions = computed(() => sortedTransactions.value.slice(0, 10))
 
-  const expenseTransactions = computed(() => transactions.value.filter((t) => t.type === 'expense'))
+  const expenseTransactions = computed(() =>
+    transactions.value.filter((t) => t.type === TransactionType.EXPENSE),
+  )
 
-  const incomeTransactions = computed(() => transactions.value.filter((t) => t.type === 'income'))
+  const incomeTransactions = computed(() =>
+    transactions.value.filter((t) => t.type === TransactionType.INCOME),
+  )
 
   const transactionCount = computed(() => transactions.value.length)
 

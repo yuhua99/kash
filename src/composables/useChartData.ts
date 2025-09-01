@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue'
 import type { Transaction } from '@/types'
+import { TransactionType } from '@/types'
 
 export interface ChartDataPoint {
   name: string
@@ -23,7 +24,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
     const categoryMap = new Map<string, number>()
 
     // Only count expenses for category breakdown
-    const expenses = transactions.value.filter((t) => t.type === 'expense')
+    const expenses = transactions.value.filter((t) => t.type === TransactionType.EXPENSE)
     const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
     expenses.forEach((transaction) => {
@@ -60,7 +61,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
       const monthKey = transaction.date.substring(0, 7) // YYYY-MM
       const current = monthlyData.get(monthKey) || { income: 0, expenses: 0 }
 
-      if (transaction.type === 'income') {
+      if (transaction.type === TransactionType.INCOME) {
         current.income += transaction.amount
       } else {
         current.expenses += Math.abs(transaction.amount)
@@ -86,7 +87,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
     const dailyMap = new Map<string, number>()
 
     transactions.value
-      .filter((t) => t.type === 'expense')
+      .filter((t) => t.type === TransactionType.EXPENSE)
       .forEach((transaction) => {
         const current = dailyMap.get(transaction.date) || 0
         dailyMap.set(transaction.date, current + Math.abs(transaction.amount))

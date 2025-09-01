@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BarChart } from '@/components/ui/chart-bar'
 import type { Transaction } from '@/types'
+import { TransactionType } from '@/types'
 import TrendTooltip from './TrendTooltip.vue'
 
 enum DataType {
@@ -79,10 +80,10 @@ const dailyTrendData = computed(() => {
   return currentMonthDays.map((date) => {
     const dayTransactions = props.transactions.filter((t) => t.date === date)
     const income = dayTransactions
-      .filter((t) => t.type === 'income')
+      .filter((t) => t.type === TransactionType.INCOME)
       .reduce((sum, t) => sum + t.amount, 0)
     const expenses = dayTransactions
-      .filter((t) => t.type === 'expense')
+      .filter((t) => t.type === TransactionType.EXPENSE)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
     // Format date as MM/DD (e.g., "08/31")
@@ -107,10 +108,10 @@ const weeklyTrendData = computed(() => {
       (t) => t.date >= week.start && t.date <= week.end,
     )
     const income = weekTransactions
-      .filter((t) => t.type === 'income')
+      .filter((t) => t.type === TransactionType.INCOME)
       .reduce((sum, t) => sum + t.amount, 0)
     const expenses = weekTransactions
-      .filter((t) => t.type === 'expense')
+      .filter((t) => t.type === TransactionType.EXPENSE)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
     return {
@@ -145,7 +146,7 @@ const processedMonthlyData = computed(() => {
     const current = monthlyData.get(monthKey)
 
     if (current) {
-      if (transaction.type === 'income') {
+      if (transaction.type === TransactionType.INCOME) {
         current.income += transaction.amount
       } else {
         current.expenses += Math.abs(transaction.amount)

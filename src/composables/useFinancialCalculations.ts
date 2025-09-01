@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue'
 import type { Transaction } from '@/types'
+import { TransactionType } from '@/types'
 
 export interface FinancialSummary {
   totalIncome: number
@@ -28,8 +29,8 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
    * Basic financial summary
    */
   const financialSummary = computed((): FinancialSummary => {
-    const income = transactions.value.filter((t) => t.type === 'income')
-    const expenses = transactions.value.filter((t) => t.type === 'expense')
+    const income = transactions.value.filter((t) => t.type === TransactionType.INCOME)
+    const expenses = transactions.value.filter((t) => t.type === TransactionType.EXPENSE)
 
     const totalIncome = income.reduce((sum, t) => sum + t.amount, 0)
     const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0)
@@ -62,7 +63,7 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
 
     // Group expenses by category
     transactions.value
-      .filter((t) => t.type === 'expense')
+      .filter((t) => t.type === TransactionType.EXPENSE)
       .forEach((transaction) => {
         const existing = categoryMap.get(transaction.category) || []
         categoryMap.set(transaction.category, [...existing, transaction])
@@ -95,7 +96,7 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
       const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0, transactions: 0 }
 
       current.transactions++
-      if (transaction.type === 'income') {
+      if (transaction.type === TransactionType.INCOME) {
         current.income += transaction.amount
       } else {
         current.expenses += Math.abs(transaction.amount)

@@ -9,21 +9,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useCategoriesStore } from '@/stores/categories'
+import { TransactionType } from '@/types'
 
 interface Props {
   modelValue: string
   placeholder?: string
   disabled?: boolean
-  filterType?: 'income' | 'expense' | 'all'
+  filterType: TransactionType
 }
 
 interface Emits {
   (e: 'update:modelValue', value: string): void
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  filterType: 'all',
-})
+const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const categoriesStore = useCategoriesStore()
@@ -32,18 +31,10 @@ const isDarkMode = computed(() => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
 })
 
-const filteredCategories = computed(() => {
-  switch (props.filterType) {
-    case 'income':
-      return { income: categoriesStore.incomeCategories, expense: [] }
-    case 'expense':
-      return { income: [], expense: categoriesStore.expenseCategories }
-    default:
-      return {
-        income: categoriesStore.incomeCategories,
-        expense: categoriesStore.expenseCategories,
-      }
-  }
+const categories = computed(() => {
+  return props.filterType === TransactionType.INCOME
+    ? categoriesStore.incomeCategories
+    : categoriesStore.expenseCategories
 })
 
 const handleValueChange = (value: unknown) => {
@@ -59,32 +50,8 @@ const handleValueChange = (value: unknown) => {
       <SelectValue :placeholder="placeholder || 'Select category'" />
     </SelectTrigger>
     <SelectContent>
-      <!-- Income Categories Group -->
-      <SelectGroup v-if="filteredCategories.income.length > 0">
-        <SelectItem
-          v-for="category in filteredCategories.income"
-          :key="category.id"
-          :value="category.name"
-        >
-          <div class="flex items-center space-x-2">
-            <div
-              class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
-              :style="{
-                backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
-              }"
-            ></div>
-            <span>{{ category.name }}</span>
-          </div>
-        </SelectItem>
-      </SelectGroup>
-
-      <!-- Expense Categories Group -->
-      <SelectGroup v-if="filteredCategories.expense.length > 0">
-        <SelectItem
-          v-for="category in filteredCategories.expense"
-          :key="category.id"
-          :value="category.name"
-        >
+      <SelectGroup v-if="categories.length > 0">
+        <SelectItem v-for="category in categories" :key="category.id" :value="category.name">
           <div class="flex items-center space-x-2">
             <div
               class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"

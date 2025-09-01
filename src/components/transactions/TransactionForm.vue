@@ -14,6 +14,7 @@ import CategorySelect from '@/components/categories/CategorySelect.vue'
 import { useFormValidation } from '@/composables/useFormValidation'
 import { useCategoriesStore } from '@/stores/categories'
 import type { TransactionFormData, Transaction } from '@/types'
+import { TransactionType } from '@/types'
 
 interface Props {
   transaction?: Transaction | null
@@ -37,14 +38,16 @@ const { transactionValidation } = useFormValidation()
 const categoriesStore = useCategoriesStore()
 
 const isEditMode = computed(() => props.transaction !== null && props.transaction !== undefined)
-const categoryFilterType = computed(() => (formData.value.type === 'income' ? 'income' : 'expense'))
+const categoryFilterType = computed(() =>
+  formData.value.type === TransactionType.INCOME ? TransactionType.INCOME : TransactionType.EXPENSE,
+)
 
 const defaultFormData: TransactionFormData = {
   id: '',
   name: '',
   amount: '',
   category: '',
-  type: 'expense',
+  type: TransactionType.EXPENSE,
   date: new Date().toISOString().split('T')[0],
 }
 
@@ -68,13 +71,10 @@ const initializeFormData = (transaction?: Transaction | null) => {
   }
 }
 
-const clearIncompatibleCategory = (
-  newType: 'income' | 'expense',
-  oldType: 'income' | 'expense',
-) => {
+const clearIncompatibleCategory = (newType: TransactionType, oldType: TransactionType) => {
   if (newType !== oldType && formData.value.category) {
     const category = categoriesStore.categories.find((cat) => cat.name === formData.value.category)
-    if (category && (newType === 'income') !== category.is_income) {
+    if (category && (newType === TransactionType.INCOME) !== category.is_income) {
       formData.value.category = ''
     }
   }
@@ -129,7 +129,7 @@ const handleSubmit = () => {
   const transaction: Transaction = {
     id: formData.value.id || '',
     name: formData.value.name,
-    amount: formData.value.type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
+    amount: formData.value.type === TransactionType.EXPENSE ? -Math.abs(amount) : Math.abs(amount),
     category: formData.value.category,
     type: formData.value.type,
     date: formData.value.date as string,
@@ -167,8 +167,8 @@ defineExpose({
           <SelectValue placeholder="Select type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="income">Income</SelectItem>
-          <SelectItem value="expense">Expense</SelectItem>
+          <SelectItem :value="TransactionType.INCOME">Income</SelectItem>
+          <SelectItem :value="TransactionType.EXPENSE">Expense</SelectItem>
         </SelectContent>
       </Select>
     </div>

@@ -10,6 +10,7 @@ import type {
   UpdateRecordPayload,
   RecordsResponse,
 } from '@/types'
+import { TransactionType } from '@/types'
 
 export const useRecordsStore = defineStore('records', () => {
   const records = ref<ApiRecord[]>([])
@@ -28,7 +29,7 @@ export const useRecordsStore = defineStore('records', () => {
       name: record.name,
       amount: record.amount,
       category: categoryName,
-      type: record.amount >= 0 ? 'income' : 'expense',
+      type: record.amount >= 0 ? TransactionType.INCOME : TransactionType.EXPENSE,
     }
   }
 

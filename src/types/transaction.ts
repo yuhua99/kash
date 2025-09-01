@@ -3,6 +3,14 @@
  */
 
 /**
+ * Transaction type enum
+ */
+export enum TransactionType {
+  INCOME = 'income',
+  EXPENSE = 'expense',
+}
+
+/**
  * Raw API record from the backend
  */
 export interface ApiRecord {
@@ -21,7 +29,7 @@ export interface Transaction {
   name: string
   amount: number
   category: string
-  type: 'income' | 'expense'
+  type: TransactionType
   date: string
 }
 
@@ -33,7 +41,7 @@ export interface TransactionFormData {
   name: string
   amount: string
   category: string
-  type: 'income' | 'expense'
+  type: TransactionType
   date: string
 }
 
