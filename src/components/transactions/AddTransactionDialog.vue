@@ -10,10 +10,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import TransactionForm, {
-  type TransactionBase,
-  type TransactionWithId,
-} from './TransactionForm.vue'
+import TransactionForm from './TransactionForm.vue'
+import type { TransactionBase, TransactionWithId } from '@/types'
 import { useDialog } from '@/composables/useDialog'
 
 interface Props {

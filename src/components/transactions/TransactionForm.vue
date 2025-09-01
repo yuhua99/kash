@@ -15,8 +15,6 @@ import { useFormValidation } from '@/composables/useFormValidation'
 import { useCategoriesStore } from '@/stores/categories'
 import type { TransactionFormData, TransactionBase, TransactionWithId } from '@/types'
 
-export type { TransactionFormData, TransactionBase, TransactionWithId }
-
 interface Props {
   transaction?: TransactionWithId | null
   modelValue?: TransactionFormData

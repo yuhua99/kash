@@ -19,7 +19,7 @@ import { Search, Filter } from 'lucide-vue-next'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
-import type { TransactionBase } from '@/components/transactions/TransactionForm.vue'
+import type { TransactionBase } from '@/types'
 import type { Transaction } from '@/types'
 
 const router = useRouter()
