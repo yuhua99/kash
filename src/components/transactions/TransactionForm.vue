@@ -38,9 +38,6 @@ const { transactionValidation } = useFormValidation()
 const categoriesStore = useCategoriesStore()
 
 const isEditMode = computed(() => props.transaction !== null && props.transaction !== undefined)
-const categoryFilterType = computed(() =>
-  formData.value.type === TransactionType.INCOME ? TransactionType.INCOME : TransactionType.EXPENSE,
-)
 
 const defaultFormData: TransactionFormData = {
   id: '',
@@ -175,7 +172,7 @@ defineExpose({
 
     <div class="space-y-2">
       <Label for="category">Category</Label>
-      <CategorySelect v-model="formData.category" :filter-type="categoryFilterType" />
+      <CategorySelect v-model="formData.category" :filter-type="formData.type" />
     </div>
 
     <div class="space-y-2">

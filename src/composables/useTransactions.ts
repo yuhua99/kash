@@ -26,8 +26,6 @@ export function useTransactions() {
     [...transactions.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
   )
 
-  const recentTransactions = computed(() => sortedTransactions.value.slice(0, 10))
-
   const expenseTransactions = computed(() =>
     transactions.value.filter((t) => t.type === TransactionType.EXPENSE),
   )
@@ -74,7 +72,6 @@ export function useTransactions() {
 
     // Computed lists
     sortedTransactions,
-    recentTransactions,
     expenseTransactions,
     incomeTransactions,
     transactionCount,

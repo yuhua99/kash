@@ -8,7 +8,6 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader.vue'
 import StatsCards from '@/components/dashboard/StatsCards.vue'
 import TrendDisplay from '@/components/dashboard/TrendDisplay.vue'
 import SpendingByCategory from '@/components/dashboard/SpendingByCategory.vue'
-import RecentTransactions from '@/components/transactions/RecentTransactions.vue'
 import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
@@ -189,12 +188,8 @@ onMounted(() => {
             <TrendDisplay :transactions="sortedTransactions" :period="selectedPeriod" />
           </div>
           <div class="col-span-3">
-            <RecentTransactions :transactions="sortedTransactions" />
+            <SpendingByCategory :transactions="sortedTransactions" />
           </div>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-1">
-          <SpendingByCategory :transactions="sortedTransactions" />
         </div>
       </div>
 
