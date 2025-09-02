@@ -19,8 +19,7 @@ export const useRecordsStore = defineStore('records', () => {
   const categoriesStore = useCategoriesStore()
 
   const convertApiRecordToTransaction = (record: ApiRecord): Transaction => {
-    // Use direct Map access to avoid reactive dependency that triggers infinite fetches
-    const categoryName = categoriesStore.categoriesMap.get(record.category_id) || 'Unknown Category'
+    const categoryName = categoriesStore.getCategoryName(record.category_id)
 
     return {
       id: record.id,

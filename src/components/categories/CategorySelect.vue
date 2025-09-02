@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select'
 import { useCategoriesStore } from '@/stores/categories'
 import { TransactionType } from '@/types'
+import { useTheme } from '@/composables/useTheme'
 
 interface Props {
   modelValue: string
@@ -27,9 +28,7 @@ const emit = defineEmits<Emits>()
 
 const categoriesStore = useCategoriesStore()
 
-const isDarkMode = computed(() => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-})
+const { isDark: isDarkMode } = useTheme()
 
 const categories = computed(() => {
   return props.filterType === TransactionType.INCOME

@@ -10,15 +10,13 @@ interface Props {
 
 defineProps<Props>()
 
-// Format currency values - handle both formatted strings and numbers
-const formatCurrency = (value: number | string): string => {
-  // If it's already formatted with currency symbol, return as is
-  if (typeof value === 'string' && value.startsWith('$')) {
-    return value
-  }
+import { formatCurrency } from '@/lib/formatters'
 
-  const numValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : value
-  return isNaN(numValue) ? '$0.00' : `$${numValue.toFixed(2)}`
+// Normalize incoming value (may be string or number from chart)
+const toNumber = (value: number | string): number => {
+  if (typeof value === 'number') return value
+  const parsed = parseFloat(value.replace(/[^0-9.-]/g, ''))
+  return isNaN(parsed) ? 0 : parsed
 }
 </script>
 
@@ -35,7 +33,7 @@ const formatCurrency = (value: number | string): string => {
       </span>
     </div>
     <span class="font-semibold whitespace-nowrap">
-      {{ formatCurrency(title || 0) }}
+      {{ formatCurrency(toNumber(title || 0)) }}
     </span>
   </div>
 </template>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -26,8 +25,9 @@ import { Search, MoreHorizontal, Edit, Trash2, Plus } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useCategoriesStore } from '@/stores/categories'
 import { useRecordsStore } from '@/stores/records'
+import { formatCurrency, formatSignedCurrency } from '@/lib/formatters'
+import { useTheme } from '@/composables/useTheme'
 
-const router = useRouter()
 const authStore = useAuthStore()
 const categoriesStore = useCategoriesStore()
 const recordsStore = useRecordsStore()
@@ -39,9 +39,7 @@ const isLoading = computed(
   () => authStore.isLoading || categoriesStore.isLoading || recordsStore.isLoading,
 )
 
-const isDarkMode = computed(() => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-})
+const { isDark: isDarkMode } = useTheme()
 
 // Filter categories based on search
 const filteredCategories = computed(() => {
@@ -102,14 +100,6 @@ const onCategorySaved = () => {
 }
 
 const loadData = async () => {
-  const isAuthenticated = await authStore.checkAuthStatus()
-
-  if (!isAuthenticated) {
-    console.warn('User not authenticated, redirecting to login')
-    router.push('/login')
-    return
-  }
-
   await categoriesStore.fetchCategories()
   await recordsStore.fetchRecords()
 }
@@ -281,16 +271,24 @@ onMounted(() => {
                   </TableCell>
                   <TableCell class="text-right text-sm">{{ stat.transactionCount }}</TableCell>
                   <TableCell class="text-right text-red-600 text-sm">
-                    {{ stat.totalSpent > 0 ? '-$' + stat.totalSpent.toFixed(0) : '$0' }}
+                    {{
+                      stat.totalSpent > 0
+                        ? formatSignedCurrency(-stat.totalSpent)
+                        : formatCurrency(0)
+                    }}
                   </TableCell>
                   <TableCell class="text-right text-green-600 text-sm">
-                    {{ stat.totalIncome > 0 ? '+$' + stat.totalIncome.toFixed(0) : '$0' }}
+                    {{
+                      stat.totalIncome > 0
+                        ? formatSignedCurrency(stat.totalIncome)
+                        : formatCurrency(0)
+                    }}
                   </TableCell>
                   <TableCell
                     class="text-right font-medium text-sm"
                     :class="stat.netAmount >= 0 ? 'text-green-600' : 'text-red-600'"
                   >
-                    {{ stat.netAmount >= 0 ? '+' : '' }}${{ stat.netAmount.toFixed(0) }}
+                    {{ formatSignedCurrency(stat.netAmount) }}
                   </TableCell>
                 </TableRow>
                 <TableRow v-if="categoryStats.length === 0">

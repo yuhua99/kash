@@ -44,16 +44,28 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next('/')
-  } else {
-    next()
+  if (to.meta.requiresAuth) {
+    // If not marked authenticated, verify with server
+    if (!authStore.isAuthenticated) {
+      const ok = await authStore.checkAuthStatus()
+      if (!ok) return { path: '/login' }
+    }
   }
+
+  if (to.meta.requiresGuest) {
+    // If not sure, verify; redirect authenticated users away from guest routes
+    if (!authStore.isAuthenticated) {
+      const ok = await authStore.checkAuthStatus()
+      if (ok) return { path: '/' }
+    } else {
+      return { path: '/' }
+    }
+  }
+
+  return true
 })
 
 export default router

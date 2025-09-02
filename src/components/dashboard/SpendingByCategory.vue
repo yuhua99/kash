@@ -13,7 +13,9 @@ import { DonutChart } from '@/components/ui/chart-donut'
 import CategoryTooltip from './CategoryTooltip.vue'
 import { useCategories } from '@/composables/useCategories'
 import { useChartData } from '@/composables/useChartData'
+import { useTheme } from '@/composables/useTheme'
 import type { Transaction } from '@/types'
+import { formatCurrency, formatPercent } from '@/lib/formatters'
 
 interface Props {
   transactions: Transaction[]
@@ -25,9 +27,7 @@ const { categorySpending, donutChartData, currencyFormatter } = useChartData(
   toRef(props, 'transactions'),
 )
 
-const isDarkMode = computed(() => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-})
+const { isDark: isDarkMode } = useTheme()
 
 const chartColors = computed(() => {
   return donutChartData.value.map((item) => getCategoryColorByName(item.name, isDarkMode.value))
@@ -88,10 +88,12 @@ const chartColors = computed(() => {
                     <span class="font-medium">{{ item.category }}</span>
                   </div>
                 </TableCell>
-                <TableCell class="text-right font-medium">${{ item.amount.toFixed(2) }}</TableCell>
-                <TableCell class="text-right text-muted-foreground"
-                  >{{ item.percentage.toFixed(1) }}%</TableCell
-                >
+                <TableCell class="text-right font-medium">{{
+                  formatCurrency(item.amount)
+                }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  formatPercent(item.percentage)
+                }}</TableCell>
               </TableRow>
               <TableRow v-if="categorySpending.length === 0">
                 <TableCell colspan="3" class="text-center text-muted-foreground py-6">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { MoreHorizontal, Edit, Trash2, Plus, TrendingUp, TrendingDown } from 'lucide-vue-next'
 import CategoryDialog from './CategoryDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
+import { useTheme } from '@/composables/useTheme'
 
 const categoriesStore = useCategoriesStore()
 
@@ -19,9 +20,7 @@ const editDialogCategory = ref<{ id: string; name: string; is_income: boolean } 
 const showEditDialog = ref(false)
 const showAddDialog = ref(false)
 
-const isDarkMode = computed(() => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-})
+const { isDark: isDarkMode } = useTheme()
 
 // Categories are loaded by parent component, no need to fetch here
 

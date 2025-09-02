@@ -18,10 +18,10 @@ const formatPercent = (value: number) => `${value.toFixed(1)}%`
 
 <template>
   <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-    <!-- Monthly Income -->
+    <!-- Income (period-aware) -->
     <Card>
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Monthly Income</CardTitle>
+        <CardTitle class="text-sm font-medium">Income</CardTitle>
         <DollarSign class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
@@ -29,10 +29,10 @@ const formatPercent = (value: number) => `${value.toFixed(1)}%`
       </CardContent>
     </Card>
 
-    <!-- Monthly Expenses -->
+    <!-- Expenses (period-aware) -->
     <Card>
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Monthly Expenses</CardTitle>
+        <CardTitle class="text-sm font-medium">Expenses</CardTitle>
         <TrendingDown class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
@@ -40,10 +40,10 @@ const formatPercent = (value: number) => `${value.toFixed(1)}%`
       </CardContent>
     </Card>
 
-    <!-- Net This Month -->
+    <!-- Net (this period) -->
     <Card>
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Net This Month</CardTitle>
+        <CardTitle class="text-sm font-medium">Net This Period</CardTitle>
         <TrendingUp class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>

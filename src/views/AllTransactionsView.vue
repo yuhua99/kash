@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -20,8 +19,8 @@ import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
 import type { Transaction } from '@/types'
+import { formatSignedCurrency } from '@/lib/formatters'
 
-const router = useRouter()
 const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
 const categoriesStore = useCategoriesStore()
@@ -117,14 +116,6 @@ const deleteTransaction = async (id: string) => {
 }
 
 const loadData = async () => {
-  const isAuthenticated = await authStore.checkAuthStatus()
-
-  if (!isAuthenticated) {
-    console.warn('User not authenticated, redirecting to login')
-    router.push('/login')
-    return
-  }
-
   await categoriesStore.fetchCategories()
   await recordsStore.fetchRecords()
 }
@@ -242,7 +233,7 @@ onMounted(() => {
           <CardContent class="p-4">
             <div class="text-sm text-muted-foreground">Income</div>
             <div class="text-2xl font-bold text-green-600">
-              +${{ filteredStats.totalIncome.toFixed(2) }}
+              {{ formatSignedCurrency(filteredStats.totalIncome) }}
             </div>
           </CardContent>
         </Card>
@@ -250,7 +241,7 @@ onMounted(() => {
           <CardContent class="p-4">
             <div class="text-sm text-muted-foreground">Expenses</div>
             <div class="text-2xl font-bold text-red-600">
-              -${{ filteredStats.totalExpenses.toFixed(2) }}
+              {{ formatSignedCurrency(-filteredStats.totalExpenses) }}
             </div>
           </CardContent>
         </Card>
@@ -261,7 +252,7 @@ onMounted(() => {
               class="text-2xl font-bold"
               :class="filteredStats.netAmount >= 0 ? 'text-green-600' : 'text-red-600'"
             >
-              {{ filteredStats.netAmount >= 0 ? '+' : '' }}${{ filteredStats.netAmount.toFixed(2) }}
+              {{ formatSignedCurrency(filteredStats.netAmount) }}
             </div>
           </CardContent>
         </Card>

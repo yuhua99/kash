@@ -1,6 +1,7 @@
 import { computed, type Ref } from 'vue'
 import type { Transaction } from '@/types'
 import { TransactionType } from '@/types'
+import { formatCurrency, formatPercent as formatPercentage } from '@/lib/formatters'
 
 export interface FinancialSummary {
   totalIncome: number
@@ -161,19 +162,7 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
     return recommendations
   }
 
-  /**
-   * Format currency for display
-   */
-  const formatCurrency = (amount: number): string =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
-
-  /**
-   * Format percentage for display
-   */
-  const formatPercentage = (percentage: number): string => `${percentage.toFixed(1)}%`
+  // Use centralized formatters from lib/formatters
 
   return {
     // Calculations

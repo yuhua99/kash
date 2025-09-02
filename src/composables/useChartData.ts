@@ -1,6 +1,7 @@
 import { computed, type Ref } from 'vue'
 import type { Transaction } from '@/types'
 import { TransactionType, DashboardPeriod } from '@/types'
+import { formatCurrency, formatPercent } from '@/lib/formatters'
 
 export interface ChartDataPoint {
   name: string
@@ -93,12 +94,12 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   /**
    * Format currency values for charts
    */
-  const currencyFormatter = (value: number): string => `$${value.toFixed(0)}`
+  const currencyFormatter = (value: number): string => formatCurrency(value)
 
   /**
    * Format percentage values for charts
    */
-  const percentageFormatter = (value: number): string => `${value.toFixed(1)}%`
+  const percentageFormatter = (value: number): string => formatPercent(value)
 
   /**
    * Get timestamp range based on dashboard period
@@ -198,13 +199,11 @@ export function useChartData(transactions: Ref<Transaction[]>) {
       }
     })
 
-    return Array.from(dailyMap.entries())
-      .map(([timestamp, data]) => ({
-        period: formatMonthDay(timestamp),
-        income: data.income,
-        expenses: data.expenses,
-      }))
-      .sort((a, b) => a.period.localeCompare(b.period))
+    return Array.from(dailyMap.entries()).map(([timestamp, data]) => ({
+      period: formatMonthDay(timestamp),
+      income: data.income,
+      expenses: data.expenses,
+    }))
   }
 
   /**

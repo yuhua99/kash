@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -20,7 +20,9 @@ import {
 import { Edit, Trash2, MoreHorizontal } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
+import { useTheme } from '@/composables/useTheme'
 import type { Transaction } from '@/types'
+import { formatSignedCurrency } from '@/lib/formatters'
 
 interface Props {
   transactions: Transaction[]
@@ -37,10 +39,7 @@ const categoriesStore = useCategoriesStore()
 
 const editDialogOpen = ref(false)
 const editingTransaction = ref<Transaction | null>(null)
-
-const isDarkMode = computed(() => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-})
+const { isDark: isDarkMode } = useTheme()
 
 const openEditDialog = (transaction: Transaction) => {
   editingTransaction.value = transaction
@@ -52,20 +51,7 @@ const handleEditTransaction = (transaction: Transaction) => {
   emit('editTransaction', transaction)
 }
 
-const getCategoryVariant = (
-  category: string,
-): 'default' | 'destructive' | 'outline' | 'secondary' => {
-  const variants: Record<string, 'default' | 'destructive' | 'outline' | 'secondary'> = {
-    Food: 'default',
-    Utilities: 'secondary',
-    Transportation: 'outline',
-    Income: 'default',
-    Entertainment: 'secondary',
-    Healthcare: 'outline',
-    Shopping: 'default',
-  }
-  return variants[category] || 'default'
-}
+// Simplify badge styling; color dot already conveys category
 </script>
 
 <template>
@@ -103,7 +89,7 @@ const getCategoryVariant = (
                   ),
                 }"
               ></div>
-              <Badge :variant="getCategoryVariant(transaction.category)">
+              <Badge variant="secondary">
                 {{ transaction.category }}
               </Badge>
             </div>
@@ -112,7 +98,7 @@ const getCategoryVariant = (
             <span
               :class="['font-semibold', transaction.amount > 0 ? 'text-green-600' : 'text-red-600']"
             >
-              {{ transaction.amount > 0 ? '+' : '' }}${{ Math.abs(transaction.amount).toFixed(2) }}
+              {{ formatSignedCurrency(transaction.amount) }}
             </span>
           </TableCell>
           <TableCell>

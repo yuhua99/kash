@@ -46,40 +46,10 @@ export function useApiRequest() {
     }
   }
 
-  const executeVoidRequest = async (
-    requestFn: () => Promise<ApiResponse<void>>,
-    options: ApiRequestOptions<void> = {},
-  ): Promise<boolean> => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response = await requestFn()
-
-      if (response.success) {
-        options.onSuccess?.(undefined)
-        return true
-      } else {
-        const errorMessage = response.error || 'Request failed'
-        error.value = errorMessage
-        options.onError?.(errorMessage)
-        return false
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Network error occurred'
-      error.value = errorMessage
-      options.onError?.(errorMessage)
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
   return {
     isLoading,
     error,
     clearError,
     executeRequest,
-    executeVoidRequest,
   }
 }
