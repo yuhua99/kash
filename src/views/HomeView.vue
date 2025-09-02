@@ -62,7 +62,7 @@ const addTransaction = async (newTransaction: Transaction) => {
     name: newTransaction.name,
     amount: newTransaction.amount,
     category_id: category.id,
-    timestamp: Math.floor(new Date(newTransaction.date).getTime() / 1000),
+    timestamp: newTransaction.timestamp,
   }
 
   await createRecord(payload)

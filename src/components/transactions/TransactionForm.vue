@@ -58,7 +58,7 @@ const initializeFormData = (transaction?: Transaction | null) => {
       amount: Math.abs(transaction.amount).toString(),
       category: transaction.category,
       type: transaction.type,
-      date: transaction.date,
+      date: new Date(transaction.timestamp * 1000).toISOString().split('T')[0],
     }
   } else {
     formData.value = {
@@ -129,7 +129,7 @@ const handleSubmit = () => {
     amount: formData.value.type === TransactionType.EXPENSE ? -Math.abs(amount) : Math.abs(amount),
     category: formData.value.category,
     type: formData.value.type,
-    date: formData.value.date as string,
+    timestamp: Math.floor(new Date(formData.value.date).getTime() / 1000),
   }
 
   if (isEditMode.value && props.transaction?.id) {

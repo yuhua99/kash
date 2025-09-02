@@ -23,7 +23,7 @@ export function useTransactions() {
 
   // Computed transaction lists
   const sortedTransactions = computed(() =>
-    [...transactions.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [...transactions.value].sort((a, b) => b.timestamp - a.timestamp),
   )
 
   const expenseTransactions = computed(() =>
@@ -52,8 +52,11 @@ export function useTransactions() {
   const getTransactionsByCategory = (category: string): Transaction[] =>
     transactions.value.filter((t) => t.category === category)
 
-  const getTransactionsByDateRange = (startDate: string, endDate: string): Transaction[] =>
-    transactions.value.filter((t) => t.date >= startDate && t.date <= endDate)
+  const getTransactionsByTimestampRange = (
+    startTimestamp: number,
+    endTimestamp: number,
+  ): Transaction[] =>
+    transactions.value.filter((t) => t.timestamp >= startTimestamp && t.timestamp <= endTimestamp)
 
   return {
     // Raw data
@@ -86,6 +89,6 @@ export function useTransactions() {
     // Utilities
     getTransactionById,
     getTransactionsByCategory,
-    getTransactionsByDateRange,
+    getTransactionsByTimestampRange,
   }
 }

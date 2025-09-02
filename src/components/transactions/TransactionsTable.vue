@@ -87,7 +87,7 @@ const getCategoryVariant = (
           class="hover:bg-muted/50"
         >
           <TableCell class="font-mono text-sm">
-            {{ new Date(transaction.date).toLocaleDateString() }}
+            {{ new Date(transaction.timestamp * 1000).toLocaleDateString() }}
           </TableCell>
           <TableCell class="font-medium">
             {{ transaction.name }}

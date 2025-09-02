@@ -59,7 +59,7 @@ const filteredAndSortedTransactions = computed(() => {
   }
 
   // Sort by date (most recent first)
-  return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  return filtered.sort((a, b) => b.timestamp - a.timestamp)
 })
 
 // Summary statistics for filtered transactions
@@ -89,7 +89,7 @@ const addTransaction = async (newTransaction: Transaction) => {
     name: newTransaction.name,
     amount: newTransaction.amount,
     category_id: category.id,
-    timestamp: Math.floor(new Date(newTransaction.date).getTime() / 1000),
+    timestamp: newTransaction.timestamp,
   }
 
   await recordsStore.createRecord(payload)
@@ -106,7 +106,7 @@ const editTransaction = async (transaction: Transaction) => {
     name: transaction.name,
     amount: transaction.amount,
     category_id: category.id,
-    timestamp: Math.floor(new Date(transaction.date).getTime() / 1000),
+    timestamp: transaction.timestamp,
   }
 
   await recordsStore.updateRecord(transaction.id, payload)

@@ -24,12 +24,33 @@ export interface SingleTrendDataPoint {
   value: number
 }
 
-export type TrendPeriod = 'daily' | 'weekly' | 'monthly'
+export enum TrendPeriod {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+}
 
 // Constants
 const WEEKS_IN_HALF_YEAR = 26
 const MONTHS_IN_YEAR = 12
 const DAYS_PER_WEEK = 7
+
+// Date utilities
+const formatMonthDay = (timestamp: number): string => {
+  const date = new Date(timestamp * 1000)
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  return `${month}/${day}`
+}
+const formatMonthLabel = (timestamp: number): string => {
+  const date = new Date(timestamp * 1000)
+  return date.toLocaleDateString('en-US', { month: 'short' })
+}
+const getStartOfDay = (timestamp: number): number => {
+  const date = new Date(timestamp * 1000)
+  date.setHours(0, 0, 0, 0)
+  return Math.floor(date.getTime() / 1000)
+}
 
 /**
  * Chart data composable - transforms transaction data into chart-ready formats
@@ -70,63 +91,9 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   })
 
   /**
-   * Monthly trend data for line charts
-   */
-  const monthlyTrendData = computed(() => {
-    const monthlyData = new Map<string, { income: number; expenses: number }>()
-
-    transactions.value.forEach((transaction) => {
-      const monthKey = transaction.date.substring(0, 7) // YYYY-MM
-      const current = monthlyData.get(monthKey) || { income: 0, expenses: 0 }
-
-      if (transaction.type === TransactionType.INCOME) {
-        current.income += transaction.amount
-      } else {
-        current.expenses += Math.abs(transaction.amount)
-      }
-
-      monthlyData.set(monthKey, current)
-    })
-
-    return Array.from(monthlyData.entries())
-      .map(([month, data]) => ({
-        month,
-        income: data.income,
-        expenses: data.expenses,
-        net: data.income - data.expenses,
-      }))
-      .sort((a, b) => a.month.localeCompare(b.month))
-  })
-
-  /**
-   * Daily spending data for detailed analysis
-   */
-  const dailySpendingData = computed(() => {
-    const dailyMap = new Map<string, number>()
-
-    transactions.value
-      .filter((t) => t.type === TransactionType.EXPENSE)
-      .forEach((transaction) => {
-        const current = dailyMap.get(transaction.date) || 0
-        dailyMap.set(transaction.date, current + Math.abs(transaction.amount))
-      })
-
-    return Array.from(dailyMap.entries())
-      .map(([date, amount]) => ({
-        date,
-        amount,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date))
-  })
-
-  /**
    * Format currency values for charts
    */
-  const currencyFormatter = (value: number | string): string => {
-    if (value == null) return '$0'
-    const numValue = typeof value === 'string' ? parseFloat(value) : value
-    return isNaN(numValue) ? '$0' : `$${numValue.toFixed(0)}`
-  }
+  const currencyFormatter = (value: number): string => `$${value.toFixed(0)}`
 
   /**
    * Format percentage values for charts
@@ -134,55 +101,47 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   const percentageFormatter = (value: number): string => `${value.toFixed(1)}%`
 
   /**
-   * Get date range based on dashboard period
+   * Get timestamp range based on dashboard period
    */
-  const getDateRange = (period: string) => {
+  const getTimestampRange = (period: string) => {
     const now = new Date()
 
     switch (period) {
       case 'this-month': {
         const start = new Date(now.getFullYear(), now.getMonth(), 1)
-        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-        return { start, end }
+        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+        return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
       }
       case 'this-half-year': {
         const start = new Date(now.getFullYear(), now.getMonth() - 6, 1)
-        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-        return { start, end }
+        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+        return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
       }
       case 'this-year': {
         const start = new Date(now.getFullYear(), 0, 1)
-        const end = new Date(now.getFullYear(), 11, 31)
-        return { start, end }
+        const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999)
+        return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
       }
       default:
         return {
-          start: new Date(now.getFullYear(), 0, 1),
-          end: new Date(now.getFullYear(), 11, 31),
+          start: Math.floor(new Date(now.getFullYear(), 0, 1).getTime() / 1000),
+          end: Math.floor(new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).getTime() / 1000),
         }
     }
   }
 
   /**
-   * Filter transactions by date range
+   * Filter transactions by timestamp range
    */
   const filterTransactionsByPeriod = (period: string) => {
     if (!transactions.value?.length) return []
 
-    try {
-      const { start, end } = getDateRange(period)
-      const startStr = start.toISOString().split('T')[0]
-      const endStr = end.toISOString().split('T')[0]
+    const { start, end } = getTimestampRange(period)
 
-      return transactions.value.filter((t) => {
-        // Handle invalid dates gracefully
-        if (!t.date || typeof t.date !== 'string') return false
-        return t.date >= startStr && t.date <= endStr
-      })
-    } catch (error) {
-      console.warn('Error filtering transactions by period:', error)
-      return []
-    }
+    return transactions.value.filter((t) => {
+      if (!t.timestamp || typeof t.timestamp !== 'number') return false
+      return t.timestamp >= start && t.timestamp <= end
+    })
   }
 
   /**
@@ -192,14 +151,14 @@ export function useChartData(transactions: Ref<Transaction[]>) {
     const filteredTransactions = filterTransactionsByPeriod(dashboardPeriod)
     const trendPeriod: TrendPeriod =
       dashboardPeriod === 'this-month'
-        ? 'daily'
+        ? TrendPeriod.DAILY
         : dashboardPeriod === 'this-half-year'
-          ? 'weekly'
-          : 'monthly'
+          ? TrendPeriod.WEEKLY
+          : TrendPeriod.MONTHLY
 
-    if (trendPeriod === 'daily') {
+    if (trendPeriod === TrendPeriod.DAILY) {
       return getDailyTrendData(filteredTransactions)
-    } else if (trendPeriod === 'weekly') {
+    } else if (trendPeriod === TrendPeriod.WEEKLY) {
       return getWeeklyTrendData(filteredTransactions)
     } else {
       return getMonthlyTrendData(filteredTransactions)
@@ -210,185 +169,137 @@ export function useChartData(transactions: Ref<Transaction[]>) {
    * Generate daily trend data for current month
    */
   const getDailyTrendData = (transactions: Transaction[]): TrendDataPoint[] => {
-    try {
-      const now = new Date()
-      const year = now.getFullYear()
-      const month = now.getMonth()
-      const daysInMonth = new Date(year, month + 1, 0).getDate()
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
 
-      const dailyMap = new Map<string, { income: number; expenses: number }>()
+    const dailyMap = new Map<number, { income: number; expenses: number }>()
 
-      // Initialize all days in month
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
-        dailyMap.set(date, { income: 0, expenses: 0 })
-      }
-
-      // Aggregate transactions by day
-      transactions.forEach((transaction) => {
-        if (!transaction.date || !transaction.amount || !transaction.type) return
-
-        const data = dailyMap.get(transaction.date)
-        if (data) {
-          if (transaction.type === TransactionType.INCOME) {
-            data.income += transaction.amount
-          } else {
-            data.expenses += Math.abs(transaction.amount)
-          }
-        }
-      })
-
-      return Array.from(dailyMap.entries())
-        .map(([date, data]) => {
-          const dateObj = new Date(date)
-          if (isNaN(dateObj.getTime())) {
-            console.warn('Invalid date found in daily trend data:', date)
-            return null
-          }
-
-          const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
-          const day = dateObj.getDate().toString().padStart(2, '0')
-
-          return {
-            period: `${month}/${day}`,
-            income: data.income,
-            expenses: data.expenses,
-          }
-        })
-        .filter((item): item is TrendDataPoint => item !== null)
-        .sort((a, b) => a.period.localeCompare(b.period))
-    } catch (error) {
-      console.warn('Error generating daily trend data:', error)
-      return []
+    // Initialize all days in month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayStart = Math.floor(new Date(year, month, day).getTime() / 1000)
+      dailyMap.set(dayStart, { income: 0, expenses: 0 })
     }
+
+    // Aggregate transactions by day
+    transactions.forEach((transaction) => {
+      if (!transaction.timestamp || typeof transaction.amount !== 'number' || !transaction.type)
+        return
+
+      const dayStart = getStartOfDay(transaction.timestamp)
+      const data = dailyMap.get(dayStart)
+      if (data) {
+        if (transaction.type === TransactionType.INCOME) {
+          data.income += transaction.amount
+        } else {
+          data.expenses += Math.abs(transaction.amount)
+        }
+      }
+    })
+
+    return Array.from(dailyMap.entries())
+      .map(([timestamp, data]) => ({
+        period: formatMonthDay(timestamp),
+        income: data.income,
+        expenses: data.expenses,
+      }))
+      .sort((a, b) => a.period.localeCompare(b.period))
   }
 
   /**
    * Generate weekly trend data for last 26 weeks
    */
   const getWeeklyTrendData = (transactions: Transaction[]): TrendDataPoint[] => {
-    try {
-      const weeks: Array<{ label: string; start: string; end: string }> = []
-      const today = new Date()
+    const weeks: Array<{ label: string; start: number; end: number }> = []
+    const today = new Date()
 
-      // Generate last N weeks
-      for (let i = WEEKS_IN_HALF_YEAR - 1; i >= 0; i--) {
-        const weekStart = new Date(today)
-        weekStart.setDate(weekStart.getDate() - i * DAYS_PER_WEEK - today.getDay())
-        const weekEnd = new Date(weekStart)
-        weekEnd.setDate(weekStart.getDate() + DAYS_PER_WEEK - 1)
+    // Generate last N weeks
+    for (let i = WEEKS_IN_HALF_YEAR - 1; i >= 0; i--) {
+      const weekStart = new Date(today)
+      weekStart.setDate(weekStart.getDate() - i * DAYS_PER_WEEK - today.getDay())
+      weekStart.setHours(0, 0, 0, 0)
+      const weekEnd = new Date(weekStart)
+      weekEnd.setDate(weekStart.getDate() + DAYS_PER_WEEK - 1)
+      weekEnd.setHours(23, 59, 59, 999)
 
-        const weekStartMonth = (weekStart.getMonth() + 1).toString().padStart(2, '0')
-        const weekStartDay = weekStart.getDate().toString().padStart(2, '0')
+      const startTimestamp = Math.floor(weekStart.getTime() / 1000)
+      const endTimestamp = Math.floor(weekEnd.getTime() / 1000)
 
-        weeks.push({
-          label: `${weekStartMonth}/${weekStartDay}`,
-          start: weekStart.toISOString().split('T')[0],
-          end: weekEnd.toISOString().split('T')[0],
-        })
-      }
-
-      return weeks.map((week) => {
-        const weekTransactions = transactions.filter(
-          (t) => t.date && t.date >= week.start && t.date <= week.end,
-        )
-
-        const income = weekTransactions
-          .filter((t) => t.type === TransactionType.INCOME && typeof t.amount === 'number')
-          .reduce((sum, t) => sum + t.amount, 0)
-
-        const expenses = weekTransactions
-          .filter((t) => t.type === TransactionType.EXPENSE && typeof t.amount === 'number')
-          .reduce((sum, t) => sum + Math.abs(t.amount), 0)
-
-        return {
-          period: week.label,
-          income,
-          expenses,
-        }
+      weeks.push({
+        label: formatMonthDay(startTimestamp),
+        start: startTimestamp,
+        end: endTimestamp,
       })
-    } catch (error) {
-      console.warn('Error generating weekly trend data:', error)
-      return []
     }
+
+    return weeks.map((week) => {
+      const weekTransactions = transactions.filter(
+        (t) => t.timestamp && t.timestamp >= week.start && t.timestamp <= week.end,
+      )
+
+      const income = weekTransactions
+        .filter((t) => t.type === TransactionType.INCOME && typeof t.amount === 'number')
+        .reduce((sum, t) => sum + t.amount, 0)
+
+      const expenses = weekTransactions
+        .filter((t) => t.type === TransactionType.EXPENSE && typeof t.amount === 'number')
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+
+      return {
+        period: week.label,
+        income,
+        expenses,
+      }
+    })
   }
 
   /**
    * Generate monthly trend data for last 12 months
    */
   const getMonthlyTrendData = (transactions: Transaction[]): TrendDataPoint[] => {
-    try {
-      const monthlyMap = new Map<string, { income: number; expenses: number }>()
-      const months: Array<{ key: string; label: string }> = []
-      const today = new Date()
+    const monthlyMap = new Map<number, { income: number; expenses: number }>()
+    const months: Array<{ timestamp: number; label: string }> = []
+    const today = new Date()
 
-      // Generate current year months (January to December)
-      for (let month = 0; month < MONTHS_IN_YEAR; month++) {
-        const date = new Date(today.getFullYear(), month, 1)
-        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`
-        const monthLabel = date.toLocaleDateString('en-US', { month: 'short' })
+    // Generate current year months (January to December)
+    for (let month = 0; month < MONTHS_IN_YEAR; month++) {
+      const monthStart = new Date(today.getFullYear(), month, 1)
+      const monthTimestamp = Math.floor(monthStart.getTime() / 1000)
+      const monthLabel = formatMonthLabel(monthTimestamp)
 
-        months.push({ key: monthKey, label: monthLabel })
-        monthlyMap.set(monthKey, { income: 0, expenses: 0 })
-      }
+      months.push({ timestamp: monthTimestamp, label: monthLabel })
+      monthlyMap.set(monthTimestamp, { income: 0, expenses: 0 })
+    }
 
-      // Aggregate transactions by month
-      transactions.forEach((transaction) => {
-        if (!transaction.date || typeof transaction.amount !== 'number' || !transaction.type) return
+    // Aggregate transactions by month
+    transactions.forEach((transaction) => {
+      if (!transaction.timestamp || typeof transaction.amount !== 'number' || !transaction.type)
+        return
 
-        const monthKey = transaction.date.substring(0, 7)
-        const data = monthlyMap.get(monthKey)
+      // Get month start timestamp for grouping
+      const transactionDate = new Date(transaction.timestamp * 1000)
+      const monthStart = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), 1)
+      const monthTimestamp = Math.floor(monthStart.getTime() / 1000)
+      const data = monthlyMap.get(monthTimestamp)
 
-        if (data) {
-          if (transaction.type === TransactionType.INCOME) {
-            data.income += transaction.amount
-          } else {
-            data.expenses += Math.abs(transaction.amount)
-          }
+      if (data) {
+        if (transaction.type === TransactionType.INCOME) {
+          data.income += transaction.amount
+        } else {
+          data.expenses += Math.abs(transaction.amount)
         }
-      })
-
-      return months.map(({ key, label }) => {
-        const data = monthlyMap.get(key) || { income: 0, expenses: 0 }
-        return {
-          period: label,
-          income: data.income,
-          expenses: data.expenses,
-        }
-      })
-    } catch (error) {
-      console.warn('Error generating monthly trend data:', error)
-      return []
-    }
-  }
-
-  /**
-   * Memoized trend data cache
-   */
-  const trendDataCache = new Map<string, TrendDataPoint[]>()
-
-  /**
-   * Generate trend data for different periods with memoization
-   */
-  const getTrendDataMemoized = (dashboardPeriod: string): TrendDataPoint[] => {
-    const cacheKey = `${dashboardPeriod}-${transactions.value.length}-${JSON.stringify(transactions.value.slice(0, 3))}`
-
-    if (trendDataCache.has(cacheKey)) {
-      return trendDataCache.get(cacheKey)!
-    }
-
-    const result = getTrendData(dashboardPeriod)
-    trendDataCache.set(cacheKey, result)
-
-    // Clear old cache entries to prevent memory leaks
-    if (trendDataCache.size > 10) {
-      const firstKey = trendDataCache.keys().next().value
-      if (firstKey) {
-        trendDataCache.delete(firstKey)
       }
-    }
+    })
 
-    return result
+    return months.map(({ timestamp, label }) => {
+      const data = monthlyMap.get(timestamp) || { income: 0, expenses: 0 }
+      return {
+        period: label,
+        income: data.income,
+        expenses: data.expenses,
+      }
+    })
   }
 
   /**
@@ -398,7 +309,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
     dashboardPeriod: string,
     dataType: TransactionType,
   ): SingleTrendDataPoint[] => {
-    const trendData = getTrendDataMemoized(dashboardPeriod)
+    const trendData = getTrendData(dashboardPeriod)
 
     return trendData.map((item) => ({
       period: item.period,
@@ -410,10 +321,8 @@ export function useChartData(transactions: Ref<Transaction[]>) {
     // Processed data
     categorySpending,
     donutChartData,
-    monthlyTrendData,
-    dailySpendingData,
 
-    // New trend data functions
+    // Trend data functions
     getTrendData,
     getSingleTrendData,
 

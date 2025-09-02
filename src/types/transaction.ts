@@ -30,7 +30,7 @@ export interface Transaction {
   amount: number
   category: string
   type: TransactionType
-  date: string
+  timestamp: number
 }
 
 /**

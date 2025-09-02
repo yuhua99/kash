@@ -21,11 +21,10 @@ export const useRecordsStore = defineStore('records', () => {
   const convertApiRecordToTransaction = (record: ApiRecord): Transaction => {
     // Use direct Map access to avoid reactive dependency that triggers infinite fetches
     const categoryName = categoriesStore.categoriesMap.get(record.category_id) || 'Unknown Category'
-    const date = new Date(record.timestamp * 1000).toISOString().split('T')[0]
 
     return {
       id: record.id,
-      date,
+      timestamp: record.timestamp,
       name: record.name,
       amount: record.amount,
       category: categoryName,

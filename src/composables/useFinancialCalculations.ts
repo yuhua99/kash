@@ -92,7 +92,8 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
     const monthlyMap = new Map<string, { income: number; expenses: number; transactions: number }>()
 
     transactions.value.forEach((transaction) => {
-      const monthKey = transaction.date.substring(0, 7) // YYYY-MM
+      const date = new Date(transaction.timestamp * 1000)
+      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}` // YYYY-MM
       const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0, transactions: 0 }
 
       current.transactions++

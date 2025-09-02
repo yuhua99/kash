@@ -17,7 +17,7 @@ const props = defineProps<Props>()
 
 const selectedDataType = ref<TransactionType>(TransactionType.EXPENSE)
 const transactionsRef = toRef(props, 'transactions')
-const { getSingleTrendData, currencyFormatter } = useChartData(transactionsRef)
+const { getSingleTrendData } = useChartData(transactionsRef)
 
 // Get chart data using the composable with memoization
 const chartData = computed(() => {
@@ -54,7 +54,6 @@ const chartColors = computed(() => [
         :categories="chartCategories"
         :colors="chartColors"
         :show-legend="false"
-        :y-formatter="(value: number | Date) => currencyFormatter(Number(value))"
         :custom-tooltip="TrendTooltip"
         :rounded-corners="4"
         class="h-80"
