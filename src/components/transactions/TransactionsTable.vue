@@ -21,6 +21,7 @@ import { Edit, Trash2, MoreHorizontal } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
 import { useTheme } from '@/composables/useTheme'
+import { formatDate } from '@/lib/formatters'
 import type { Transaction } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
 
@@ -72,9 +73,7 @@ const handleEditTransaction = (transaction: Transaction) => {
           :key="transaction.id"
           class="hover:bg-muted/50"
         >
-          <TableCell class="font-mono text-sm">
-            {{ new Date(transaction.timestamp * 1000).toLocaleDateString() }}
-          </TableCell>
+          <TableCell class="font-mono text-sm">{{ formatDate(transaction.timestamp) }}</TableCell>
           <TableCell class="font-medium">
             {{ transaction.name }}
           </TableCell>
