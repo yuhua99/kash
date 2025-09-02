@@ -329,5 +329,8 @@ export function useChartData(transactions: Ref<Transaction[]>) {
     // Formatters
     currencyFormatter,
     percentageFormatter,
+
+    // Utilities
+    filterTransactionsByPeriod,
   }
 }

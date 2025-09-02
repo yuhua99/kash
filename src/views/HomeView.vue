@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -13,22 +12,19 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useTransactions } from '@/composables/useTransactions'
+import { useChartData } from '@/composables/useChartData'
+import { useFinancialCalculations } from '@/composables/useFinancialCalculations'
 import { useCategories } from '@/composables/useCategories'
 import type { Transaction } from '@/types'
 import { DashboardPeriod } from '@/types'
 
 // Router and stores
-const router = useRouter()
 const authStore = useAuthStore()
 
 // Period selection state
 const selectedPeriod = ref<DashboardPeriod>(DashboardPeriod.THIS_MONTH)
 const {
   sortedTransactions,
-  totalBalance,
-  monthlyIncome,
-  monthlyExpenses,
-  savingsRate,
   isLoading: transactionsLoading,
   error: transactionsError,
   fetchRecords,
@@ -71,15 +67,6 @@ const addTransaction = async (newTransaction: Transaction) => {
 
 // Load data function
 const loadData = async () => {
-  // First check if we have a valid session
-  const isAuthenticated = await authStore.checkAuthStatus()
-
-  if (!isAuthenticated) {
-    console.warn('User not authenticated, redirecting to login')
-    router.push('/login')
-    return
-  }
-
   // Load categories first, then records (records need categories for display)
   await fetchCategories()
   await fetchRecords()
@@ -94,6 +81,15 @@ const handlePeriodChange = (period: DashboardPeriod) => {
 onMounted(() => {
   loadData()
 })
+
+// Period-aware calculations for cards and category view
+const { filterTransactionsByPeriod } = useChartData(sortedTransactions)
+const periodTransactions = computed(() => filterTransactionsByPeriod(selectedPeriod.value))
+const { financialSummary } = useFinancialCalculations(periodTransactions)
+
+const periodIncome = computed(() => financialSummary.value.totalIncome)
+const periodExpenses = computed(() => financialSummary.value.totalExpenses)
+const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
 </script>
 
 <template>
@@ -177,10 +173,9 @@ onMounted(() => {
       <div class="space-y-8">
         <!-- Summary Cards -->
         <StatsCards
-          :total-balance="totalBalance"
-          :monthly-income="monthlyIncome"
-          :monthly-expenses="monthlyExpenses"
-          :savings-rate="savingsRate"
+          :monthly-income="periodIncome"
+          :monthly-expenses="periodExpenses"
+          :savings-rate="periodSavingsRate"
         />
 
         <!-- Charts and Analysis -->
@@ -189,7 +184,7 @@ onMounted(() => {
             <TrendDisplay :transactions="sortedTransactions" :period="selectedPeriod" />
           </div>
           <div class="col-span-3">
-            <SpendingByCategory :transactions="sortedTransactions" />
+            <SpendingByCategory :transactions="periodTransactions" />
           </div>
         </div>
       </div>

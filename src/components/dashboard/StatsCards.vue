@@ -1,52 +1,67 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, TrendingUp, TrendingDown } from 'lucide-vue-next'
+import { DollarSign, TrendingUp, TrendingDown, PiggyBank } from 'lucide-vue-next'
 
 interface Props {
-  totalBalance: number
   monthlyIncome: number
   monthlyExpenses: number
   savingsRate: number
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+
+const formatPercent = (value: number) => `${value.toFixed(1)}%`
 </script>
 
 <template>
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-    <!-- Income Card -->
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <!-- Monthly Income -->
     <Card>
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Total Income</CardTitle>
+        <CardTitle class="text-sm font-medium">Monthly Income</CardTitle>
         <DollarSign class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold">${{ monthlyIncome.toFixed(2) }}</div>
-        <p class="text-xs text-muted-foreground">+20.1% from last month</p>
+        <div class="text-2xl font-bold">{{ formatCurrency(props.monthlyIncome) }}</div>
       </CardContent>
     </Card>
 
-    <!-- Expenses Card -->
+    <!-- Monthly Expenses -->
     <Card>
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Total Expenses</CardTitle>
+        <CardTitle class="text-sm font-medium">Monthly Expenses</CardTitle>
         <TrendingDown class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold">${{ monthlyExpenses.toFixed(2) }}</div>
-        <p class="text-xs text-muted-foreground">+180.1% from last month</p>
+        <div class="text-2xl font-bold">{{ formatCurrency(props.monthlyExpenses) }}</div>
       </CardContent>
     </Card>
 
-    <!-- Net Balance Card -->
+    <!-- Net This Month -->
     <Card>
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-sm font-medium">Net Balance</CardTitle>
+        <CardTitle class="text-sm font-medium">Net This Month</CardTitle>
         <TrendingUp class="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold">${{ (monthlyIncome - monthlyExpenses).toFixed(2) }}</div>
-        <p class="text-xs text-muted-foreground">+19% from last month</p>
+        <div class="text-2xl font-bold">
+          {{ formatCurrency(props.monthlyIncome - props.monthlyExpenses) }}
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Savings Rate -->
+    <Card>
+      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle class="text-sm font-medium">Savings Rate</CardTitle>
+        <PiggyBank class="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div class="text-2xl font-bold">{{ formatPercent(props.savingsRate) }}</div>
+        <p class="text-xs text-muted-foreground">Income left after expenses</p>
       </CardContent>
     </Card>
   </div>

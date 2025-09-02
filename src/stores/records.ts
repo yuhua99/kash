@@ -36,29 +36,7 @@ export const useRecordsStore = defineStore('records', () => {
     return records.value.map(convertApiRecordToTransaction)
   })
 
-  const totalBalance = computed(() => {
-    return records.value.reduce((sum, record) => sum + record.amount, 0)
-  })
-
-  const monthlyIncome = computed(() => {
-    return records.value
-      .filter((record) => record.amount > 0)
-      .reduce((sum, record) => sum + record.amount, 0)
-  })
-
-  const monthlyExpenses = computed(() => {
-    return Math.abs(
-      records.value
-        .filter((record) => record.amount < 0)
-        .reduce((sum, record) => sum + record.amount, 0),
-    )
-  })
-
-  const savingsRate = computed(() => {
-    return monthlyIncome.value > 0
-      ? ((monthlyIncome.value - monthlyExpenses.value) / monthlyIncome.value) * 100
-      : 0
-  })
+  // Aggregate summaries moved to view-level period calculations
 
   const fetchRecords = async (filters?: {
     start_time?: number
@@ -123,10 +101,6 @@ export const useRecordsStore = defineStore('records', () => {
     transactions,
     isLoading,
     error,
-    totalBalance,
-    monthlyIncome,
-    monthlyExpenses,
-    savingsRate,
     fetchRecords,
     createRecord,
     updateRecord,

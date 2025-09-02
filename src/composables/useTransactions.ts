@@ -15,12 +15,6 @@ export function useTransactions() {
   const isLoading = computed(() => store.isLoading)
   const error = computed(() => store.error)
 
-  // Financial summaries
-  const totalBalance = computed(() => store.totalBalance)
-  const monthlyIncome = computed(() => store.monthlyIncome)
-  const monthlyExpenses = computed(() => store.monthlyExpenses)
-  const savingsRate = computed(() => store.savingsRate)
-
   // Computed transaction lists
   const sortedTransactions = computed(() =>
     [...transactions.value].sort((a, b) => b.timestamp - a.timestamp),
@@ -66,12 +60,6 @@ export function useTransactions() {
     // State
     isLoading,
     error,
-
-    // Financial summaries
-    totalBalance,
-    monthlyIncome,
-    monthlyExpenses,
-    savingsRate,
 
     // Computed lists
     sortedTransactions,
