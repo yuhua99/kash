@@ -15,13 +15,14 @@ import { useAuthStore } from '@/stores/auth'
 import { useTransactions } from '@/composables/useTransactions'
 import { useCategories } from '@/composables/useCategories'
 import type { Transaction } from '@/types'
+import { DashboardPeriod } from '@/types'
 
 // Router and stores
 const router = useRouter()
 const authStore = useAuthStore()
 
 // Period selection state
-const selectedPeriod = ref('this-month')
+const selectedPeriod = ref<DashboardPeriod>(DashboardPeriod.THIS_MONTH)
 const {
   sortedTransactions,
   totalBalance,
@@ -85,7 +86,7 @@ const loadData = async () => {
 }
 
 // Handle period change from DashboardHeader
-const handlePeriodChange = (period: string) => {
+const handlePeriodChange = (period: DashboardPeriod) => {
   selectedPeriod.value = period
 }
 

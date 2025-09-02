@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BarChart } from '@/components/ui/chart-bar'
 import type { Transaction } from '@/types'
-import { TransactionType } from '@/types'
+import { TransactionType, DashboardPeriod } from '@/types'
 import { useChartData, type SingleTrendDataPoint } from '@/composables/useChartData'
 import TrendTooltip from './TrendTooltip.vue'
 
 interface Props {
   transactions: Transaction[]
-  period: string
+  period: DashboardPeriod
 }
 
 const props = defineProps<Props>()

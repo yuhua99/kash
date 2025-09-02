@@ -1,6 +1,6 @@
 import { computed, type Ref } from 'vue'
 import type { Transaction } from '@/types'
-import { TransactionType } from '@/types'
+import { TransactionType, DashboardPeriod } from '@/types'
 
 export interface ChartDataPoint {
   name: string
@@ -103,21 +103,21 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   /**
    * Get timestamp range based on dashboard period
    */
-  const getTimestampRange = (period: string) => {
+  const getTimestampRange = (period: DashboardPeriod) => {
     const now = new Date()
 
     switch (period) {
-      case 'this-month': {
+      case DashboardPeriod.THIS_MONTH: {
         const start = new Date(now.getFullYear(), now.getMonth(), 1)
         const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
         return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
       }
-      case 'this-half-year': {
+      case DashboardPeriod.THIS_HALF_YEAR: {
         const start = new Date(now.getFullYear(), now.getMonth() - 6, 1)
         const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
         return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
       }
-      case 'this-year': {
+      case DashboardPeriod.THIS_YEAR: {
         const start = new Date(now.getFullYear(), 0, 1)
         const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999)
         return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
@@ -133,7 +133,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   /**
    * Filter transactions by timestamp range
    */
-  const filterTransactionsByPeriod = (period: string) => {
+  const filterTransactionsByPeriod = (period: DashboardPeriod) => {
     if (!transactions.value?.length) return []
 
     const { start, end } = getTimestampRange(period)
@@ -147,12 +147,12 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   /**
    * Generate trend data for different periods
    */
-  const getTrendData = (dashboardPeriod: string): TrendDataPoint[] => {
+  const getTrendData = (dashboardPeriod: DashboardPeriod): TrendDataPoint[] => {
     const filteredTransactions = filterTransactionsByPeriod(dashboardPeriod)
     const trendPeriod: TrendPeriod =
-      dashboardPeriod === 'this-month'
+      dashboardPeriod === DashboardPeriod.THIS_MONTH
         ? TrendPeriod.DAILY
-        : dashboardPeriod === 'this-half-year'
+        : dashboardPeriod === DashboardPeriod.THIS_HALF_YEAR
           ? TrendPeriod.WEEKLY
           : TrendPeriod.MONTHLY
 
@@ -306,7 +306,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
    * Transform trend data for single data type charts
    */
   const getSingleTrendData = (
-    dashboardPeriod: string,
+    dashboardPeriod: DashboardPeriod,
     dataType: TransactionType,
   ): SingleTrendDataPoint[] => {
     const trendData = getTrendData(dashboardPeriod)
