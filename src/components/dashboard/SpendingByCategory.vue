@@ -23,7 +23,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { getCategoryColorByName } = useCategories()
-const { categorySpending, donutChartData, currencyFormatter } = useChartData(
+const { categorySpending, donutChartData } = useChartData(
   toRef(props, 'transactions'),
 )
 
@@ -32,6 +32,21 @@ const { isDark: isDarkMode } = useTheme()
 const chartColors = computed(() => {
   return donutChartData.value.map((item) => getCategoryColorByName(item.name, isDarkMode.value))
 })
+
+// Value formatter resilient to Unovis tooltip passing label strings
+// When the tooltip sends the category name (string) instead of the numeric value,
+// map back to our donutChartData to get the amount.
+const donutValueFormatter = (tick: number) => {
+  const v = tick as unknown as string | number
+  if (typeof v === 'number' && !Number.isNaN(v)) {
+    return formatCurrency(tick)
+  }
+  if (typeof v === 'string') {
+    const found = donutChartData.value.find((d) => d.name === v)
+    if (found) return formatCurrency(found.value)
+  }
+  return formatCurrency(0)
+}
 </script>
 
 <template>
@@ -49,7 +64,7 @@ const chartColors = computed(() => {
             index="name"
             category="value"
             :colors="chartColors"
-            :value-formatter="currencyFormatter"
+            :value-formatter="donutValueFormatter"
             :custom-tooltip="CategoryTooltip"
             class="h-64 w-64"
           />
@@ -84,7 +99,7 @@ const chartColors = computed(() => {
                       :style="{
                         backgroundColor: getCategoryColorByName(item.category, isDarkMode),
                       }"
-                    ></div>
+                      ></div>
                     <span class="font-medium">{{ item.category }}</span>
                   </div>
                 </TableCell>

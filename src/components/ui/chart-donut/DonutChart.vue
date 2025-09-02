@@ -84,7 +84,7 @@ const totalValue = computed(() =>
     >
       <ChartSingleTooltip
         :selector="Donut.selectors.segment"
-        :index="category"
+        :index="index"
         :items="legendItems"
         :value-formatter="valueFormatter"
         :custom-tooltip="customTooltip"
