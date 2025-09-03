@@ -117,7 +117,7 @@ onMounted(() => {
     <!-- Error State -->
     <div
       v-if="authStore.error || categoriesStore.error || recordsStore.error"
-      class="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded"
+      class="p-4 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded"
     >
       <p v-if="authStore.error">Authentication Error: {{ authStore.error }}</p>
       <p v-if="categoriesStore.error">Categories Error: {{ categoriesStore.error }}</p>
@@ -125,11 +125,11 @@ onMounted(() => {
       <div class="mt-2 space-x-2">
         <button
           @click="(authStore.clearError(), categoriesStore.clearError(), recordsStore.clearError())"
-          class="text-red-700 underline text-sm"
+          class="text-destructive underline text-sm"
         >
           Dismiss
         </button>
-        <button @click="loadData" class="text-red-700 underline text-sm">Retry</button>
+        <button @click="loadData" class="text-destructive underline text-sm">Retry</button>
       </div>
     </div>
 
@@ -229,7 +229,7 @@ onMounted(() => {
               >
                 <div class="flex items-center space-x-3">
                   <div
-                    class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                    class="w-4 h-4 rounded-full border border-border flex-shrink-0"
                     :style="{
                       backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
                     }"
@@ -250,7 +250,7 @@ onMounted(() => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       @click="handleDeleteCategory(category.id)"
-                      class="text-red-600 focus:text-red-600"
+                      class="text-destructive focus:text-destructive"
                     >
                       <Trash2 class="h-4 w-4 mr-2" />
                       Delete
@@ -295,14 +295,14 @@ onMounted(() => {
                     </div>
                   </TableCell>
                   <TableCell class="text-right text-sm">{{ stat.transactionCount }}</TableCell>
-                  <TableCell class="text-right text-red-600 text-sm">
+                  <TableCell class="text-right text-[hsl(var(--vis-primary-color))] text-sm">
                     {{
                       stat.totalSpent > 0
                         ? formatSignedCurrency(-stat.totalSpent)
                         : formatCurrency(0)
                     }}
                   </TableCell>
-                  <TableCell class="text-right text-green-600 text-sm">
+                  <TableCell class="text-right text-[hsl(var(--vis-secondary-color))] text-sm">
                     {{
                       stat.totalIncome > 0
                         ? formatSignedCurrency(stat.totalIncome)
@@ -311,7 +311,11 @@ onMounted(() => {
                   </TableCell>
                   <TableCell
                     class="text-right font-medium text-sm"
-                    :class="stat.netAmount >= 0 ? 'text-green-600' : 'text-red-600'"
+                    :class="
+                      stat.netAmount >= 0
+                        ? 'text-[hsl(var(--vis-secondary-color))]'
+                        : 'text-[hsl(var(--vis-primary-color))]'
+                    "
                   >
                     {{ formatSignedCurrency(stat.netAmount) }}
                   </TableCell>

@@ -97,7 +97,7 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
     <!-- Error State -->
     <div
       v-if="authStore.error || transactionsError || categoriesError"
-      class="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded"
+      class="p-4 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded"
     >
       <p v-if="authStore.error">Authentication Error: {{ authStore.error }}</p>
       <p v-if="transactionsError">Records Error: {{ transactionsError }}</p>
@@ -105,11 +105,11 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
       <div class="mt-2 space-x-2">
         <button
           @click="(authStore.clearError(), clearTransactionsError(), clearCategoriesError())"
-          class="text-red-700 underline text-sm"
+          class="text-destructive underline text-sm"
         >
           Dismiss
         </button>
-        <button @click="loadData" class="text-red-700 underline text-sm">Retry</button>
+        <button @click="loadData" class="text-destructive underline text-sm">Retry</button>
       </div>
     </div>
 

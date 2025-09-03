@@ -52,7 +52,8 @@ export const useCategoriesStore = defineStore('categories', () => {
 
   const getCategoryColorByName = (categoryName: string, isDarkMode = false): string => {
     const categoryId = getCategoryId(categoryName)
-    return categoryId ? getColorFromId(categoryId, isDarkMode) : '#6b7280'
+    // Fallback to a muted theme color instead of hardcoded gray
+    return categoryId ? getColorFromId(categoryId, isDarkMode) : 'var(--muted)'
   }
 
   const fetchCategories = async (): Promise<boolean> => {

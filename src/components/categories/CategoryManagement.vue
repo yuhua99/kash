@@ -65,7 +65,7 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
       </div>
 
       <div v-else-if="categoriesStore.error" class="text-center py-8">
-        <p class="text-red-600 mb-4">{{ categoriesStore.error }}</p>
+        <p class="text-destructive mb-4">{{ categoriesStore.error }}</p>
         <Button variant="outline" @click="categoriesStore.fetchCategories()"> Retry </Button>
       </div>
 
@@ -83,8 +83,10 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
         <!-- Income Categories Section -->
         <div v-if="categoriesStore.incomeCategories.length > 0">
           <div class="flex items-center gap-2 mb-2">
-            <TrendingUp class="h-4 w-4 text-green-600" />
-            <h4 class="text-sm font-medium text-green-600">Income Categories</h4>
+            <TrendingUp class="h-4 w-4 text-[hsl(var(--vis-secondary-color))]" />
+            <h4 class="text-sm font-medium text-[hsl(var(--vis-secondary-color))]">
+              Income Categories
+            </h4>
           </div>
           <div class="space-y-2">
             <div
@@ -94,12 +96,15 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
             >
               <div class="flex items-center space-x-3">
                 <div
-                  class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                  class="w-4 h-4 rounded-full border border-border flex-shrink-0"
                   :style="{
                     backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
                   }"
                 ></div>
-                <Badge variant="secondary" class="border-green-200 bg-green-50 text-green-700">
+                <Badge
+                  variant="secondary"
+                  class="border-[hsl(var(--vis-secondary-color))/0.3] bg-[hsl(var(--vis-secondary-color))/0.1] text-[hsl(var(--vis-secondary-color))]"
+                >
                   {{ category.name }}
                 </Badge>
               </div>
@@ -117,7 +122,7 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     @click="handleDeleteCategory(category.id)"
-                    class="text-red-600 focus:text-red-600"
+                    class="text-destructive focus:text-destructive"
                   >
                     <Trash2 class="h-4 w-4 mr-2" />
                     Delete
@@ -131,8 +136,10 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
         <!-- Expense Categories Section -->
         <div v-if="categoriesStore.expenseCategories.length > 0">
           <div class="flex items-center gap-2 mb-2">
-            <TrendingDown class="h-4 w-4 text-orange-600" />
-            <h4 class="text-sm font-medium text-orange-600">Expense Categories</h4>
+            <TrendingDown class="h-4 w-4 text-[hsl(var(--vis-primary-color))]" />
+            <h4 class="text-sm font-medium text-[hsl(var(--vis-primary-color))]">
+              Expense Categories
+            </h4>
           </div>
           <div class="space-y-2">
             <div
@@ -142,12 +149,15 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
             >
               <div class="flex items-center space-x-3">
                 <div
-                  class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                  class="w-4 h-4 rounded-full border border-border flex-shrink-0"
                   :style="{
                     backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
                   }"
                 ></div>
-                <Badge variant="secondary" class="border-orange-200 bg-orange-50 text-orange-700">
+                <Badge
+                  variant="secondary"
+                  class="border-[hsl(var(--vis-primary-color))/0.3] bg-[hsl(var(--vis-primary-color))/0.1] text-[hsl(var(--vis-primary-color))]"
+                >
                   {{ category.name }}
                 </Badge>
               </div>
@@ -165,7 +175,7 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     @click="handleDeleteCategory(category.id)"
-                    class="text-red-600 focus:text-red-600"
+                    class="text-destructive focus:text-destructive"
                   >
                     <Trash2 class="h-4 w-4 mr-2" />
                     Delete

@@ -26,7 +26,10 @@ const chartData = computed(() => {
 // Chart configuration based on selected data type
 const chartCategories = computed((): (keyof SingleTrendDataPoint)[] => ['value'])
 const chartColors = computed(() => [
-  selectedDataType.value === TransactionType.INCOME ? '#059669' : '#dc2626',
+  // Use themed colors instead of hardcoded hex
+  selectedDataType.value === TransactionType.INCOME
+    ? 'hsl(var(--vis-secondary-color))'
+    : 'hsl(var(--vis-primary-color))',
 ])
 </script>
 

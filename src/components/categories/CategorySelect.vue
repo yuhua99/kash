@@ -53,7 +53,7 @@ const handleValueChange = (value: unknown) => {
         <SelectItem v-for="category in categories" :key="category.id" :value="category.name">
           <div class="flex items-center space-x-2">
             <div
-              class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+              class="w-3 h-3 rounded-full border border-border flex-shrink-0"
               :style="{
                 backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
               }"

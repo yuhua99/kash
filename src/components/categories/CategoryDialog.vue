@@ -136,7 +136,7 @@ const handleCancel = () => {
             id="category-name"
             v-model="categoryForm.name"
             placeholder="Enter category name"
-            :class="categoriesStore.error ? 'border-red-500' : ''"
+            :class="categoriesStore.error ? 'border-destructive' : ''"
           />
         </div>
 
@@ -159,7 +159,7 @@ const handleCancel = () => {
           </p>
         </div>
 
-        <p v-if="categoriesStore.error" class="text-sm text-red-500">
+        <p v-if="categoriesStore.error" class="text-sm text-destructive">
           {{ categoriesStore.error }}
         </p>
       </div>

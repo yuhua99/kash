@@ -139,7 +139,7 @@ onMounted(() => {
     <!-- Error State -->
     <div
       v-if="authStore.error || recordsStore.error || categoriesStore.error"
-      class="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded"
+      class="p-4 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded"
     >
       <p v-if="authStore.error">Authentication Error: {{ authStore.error }}</p>
       <p v-if="recordsStore.error">Records Error: {{ recordsStore.error }}</p>
@@ -147,11 +147,11 @@ onMounted(() => {
       <div class="mt-2 space-x-2">
         <button
           @click="(authStore.clearError(), recordsStore.clearError(), categoriesStore.clearError())"
-          class="text-red-700 underline text-sm"
+          class="text-destructive underline text-sm"
         >
           Dismiss
         </button>
-        <button @click="loadData" class="text-red-700 underline text-sm">Retry</button>
+        <button @click="loadData" class="text-destructive underline text-sm">Retry</button>
       </div>
     </div>
 
@@ -244,7 +244,7 @@ onMounted(() => {
         <Card>
           <CardContent class="p-4">
             <div class="text-sm text-muted-foreground">Income</div>
-            <div class="text-2xl font-bold text-green-600">
+            <div class="text-2xl font-bold text-[hsl(var(--vis-secondary-color))]">
               {{ formatSignedCurrency(filteredStats.totalIncome) }}
             </div>
           </CardContent>
@@ -252,7 +252,7 @@ onMounted(() => {
         <Card>
           <CardContent class="p-4">
             <div class="text-sm text-muted-foreground">Expenses</div>
-            <div class="text-2xl font-bold text-red-600">
+            <div class="text-2xl font-bold text-[hsl(var(--vis-primary-color))]">
               {{ formatSignedCurrency(-filteredStats.totalExpenses) }}
             </div>
           </CardContent>
@@ -262,7 +262,11 @@ onMounted(() => {
             <div class="text-sm text-muted-foreground">Net</div>
             <div
               class="text-2xl font-bold"
-              :class="filteredStats.netAmount >= 0 ? 'text-green-600' : 'text-red-600'"
+              :class="
+                filteredStats.netAmount >= 0
+                  ? 'text-[hsl(var(--vis-secondary-color))]'
+                  : 'text-[hsl(var(--vis-primary-color))]'
+              "
             >
               {{ formatSignedCurrency(filteredStats.netAmount) }}
             </div>

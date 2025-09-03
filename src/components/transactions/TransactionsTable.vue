@@ -80,7 +80,7 @@ const handleEditTransaction = (transaction: Transaction) => {
           <TableCell>
             <div class="flex items-center space-x-2">
               <div
-                class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                class="w-3 h-3 rounded-full border border-border flex-shrink-0"
                 :style="{
                   backgroundColor: categoriesStore.getCategoryColorByName(
                     transaction.category,
@@ -95,7 +95,12 @@ const handleEditTransaction = (transaction: Transaction) => {
           </TableCell>
           <TableCell class="text-right font-mono">
             <span
-              :class="['font-semibold', transaction.amount > 0 ? 'text-green-600' : 'text-red-600']"
+              :class="[
+                'font-semibold',
+                transaction.amount > 0
+                  ? 'text-[hsl(var(--vis-secondary-color))]'
+                  : 'text-[hsl(var(--vis-primary-color))]',
+              ]"
             >
               {{ formatSignedCurrency(transaction.amount) }}
             </span>
@@ -114,7 +119,7 @@ const handleEditTransaction = (transaction: Transaction) => {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  class="text-red-600 focus:text-red-600"
+                  class="text-destructive focus:text-destructive"
                   @click="$emit('deleteTransaction', transaction.id)"
                 >
                   <Trash2 class="h-4 w-4 mr-2" />

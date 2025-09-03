@@ -43,76 +43,85 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* Rose Pine Dawn (light) */
+  --background: #faf4ed; /* base */
+  --foreground: #464261; /* text */
+  --card: #fffaf3; /* surface */
+  --card-foreground: #464261; /* text */
+  --popover: #fffaf3; /* surface */
+  --popover-foreground: #464261; /* text */
+  --primary: #286983; /* pine */
+  --primary-foreground: #faf4ed; /* base */
+  --secondary: #f2e9e1; /* overlay */
+  --secondary-foreground: #464261; /* text */
+  --muted: #f4ede8; /* highlight_low */
+  --muted-foreground: #9893a5; /* muted */
+  --accent: #f4ede8; /* highlight_low */
+  --accent-foreground: #464261; /* text */
+  --destructive: #b4637a; /* love */
+  --destructive-foreground: #faf4ed; /* base */
+  --border: #cecacd; /* highlight_high */
+  --input: #cecacd; /* highlight_high */
+  --ring: #dfdad9; /* highlight_med */
+  --chart-1: #b4637a; /* love */
+  --chart-2: #ea9d34; /* gold */
+  --chart-3: #286983; /* pine */
+  --chart-4: #56949f; /* foam */
+  --chart-5: #907aa9; /* iris */
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --vis-text-color: var(--foreground);
+  --sidebar: #fffaf3; /* surface */
+  --sidebar-foreground: #464261; /* text */
+  --sidebar-primary: #286983; /* pine */
+  --sidebar-primary-foreground: #faf4ed; /* base */
+  --sidebar-accent: #f4ede8; /* highlight_low */
+  --sidebar-accent-foreground: #464261; /* text */
+  --sidebar-border: #cecacd; /* highlight_high */
+  --sidebar-ring: #dfdad9; /* highlight_med */
+  /* Rose Pine HSL triplets to drive Unovis colors */
+  --rp-primary-hsl: 197 53% 34%; /* pine */
+  --rp-secondary-hsl: 35 81% 56%; /* gold */
+  --rp-text-hsl: 248 19% 32%; /* dawn text */
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Rose Pine Moon (dark) */
+  --background: #232136; /* base */
+  --foreground: #e0def4; /* text */
+  --card: #2a273f; /* surface */
+  --card-foreground: #e0def4; /* text */
+  --popover: #2a273f; /* surface */
+  --popover-foreground: #e0def4; /* text */
+  --primary: #c4a7e7; /* iris */
+  --primary-foreground: #232136; /* base */
+  --secondary: #2a283e; /* highlight_low */
+  --secondary-foreground: #e0def4; /* text */
+  --muted: #44415a; /* highlight_med */
+  --muted-foreground: #908caa; /* subtle */
+  --accent: #2a283e; /* highlight_low */
+  --accent-foreground: #e0def4; /* text */
+  --destructive: #eb6f92; /* love */
+  --destructive-foreground: #232136; /* base */
+  --border: #56526e; /* highlight_high */
+  --input: #56526e; /* highlight_high */
+  --ring: #393552; /* overlay */
+  --chart-1: #eb6f92; /* love */
+  --chart-2: #f6c177; /* gold */
+  --chart-3: #3e8fb0; /* pine */
+  --chart-4: #9ccfd8; /* foam */
+  --chart-5: #c4a7e7; /* iris */
+  --sidebar: #232136; /* base */
+  --sidebar-foreground: #e0def4; /* text */
+  --sidebar-primary: #c4a7e7; /* iris */
+  --sidebar-primary-foreground: #232136; /* base */
+  --sidebar-accent: #2a283e; /* highlight_low */
+  --sidebar-accent-foreground: #e0def4; /* text */
+  --sidebar-border: #56526e; /* highlight_high */
+  --sidebar-ring: #393552; /* overlay */
   --vis-text-color: var(--foreground);
+  /* Rose Pine HSL triplets to drive Unovis colors */
+  --rp-primary-hsl: 267 57% 78%; /* iris */
+  --rp-secondary-hsl: 42 86% 67%; /* gold-ish */
+  --rp-text-hsl: 246 50% 91%; /* moon text */
 }
 
 @layer base {
@@ -132,10 +141,11 @@
     --vis-tooltip-border-radius: 0 !important;
     --vis-tooltip-box-shadow: none !important;
 
-    /* Optional Unovis color vars */
-    --vis-primary-color: var(--primary);
-    --vis-secondary-color: 160 81% 40%;
-    --vis-text-color: var(--muted-foreground);
+    /* Optional Unovis color vars (derived from Rose Pine) */
+    --vis-primary-color: var(--rp-primary-hsl);
+    --vis-secondary-color: var(--rp-secondary-hsl);
+    /* Axis labels (HSL triplets) */
+    --vis-text-color: var(--rp-text-hsl);
   }
   .dark {
     --vis-tooltip-background-color: transparent !important;
@@ -146,8 +156,8 @@
     --vis-tooltip-border-radius: 0 !important;
     --vis-tooltip-box-shadow: none !important;
 
-    --vis-primary-color: var(--primary);
-    --vis-secondary-color: 160 81% 40%;
-    --vis-text-color: var(--muted-foreground);
+    --vis-primary-color: var(--rp-primary-hsl);
+    --vis-secondary-color: var(--rp-secondary-hsl);
+    --vis-text-color: var(--rp-text-hsl);
   }
 }
