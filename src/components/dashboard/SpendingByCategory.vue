@@ -10,7 +10,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DonutChart } from '@/components/ui/chart-donut'
-import CategoryTooltip from './CategoryTooltip.vue'
 import { useCategories } from '@/composables/useCategories'
 import { useChartData } from '@/composables/useChartData'
 import { useTheme } from '@/composables/useTheme'
@@ -65,7 +64,6 @@ const donutValueFormatter = (tick: number) => {
             category="value"
             :colors="chartColors"
             :value-formatter="donutValueFormatter"
-            :custom-tooltip="CategoryTooltip"
             class="h-64 w-64"
           />
           <div

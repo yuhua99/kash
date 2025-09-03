@@ -6,7 +6,6 @@ import { BarChart } from '@/components/ui/chart-bar'
 import type { Transaction } from '@/types'
 import { TransactionType, DashboardPeriod } from '@/types'
 import { useChartData, type SingleTrendDataPoint } from '@/composables/useChartData'
-import TrendTooltip from './TrendTooltip.vue'
 
 interface Props {
   transactions: Transaction[]
@@ -54,7 +53,6 @@ const chartColors = computed(() => [
         :categories="chartCategories"
         :colors="chartColors"
         :show-legend="false"
-        :custom-tooltip="TrendTooltip"
         :rounded-corners="4"
         class="h-80"
       />

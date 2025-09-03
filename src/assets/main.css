@@ -77,14 +77,6 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --vis-text-color: var(--foreground);
-  /* Unovis tooltip container overrides to let our Card style dominate */
-  --vis-tooltip-background-color: transparent !important;
-  --vis-tooltip-border-color: transparent !important;
-  --vis-tooltip-text-color: var(--foreground) !important;
-  --vis-tooltip-backdrop-filter: none !important;
-  --vis-tooltip-padding: 0 !important;
-  --vis-tooltip-border-radius: 0 !important;
-  --vis-tooltip-box-shadow: none !important;
 }
 
 .dark {
@@ -121,14 +113,6 @@
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
   --vis-text-color: var(--foreground);
-  /* Unovis tooltip container overrides (dark) */
-  --vis-tooltip-background-color: transparent !important;
-  --vis-tooltip-border-color: transparent !important;
-  --vis-tooltip-text-color: var(--foreground) !important;
-  --vis-tooltip-backdrop-filter: none !important;
-  --vis-tooltip-padding: 0 !important;
-  --vis-tooltip-border-radius: 0 !important;
-  --vis-tooltip-box-shadow: none !important;
 }
 
 @layer base {
@@ -137,5 +121,33 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Unovis tooltip container overrides to match shadcn chart docs */
+  :root {
+    --vis-tooltip-background-color: transparent !important;
+    --vis-tooltip-border-color: transparent !important;
+    --vis-tooltip-text-color: var(--foreground) !important;
+    --vis-tooltip-backdrop-filter: none !important;
+    --vis-tooltip-padding: 0 !important;
+    --vis-tooltip-border-radius: 0 !important;
+    --vis-tooltip-box-shadow: none !important;
+
+    /* Optional Unovis color vars */
+    --vis-primary-color: var(--primary);
+    --vis-secondary-color: 160 81% 40%;
+    --vis-text-color: var(--muted-foreground);
+  }
+  .dark {
+    --vis-tooltip-background-color: transparent !important;
+    --vis-tooltip-border-color: transparent !important;
+    --vis-tooltip-text-color: var(--foreground) !important;
+    --vis-tooltip-backdrop-filter: none !important;
+    --vis-tooltip-padding: 0 !important;
+    --vis-tooltip-border-radius: 0 !important;
+    --vis-tooltip-box-shadow: none !important;
+
+    --vis-primary-color: var(--primary);
+    --vis-secondary-color: 160 81% 40%;
+    --vis-text-color: var(--muted-foreground);
   }
 }
