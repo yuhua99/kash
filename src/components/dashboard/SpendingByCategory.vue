@@ -22,9 +22,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { getCategoryColorByName } = useCategories()
-const { categorySpending, donutChartData } = useChartData(
-  toRef(props, 'transactions'),
-)
+const { categorySpending, donutChartData } = useChartData(toRef(props, 'transactions'))
 
 const { isDark: isDarkMode } = useTheme()
 
@@ -97,7 +95,7 @@ const donutValueFormatter = (tick: number) => {
                       :style="{
                         backgroundColor: getCategoryColorByName(item.category, isDarkMode),
                       }"
-                      ></div>
+                    ></div>
                     <span class="font-medium">{{ item.category }}</span>
                   </div>
                 </TableCell>

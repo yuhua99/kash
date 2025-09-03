@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
-import { Download, Plus } from 'lucide-vue-next'
+import { Plus } from 'lucide-vue-next'
 import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
 import type { Transaction } from '@/types'
 
@@ -10,7 +10,6 @@ interface Props {
 
 interface Emits {
   (e: 'add-transaction', transaction: Transaction): void
-  (e: 'export-transactions'): void
 }
 
 withDefaults(defineProps<Props>(), {
@@ -26,10 +25,6 @@ defineEmits<Emits>()
       <h1 class="text-2xl font-bold tracking-tight">{{ title }}</h1>
     </div>
     <div class="flex items-center gap-2">
-      <Button variant="outline" size="sm" @click="$emit('export-transactions')">
-        <Download class="h-4 w-4 mr-2" />
-        Export
-      </Button>
       <AddTransactionDialog @add-transaction="$emit('add-transaction', $event)">
         <Button size="sm">
           <Plus class="h-4 w-4 mr-2" />

@@ -126,11 +126,6 @@ const clearFilters = () => {
   selectedCategory.value = ''
 }
 
-// Export functionality (placeholder)
-const exportTransactions = () => {
-  console.log('Export functionality - TODO: implement CSV/PDF export')
-}
-
 onMounted(() => {
   loadData()
 })
@@ -139,10 +134,7 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
-    <TransactionHeader
-      @add-transaction="addTransaction"
-      @export-transactions="exportTransactions"
-    />
+    <TransactionHeader @add-transaction="addTransaction" />
 
     <!-- Error State -->
     <div
