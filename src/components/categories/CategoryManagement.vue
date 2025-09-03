@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge'
 import { MoreHorizontal, Edit, Trash2, Plus, TrendingUp, TrendingDown } from 'lucide-vue-next'
 import CategoryDialog from './CategoryDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
-import { useTheme } from '@/composables/useTheme'
 
 const categoriesStore = useCategoriesStore()
 
@@ -20,7 +19,6 @@ const editDialogCategory = ref<{ id: string; name: string; is_income: boolean } 
 const showEditDialog = ref(false)
 const showAddDialog = ref(false)
 
-const { isDark: isDarkMode } = useTheme()
 
 // Categories are loaded by parent component, no need to fetch here
 
@@ -98,7 +96,7 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
                 <div
                   class="w-4 h-4 rounded-full border border-border flex-shrink-0"
                   :style="{
-                    backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
+                    backgroundColor: categoriesStore.getCategoryColor(category.id),
                   }"
                 ></div>
                 <Badge
@@ -151,7 +149,7 @@ const onCategorySaved = (savedCategory: { id: string; name: string; is_income: b
                 <div
                   class="w-4 h-4 rounded-full border border-border flex-shrink-0"
                   :style="{
-                    backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
+                    backgroundColor: categoriesStore.getCategoryColor(category.id),
                   }"
                 ></div>
                 <Badge

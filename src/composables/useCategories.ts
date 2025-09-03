@@ -40,10 +40,7 @@ export function useCategories() {
 
   const getCategoryName = (id: string): string => store.getCategoryName(id)
   const getCategoryId = (name: string): string | null => store.getCategoryId(name)
-  const getCategoryColor = (id: string, isDarkMode = false): string =>
-    store.getCategoryColor(id, isDarkMode)
-  const getCategoryColorByName = (name: string, isDarkMode = false): string =>
-    store.getCategoryColorByName(name, isDarkMode)
+  const getCategoryColor = (id: string): string => store.getCategoryColor(id)
 
   return {
     // State
@@ -66,6 +63,5 @@ export function useCategories() {
     getCategoryName,
     getCategoryId,
     getCategoryColor,
-    getCategoryColorByName,
   }
 }

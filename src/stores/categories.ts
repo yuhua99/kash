@@ -46,15 +46,10 @@ export const useCategoriesStore = defineStore('categories', () => {
     return categoriesNameMap.value.get(categoryName) || null
   }
 
-  const getCategoryColor = (categoryId: string, isDarkMode = false): string => {
-    return getColorFromId(categoryId, isDarkMode)
+  const getCategoryColor = (categoryId: string): string => {
+    return getColorFromId(categoryId)
   }
 
-  const getCategoryColorByName = (categoryName: string, isDarkMode = false): string => {
-    const categoryId = getCategoryId(categoryName)
-    // Fallback to a muted theme color instead of hardcoded gray
-    return categoryId ? getColorFromId(categoryId, isDarkMode) : 'var(--muted)'
-  }
 
   const fetchCategories = async (): Promise<boolean> => {
     const data = await executeRequest(() => api.get<CategoriesResponse>('/categories'), {
@@ -110,7 +105,6 @@ export const useCategoriesStore = defineStore('categories', () => {
     getCategoryName,
     getCategoryId,
     getCategoryColor,
-    getCategoryColorByName,
     fetchCategories,
     createCategory,
     updateCategory,

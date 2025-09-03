@@ -1,25 +1,12 @@
-// Rose Pine palettes: dawn (light) and moon (dark)
-// Using accent hues for distinct category colors.
-// Dawn accents: love, gold, rose, pine, foam, iris, leaf
-const LIGHT_MODE_COLORS = [
-  '#b4637a', // love
-  '#ea9d34', // gold
-  '#d7827e', // rose
-  '#286983', // pine
-  '#56949f', // foam
-  '#907aa9', // iris
-  '#6d8f89', // leaf
-]
-
-// Moon accents: love, gold, rose, pine, foam, iris, leaf
-const DARK_MODE_COLORS = [
-  '#eb6f92', // love
-  '#f6c177', // gold
-  '#ea9a97', // rose
-  '#3e8fb0', // pine
-  '#9ccfd8', // foam
-  '#c4a7e7', // iris
-  '#95b1ac', // leaf
+// Rosé Pine palette via CSS variables.
+const RP_ACCENT_VARS: string[] = [
+  'var(--rp-love)',
+  'var(--rp-gold)',
+  'var(--rp-rose)',
+  'var(--rp-pine)',
+  'var(--rp-foam)',
+  'var(--rp-iris)',
+  'var(--rp-leaf)',
 ]
 
 function hashString(str: string): number {
@@ -32,9 +19,8 @@ function hashString(str: string): number {
   return Math.abs(hash)
 }
 
-export function getCategoryColor(categoryId: string, isDarkMode = false): string {
-  const colors = isDarkMode ? DARK_MODE_COLORS : LIGHT_MODE_COLORS
+export function getCategoryColor(categoryId: string): string {
   const hash = hashString(categoryId)
-  const index = hash % colors.length
-  return colors[index]
+  const index = hash % RP_ACCENT_VARS.length
+  return RP_ACCENT_VARS[index]
 }

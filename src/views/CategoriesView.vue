@@ -26,7 +26,6 @@ import { useAuthStore } from '@/stores/auth'
 import { useCategoriesStore } from '@/stores/categories'
 import { useRecordsStore } from '@/stores/records'
 import { formatCurrency, formatSignedCurrency } from '@/lib/formatters'
-import { useTheme } from '@/composables/useTheme'
 
 const authStore = useAuthStore()
 const categoriesStore = useCategoriesStore()
@@ -38,8 +37,6 @@ const searchQuery = ref('')
 const isLoading = computed(
   () => authStore.isLoading || categoriesStore.isLoading || recordsStore.isLoading,
 )
-
-const { isDark: isDarkMode } = useTheme()
 
 // Filter categories based on search
 const filteredCategories = computed(() => {
@@ -231,7 +228,7 @@ onMounted(() => {
                   <div
                     class="w-4 h-4 rounded-full border border-border flex-shrink-0"
                     :style="{
-                      backgroundColor: categoriesStore.getCategoryColor(category.id, isDarkMode),
+                      backgroundColor: categoriesStore.getCategoryColor(category.id),
                     }"
                   ></div>
                   <Badge variant="secondary">{{ category.name }}</Badge>
@@ -288,7 +285,7 @@ onMounted(() => {
                       <div
                         class="w-3 h-3 rounded-full flex-shrink-0"
                         :style="{
-                          backgroundColor: categoriesStore.getCategoryColor(stat.id, isDarkMode),
+                          backgroundColor: categoriesStore.getCategoryColor(stat.id),
                         }"
                       ></div>
                       <span class="font-medium text-sm">{{ stat.name }}</span>

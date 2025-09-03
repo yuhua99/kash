@@ -12,7 +12,6 @@ import {
 import { DonutChart } from '@/components/ui/chart-donut'
 import { useCategories } from '@/composables/useCategories'
 import { useChartData } from '@/composables/useChartData'
-import { useTheme } from '@/composables/useTheme'
 import type { Transaction } from '@/types'
 import { formatCurrency, formatPercent } from '@/lib/formatters'
 
@@ -21,13 +20,14 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const { getCategoryColorByName } = useCategories()
+const { getCategoryColor, getCategoryId } = useCategories()
 const { categorySpending, donutChartData } = useChartData(toRef(props, 'transactions'))
 
-const { isDark: isDarkMode } = useTheme()
-
 const chartColors = computed(() => {
-  return donutChartData.value.map((item) => getCategoryColorByName(item.name, isDarkMode.value))
+  return donutChartData.value.map((item) => {
+    const id = getCategoryId(item.name)
+    return id ? getCategoryColor(id) : 'var(--muted)'
+  })
 })
 
 // Value formatter resilient to Unovis tooltip passing label strings
@@ -93,7 +93,9 @@ const donutValueFormatter = (tick: number) => {
                     <div
                       class="w-3 h-3 rounded-full flex-shrink-0"
                       :style="{
-                        backgroundColor: getCategoryColorByName(item.category, isDarkMode),
+                        backgroundColor: (getCategoryId(item.category)
+                          ? getCategoryColor(getCategoryId(item.category)!)
+                          : 'var(--muted)') as string,
                       }"
                     ></div>
                     <span class="font-medium">{{ item.category }}</span>

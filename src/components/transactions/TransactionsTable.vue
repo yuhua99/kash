@@ -20,7 +20,6 @@ import {
 import { Edit, Trash2, MoreHorizontal } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
 import { useCategoriesStore } from '@/stores/categories'
-import { useTheme } from '@/composables/useTheme'
 import { formatDate } from '@/lib/formatters'
 import type { Transaction } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
@@ -40,7 +39,6 @@ const categoriesStore = useCategoriesStore()
 
 const editDialogOpen = ref(false)
 const editingTransaction = ref<Transaction | null>(null)
-const { isDark: isDarkMode } = useTheme()
 
 const openEditDialog = (transaction: Transaction) => {
   editingTransaction.value = transaction
@@ -82,10 +80,11 @@ const handleEditTransaction = (transaction: Transaction) => {
               <div
                 class="w-3 h-3 rounded-full border border-border flex-shrink-0"
                 :style="{
-                  backgroundColor: categoriesStore.getCategoryColorByName(
-                    transaction.category,
-                    isDarkMode,
-                  ),
+                  backgroundColor: (categoriesStore.getCategoryId(transaction.category)
+                    ? categoriesStore.getCategoryColor(
+                        categoriesStore.getCategoryId(transaction.category) as string,
+                      )
+                    : 'var(--muted)') as string,
                 }"
               ></div>
               <Badge variant="secondary">
