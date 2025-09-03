@@ -115,16 +115,13 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
 
     <!-- Loading State -->
     <div v-if="isLoading" class="space-y-8">
-      <!-- Dashboard Header Skeleton -->
+      <!-- Dashboard Header Skeleton (title + single period select) -->
       <div class="flex items-center justify-between">
         <div>
-          <Skeleton class="h-8 w-64 mb-2" />
-          <Skeleton class="h-4 w-48" />
+          <Skeleton class="h-8 w-64" />
         </div>
         <div class="flex items-center gap-4">
-          <Skeleton class="h-10 w-64" />
           <Skeleton class="h-10 w-48" />
-          <Skeleton class="h-10 w-40" />
         </div>
       </div>
 
@@ -136,7 +133,7 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
             <Skeleton class="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <Skeleton class="h-8 w-20 mb-1" />
+            <Skeleton class="h-8 w-24 mb-1" />
             <Skeleton class="h-3 w-32" />
           </CardContent>
         </Card>
@@ -144,24 +141,36 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
 
       <Separator />
 
-      <!-- Transactions Table Skeleton -->
-      <Card>
-        <CardHeader>
-          <Skeleton class="h-6 w-32 mb-2" />
-          <Skeleton class="h-4 w-48" />
-        </CardHeader>
-        <CardContent>
-          <div class="space-y-4">
-            <div v-for="i in 5" :key="i" class="flex items-center space-x-4">
-              <Skeleton class="h-4 w-20" />
+      <!-- Charts Grid Skeleton (Trend + Spending by Category) -->
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div class="col-span-4">
+          <Card>
+            <CardHeader>
+              <Skeleton class="h-6 w-40 mb-2" />
+              <Skeleton class="h-4 w-64" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton class="h-64 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+        <div class="col-span-3">
+          <Card>
+            <CardHeader>
+              <Skeleton class="h-6 w-56 mb-2" />
               <Skeleton class="h-4 w-40" />
-              <Skeleton class="h-4 w-24" />
-              <Skeleton class="h-4 w-16" />
-              <Skeleton class="h-4 w-8" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent>
+              <div class="space-y-3">
+                <div v-for="i in 6" :key="i" class="flex items-center gap-3">
+                  <Skeleton class="h-3 w-24" />
+                  <Skeleton class="h-3 w-16 ml-auto" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
 
     <!-- Main Content -->

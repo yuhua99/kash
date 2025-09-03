@@ -157,6 +157,26 @@ onMounted(() => {
 
     <!-- Loading State -->
     <div v-if="isLoading" class="space-y-6">
+      <!-- Search and Filters Skeleton -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <Skeleton class="h-10 w-full" />
+        </div>
+        <Skeleton class="h-10 w-[180px]" />
+        <Skeleton class="h-10 w-24" />
+      </div>
+
+      <!-- Filtered Stats Summary Skeleton -->
+      <div class="grid gap-4 md:grid-cols-4">
+        <Card v-for="i in 4" :key="i">
+          <CardContent class="p-4 space-y-2">
+            <Skeleton class="h-4 w-24" />
+            <Skeleton class="h-6 w-20" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Transactions Table Skeleton -->
       <Card>
         <CardHeader>
           <Skeleton class="h-6 w-32 mb-2" />
