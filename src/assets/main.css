@@ -43,82 +43,91 @@
 }
 
 :root {
-  /* Rose Pine Dawn (light) */
-  --background: #faf4ed; /* base */
-  --foreground: #464261; /* text */
-  --card: #fffaf3; /* surface */
-  --card-foreground: #464261; /* text */
-  --popover: #fffaf3; /* surface */
-  --popover-foreground: #464261; /* text */
-  --primary: #286983; /* pine */
-  --primary-foreground: #faf4ed; /* base */
-  --secondary: #f2e9e1; /* overlay */
-  --secondary-foreground: #464261; /* text */
-  --muted: #f4ede8; /* highlight_low */
-  --muted-foreground: #9893a5; /* muted */
-  --accent: #f4ede8; /* highlight_low */
-  --accent-foreground: #464261; /* text */
-  --destructive: #b4637a; /* love */
-  --destructive-foreground: #faf4ed; /* base */
-  --border: #cecacd; /* highlight_high */
-  --input: #cecacd; /* highlight_high */
-  --ring: #dfdad9; /* highlight_med */
-  --chart-1: #b4637a; /* love */
-  --chart-2: #ea9d34; /* gold */
-  --chart-3: #286983; /* pine */
-  --chart-4: #56949f; /* foam */
-  --chart-5: #907aa9; /* iris */
+  /* Rosé Pine palette variables (Dawn).
+     Define palette once, then map app vars to these tokens for readability. */
+  --rp-_nc: #f8f0e7;
+  --rp-base: #faf4ed;
+  --rp-surface: #fffaf3;
+  --rp-overlay: #f2e9e1;
+  --rp-muted: #9893a5;
+  --rp-subtle: #797593;
+  --rp-text: #464261;
+  --rp-love: #b4637a;
+  --rp-gold: #ea9d34;
+  --rp-rose: #d7827e;
+  --rp-pine: #286983;
+  --rp-foam: #56949f;
+  --rp-iris: #907aa9;
+  --rp-leaf: #6d8f89;
+  --rp-highlight-low: #f4ede8;
+  --rp-highlight-med: #dfdad9;
+  --rp-highlight-high: #cecacd;
+
+  /* Map app theme variables to Rosé Pine (Dawn) */
+  --background: var(--rp-base);
+  --foreground: var(--rp-text);
+  --card: var(--rp-surface);
+  --card-foreground: var(--rp-text);
+  --popover: var(--rp-surface);
+  --popover-foreground: var(--rp-text);
+  --primary: var(--rp-pine);
+  --primary-foreground: var(--rp-base);
+  --secondary: var(--rp-overlay);
+  --secondary-foreground: var(--rp-text);
+  --muted: var(--rp-highlight-low);
+  --muted-foreground: var(--rp-muted);
+  --accent: var(--rp-highlight-low);
+  --accent-foreground: var(--rp-text);
+  --destructive: var(--rp-love);
+  --destructive-foreground: var(--rp-base);
+  --border: var(--rp-highlight-high);
+  --input: var(--rp-highlight-high);
+  --ring: var(--rp-highlight-med);
+  --chart-1: var(--rp-love);
+  --chart-2: var(--rp-gold);
+  --chart-3: var(--rp-pine);
+  --chart-4: var(--rp-foam);
+  --chart-5: var(--rp-iris);
   --radius: 0.625rem;
-  --sidebar: #fffaf3; /* surface */
-  --sidebar-foreground: #464261; /* text */
-  --sidebar-primary: #286983; /* pine */
-  --sidebar-primary-foreground: #faf4ed; /* base */
-  --sidebar-accent: #f4ede8; /* highlight_low */
-  --sidebar-accent-foreground: #464261; /* text */
-  --sidebar-border: #cecacd; /* highlight_high */
-  --sidebar-ring: #dfdad9; /* highlight_med */
-  /* Rose Pine HSL triplets to drive Unovis colors */
+  --sidebar: var(--rp-surface);
+  --sidebar-foreground: var(--rp-text);
+  --sidebar-primary: var(--rp-pine);
+  --sidebar-primary-foreground: var(--rp-base);
+  --sidebar-accent: var(--rp-highlight-low);
+  --sidebar-accent-foreground: var(--rp-text);
+  --sidebar-border: var(--rp-highlight-high);
+  --sidebar-ring: var(--rp-highlight-med);
+
+  /* Rosé Pine HSL triplets to drive Unovis colors (Dawn) */
   --rp-primary-hsl: 197 53% 34%; /* pine */
   --rp-secondary-hsl: 35 81% 56%; /* gold */
   --rp-text-hsl: 248 19% 32%; /* dawn text */
 }
 
 .dark {
-  /* Rose Pine Moon (dark) */
-  --background: #232136; /* base */
-  --foreground: #e0def4; /* text */
-  --card: #2a273f; /* surface */
-  --card-foreground: #e0def4; /* text */
-  --popover: #2a273f; /* surface */
-  --popover-foreground: #e0def4; /* text */
-  --primary: #c4a7e7; /* iris */
-  --primary-foreground: #232136; /* base */
-  --secondary: #2a283e; /* highlight_low */
-  --secondary-foreground: #e0def4; /* text */
-  --muted: #44415a; /* highlight_med */
-  --muted-foreground: #908caa; /* subtle */
-  --accent: #2a283e; /* highlight_low */
-  --accent-foreground: #e0def4; /* text */
-  --destructive: #eb6f92; /* love */
-  --destructive-foreground: #232136; /* base */
-  --border: #56526e; /* highlight_high */
-  --input: #56526e; /* highlight_high */
-  --ring: #393552; /* overlay */
-  --chart-1: #eb6f92; /* love */
-  --chart-2: #f6c177; /* gold */
-  --chart-3: #3e8fb0; /* pine */
-  --chart-4: #9ccfd8; /* foam */
-  --chart-5: #c4a7e7; /* iris */
-  --sidebar: #232136; /* base */
-  --sidebar-foreground: #e0def4; /* text */
-  --sidebar-primary: #c4a7e7; /* iris */
-  --sidebar-primary-foreground: #232136; /* base */
-  --sidebar-accent: #2a283e; /* highlight_low */
-  --sidebar-accent-foreground: #e0def4; /* text */
-  --sidebar-border: #56526e; /* highlight_high */
-  --sidebar-ring: #393552; /* overlay */
+  /* Rosé Pine palette overrides (Moon) */
+  --rp-_nc: #1f1d30;
+  --rp-base: #232136;
+  --rp-surface: #2a273f;
+  --rp-overlay: #393552;
+  --rp-muted: #6e6a86;
+  --rp-subtle: #908caa;
+  --rp-text: #e0def4;
+  --rp-love: #eb6f92;
+  --rp-gold: #f6c177;
+  --rp-rose: #ea9a97;
+  --rp-pine: #3e8fb0;
+  --rp-foam: #9ccfd8;
+  --rp-iris: #c4a7e7;
+  --rp-leaf: #95b1ac;
+  --rp-highlight-low: #2a283e;
+  --rp-highlight-med: #44415a;
+  --rp-highlight-high: #56526e;
+
+  /* Variables below still reference mapped tokens */
   --vis-text-color: var(--foreground);
-  /* Rose Pine HSL triplets to drive Unovis colors */
+
+  /* Rosé Pine HSL triplets to drive Unovis colors (Moon) */
   --rp-primary-hsl: 267 57% 78%; /* iris */
   --rp-secondary-hsl: 42 86% 67%; /* gold-ish */
   --rp-text-hsl: 246 50% 91%; /* moon text */
