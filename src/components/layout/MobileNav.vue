@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetDescription,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Menu, Home, List, Folder, Info } from 'lucide-vue-next'
 
@@ -24,6 +31,7 @@ const navigation = [
         <div class="p-4 border-b">
           <SheetHeader>
             <SheetTitle class="text-lg">My Budget</SheetTitle>
+            <SheetDescription class="sr-only">Main navigation menu</SheetDescription>
           </SheetHeader>
         </div>
         <nav class="p-2">
@@ -48,4 +56,3 @@ const navigation = [
     </div>
   </div>
 </template>
-
