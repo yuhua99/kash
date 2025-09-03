@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BarChart } from '@/components/ui/chart-bar'
 import type { Transaction } from '@/types'
 import { TransactionType, DashboardPeriod } from '@/types'
-import { useChartData, type SingleTrendDataPoint } from '@/composables/useChartData'
+import { useChartData } from '@/composables/useChartData'
 
 interface Props {
   transactions: Transaction[]
@@ -24,7 +24,6 @@ const chartData = computed(() => {
 })
 
 // Chart configuration based on selected data type
-const chartCategories = computed((): (keyof SingleTrendDataPoint)[] => ['value'])
 const chartColors = computed(() => [
   // Use themed colors instead of hardcoded hex
   selectedDataType.value === TransactionType.INCOME
@@ -53,7 +52,7 @@ const chartColors = computed(() => [
       <BarChart
         :data="chartData"
         index="period"
-        :categories="chartCategories"
+        :categories="['value']"
         :colors="chartColors"
         :show-legend="false"
         :rounded-corners="4"

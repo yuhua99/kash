@@ -1,40 +1,17 @@
 import { computed, type Ref } from 'vue'
 import type { Transaction } from '@/types'
 import { TransactionType, DashboardPeriod } from '@/types'
-import { formatCurrency, formatPercent } from '@/lib/formatters'
 
-export interface ChartDataPoint {
-  name: string
-  value: number
-}
-
-export interface CategorySpendingData {
-  category: string
-  amount: number
-  percentage: number
-}
-
-export interface TrendDataPoint {
-  period: string
-  income: number
-  expenses: number
-}
-
-export interface SingleTrendDataPoint {
-  period: string
-  value: number
-}
-
-export enum TrendPeriod {
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-}
+// Internal types
+type ChartDataPoint = { name: string; value: number }
+type CategorySpendingData = { category: string; amount: number; percentage: number }
+type TrendDataPoint = { period: string; income: number; expenses: number }
 
 // Constants
 const WEEKS_IN_HALF_YEAR = 26
 const MONTHS_IN_YEAR = 12
 const DAYS_PER_WEEK = 7
+const SEC_PER_DAY = 86400
 
 // Date utilities
 const formatMonthDay = (timestamp: number): string => {
@@ -47,10 +24,22 @@ const formatMonthLabel = (timestamp: number): string => {
   const date = new Date(timestamp * 1000)
   return date.toLocaleDateString('en-US', { month: 'short' })
 }
-const getStartOfDay = (timestamp: number): number => {
-  const date = new Date(timestamp * 1000)
-  date.setHours(0, 0, 0, 0)
-  return Math.floor(date.getTime() / 1000)
+const startOfDay = (timestamp: number): number => {
+  const d = new Date(timestamp * 1000)
+  d.setHours(0, 0, 0, 0)
+  return Math.floor(d.getTime() / 1000)
+}
+const startOfWeekSunday = (timestamp: number): number => {
+  const d = new Date(timestamp * 1000)
+  const day = d.getDay() // Sunday=0
+  d.setDate(d.getDate() - day)
+  d.setHours(0, 0, 0, 0)
+  return Math.floor(d.getTime() / 1000)
+}
+const startOfMonth = (timestamp: number): number => {
+  const d = new Date(timestamp * 1000)
+  const m = new Date(d.getFullYear(), d.getMonth(), 1)
+  return Math.floor(m.getTime() / 1000)
 }
 
 /**
@@ -90,16 +79,6 @@ export function useChartData(transactions: Ref<Transaction[]>) {
       value: item.amount,
     }))
   })
-
-  /**
-   * Format currency values for charts
-   */
-  const currencyFormatter = (value: number): string => formatCurrency(value)
-
-  /**
-   * Format percentage values for charts
-   */
-  const percentageFormatter = (value: number): string => formatPercent(value)
 
   /**
    * Get timestamp range based on dashboard period
@@ -146,171 +125,105 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   }
 
   /**
-   * Generate trend data for different periods
+   * Build buckets for the given period
    */
-  const getTrendData = (dashboardPeriod: DashboardPeriod): TrendDataPoint[] => {
-    const filteredTransactions = filterTransactionsByPeriod(dashboardPeriod)
-    const trendPeriod: TrendPeriod =
-      dashboardPeriod === DashboardPeriod.THIS_MONTH
-        ? TrendPeriod.DAILY
-        : dashboardPeriod === DashboardPeriod.THIS_HALF_YEAR
-          ? TrendPeriod.WEEKLY
-          : TrendPeriod.MONTHLY
+  const buildBuckets = (
+    dashboardPeriod: DashboardPeriod,
+  ): Array<{ start: number; end: number; label: string; key: number }> => {
+    const now = new Date()
 
-    if (trendPeriod === TrendPeriod.DAILY) {
-      return getDailyTrendData(filteredTransactions)
-    } else if (trendPeriod === TrendPeriod.WEEKLY) {
-      return getWeeklyTrendData(filteredTransactions)
-    } else {
-      return getMonthlyTrendData(filteredTransactions)
+    if (dashboardPeriod === DashboardPeriod.THIS_MONTH) {
+      const year = now.getFullYear()
+      const month = now.getMonth()
+      const daysInMonth = new Date(year, month + 1, 0).getDate()
+      const buckets: Array<{ start: number; end: number; label: string; key: number }> = []
+      for (let day = 1; day <= daysInMonth; day++) {
+        const start = Math.floor(new Date(year, month, day).getTime() / 1000)
+        const end = start + SEC_PER_DAY - 1
+        buckets.push({ start, end, label: formatMonthDay(start), key: start })
+      }
+      return buckets
     }
+
+    if (dashboardPeriod === DashboardPeriod.THIS_HALF_YEAR) {
+      const buckets: Array<{ start: number; end: number; label: string; key: number }> = []
+      const todayTs = Math.floor(now.getTime() / 1000)
+      const startOfThisWeek = startOfWeekSunday(todayTs)
+      for (let i = WEEKS_IN_HALF_YEAR - 1; i >= 0; i--) {
+        const start = startOfThisWeek - i * DAYS_PER_WEEK * SEC_PER_DAY
+        const end = start + DAYS_PER_WEEK * SEC_PER_DAY - 1
+        buckets.push({ start, end, label: formatMonthDay(start), key: start })
+      }
+      return buckets
+    }
+
+    // THIS_YEAR
+    const buckets: Array<{ start: number; end: number; label: string; key: number }> = []
+    const year = now.getFullYear()
+    for (let m = 0; m < MONTHS_IN_YEAR; m++) {
+      const startDate = new Date(year, m, 1)
+      const nextMonth = new Date(year, m + 1, 1)
+      const start = Math.floor(startDate.getTime() / 1000)
+      const end = Math.floor(nextMonth.getTime() / 1000) - 1
+      buckets.push({ start, end, label: formatMonthLabel(start), key: start })
+    }
+    return buckets
   }
 
   /**
-   * Generate daily trend data for current month
+   * Aggregate transactions into buckets efficiently
    */
-  const getDailyTrendData = (transactions: Transaction[]): TrendDataPoint[] => {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth()
-    const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const aggregateIntoBuckets = (
+    txs: Transaction[],
+    dashboardPeriod: DashboardPeriod,
+  ): TrendDataPoint[] => {
+    const buckets = buildBuckets(dashboardPeriod)
+    const indexByKey = new Map<number, number>(buckets.map((b, i) => [b.key, i]))
+    const totals = buckets.map(() => ({ income: 0, expenses: 0 }))
 
-    const dailyMap = new Map<number, { income: number; expenses: number }>()
+    for (const t of txs) {
+      if (!t.timestamp || typeof t.amount !== 'number' || !t.type) continue
 
-    // Initialize all days in month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dayStart = Math.floor(new Date(year, month, day).getTime() / 1000)
-      dailyMap.set(dayStart, { income: 0, expenses: 0 })
+      let key: number
+      if (dashboardPeriod === DashboardPeriod.THIS_MONTH) {
+        key = startOfDay(t.timestamp)
+      } else if (dashboardPeriod === DashboardPeriod.THIS_HALF_YEAR) {
+        key = startOfWeekSunday(t.timestamp)
+      } else {
+        key = startOfMonth(t.timestamp)
+      }
+
+      const idx = indexByKey.get(key)
+      if (idx === undefined) continue
+
+      if (t.type === TransactionType.INCOME) {
+        totals[idx].income += t.amount
+      } else if (t.type === TransactionType.EXPENSE) {
+        totals[idx].expenses += Math.abs(t.amount)
+      }
     }
 
-    // Aggregate transactions by day
-    transactions.forEach((transaction) => {
-      if (!transaction.timestamp || typeof transaction.amount !== 'number' || !transaction.type)
-        return
-
-      const dayStart = getStartOfDay(transaction.timestamp)
-      const data = dailyMap.get(dayStart)
-      if (data) {
-        if (transaction.type === TransactionType.INCOME) {
-          data.income += transaction.amount
-        } else {
-          data.expenses += Math.abs(transaction.amount)
-        }
-      }
-    })
-
-    return Array.from(dailyMap.entries()).map(([timestamp, data]) => ({
-      period: formatMonthDay(timestamp),
-      income: data.income,
-      expenses: data.expenses,
+    return buckets.map((b, i) => ({
+      period: b.label,
+      income: totals[i].income,
+      expenses: totals[i].expenses,
     }))
   }
 
   /**
-   * Generate weekly trend data for last 26 weeks
+   * Generate trend data (both income and expenses)
    */
-  const getWeeklyTrendData = (transactions: Transaction[]): TrendDataPoint[] => {
-    const weeks: Array<{ label: string; start: number; end: number }> = []
-    const today = new Date()
-
-    // Generate last N weeks
-    for (let i = WEEKS_IN_HALF_YEAR - 1; i >= 0; i--) {
-      const weekStart = new Date(today)
-      weekStart.setDate(weekStart.getDate() - i * DAYS_PER_WEEK - today.getDay())
-      weekStart.setHours(0, 0, 0, 0)
-      const weekEnd = new Date(weekStart)
-      weekEnd.setDate(weekStart.getDate() + DAYS_PER_WEEK - 1)
-      weekEnd.setHours(23, 59, 59, 999)
-
-      const startTimestamp = Math.floor(weekStart.getTime() / 1000)
-      const endTimestamp = Math.floor(weekEnd.getTime() / 1000)
-
-      weeks.push({
-        label: formatMonthDay(startTimestamp),
-        start: startTimestamp,
-        end: endTimestamp,
-      })
-    }
-
-    return weeks.map((week) => {
-      const weekTransactions = transactions.filter(
-        (t) => t.timestamp && t.timestamp >= week.start && t.timestamp <= week.end,
-      )
-
-      const income = weekTransactions
-        .filter((t) => t.type === TransactionType.INCOME && typeof t.amount === 'number')
-        .reduce((sum, t) => sum + t.amount, 0)
-
-      const expenses = weekTransactions
-        .filter((t) => t.type === TransactionType.EXPENSE && typeof t.amount === 'number')
-        .reduce((sum, t) => sum + Math.abs(t.amount), 0)
-
-      return {
-        period: week.label,
-        income,
-        expenses,
-      }
-    })
+  const getTrendData = (dashboardPeriod: DashboardPeriod): TrendDataPoint[] => {
+    const filtered = filterTransactionsByPeriod(dashboardPeriod)
+    return aggregateIntoBuckets(filtered, dashboardPeriod)
   }
 
   /**
-   * Generate monthly trend data for last 12 months
+   * Transform trend data for a single TransactionType using enums
    */
-  const getMonthlyTrendData = (transactions: Transaction[]): TrendDataPoint[] => {
-    const monthlyMap = new Map<number, { income: number; expenses: number }>()
-    const months: Array<{ timestamp: number; label: string }> = []
-    const today = new Date()
-
-    // Generate current year months (January to December)
-    for (let month = 0; month < MONTHS_IN_YEAR; month++) {
-      const monthStart = new Date(today.getFullYear(), month, 1)
-      const monthTimestamp = Math.floor(monthStart.getTime() / 1000)
-      const monthLabel = formatMonthLabel(monthTimestamp)
-
-      months.push({ timestamp: monthTimestamp, label: monthLabel })
-      monthlyMap.set(monthTimestamp, { income: 0, expenses: 0 })
-    }
-
-    // Aggregate transactions by month
-    transactions.forEach((transaction) => {
-      if (!transaction.timestamp || typeof transaction.amount !== 'number' || !transaction.type)
-        return
-
-      // Get month start timestamp for grouping
-      const transactionDate = new Date(transaction.timestamp * 1000)
-      const monthStart = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), 1)
-      const monthTimestamp = Math.floor(monthStart.getTime() / 1000)
-      const data = monthlyMap.get(monthTimestamp)
-
-      if (data) {
-        if (transaction.type === TransactionType.INCOME) {
-          data.income += transaction.amount
-        } else {
-          data.expenses += Math.abs(transaction.amount)
-        }
-      }
-    })
-
-    return months.map(({ timestamp, label }) => {
-      const data = monthlyMap.get(timestamp) || { income: 0, expenses: 0 }
-      return {
-        period: label,
-        income: data.income,
-        expenses: data.expenses,
-      }
-    })
-  }
-
-  /**
-   * Transform trend data for single data type charts
-   */
-  const getSingleTrendData = (
-    dashboardPeriod: DashboardPeriod,
-    dataType: TransactionType,
-  ): SingleTrendDataPoint[] => {
-    const trendData = getTrendData(dashboardPeriod)
-
-    return trendData.map((item) => ({
+  const getSingleTrendData = (dashboardPeriod: DashboardPeriod, dataType: TransactionType) => {
+    const trend = getTrendData(dashboardPeriod)
+    return trend.map((item) => ({
       period: item.period,
       value: dataType === TransactionType.INCOME ? item.income : item.expenses,
     }))
@@ -324,10 +237,6 @@ export function useChartData(transactions: Ref<Transaction[]>) {
     // Trend data functions
     getTrendData,
     getSingleTrendData,
-
-    // Formatters
-    currencyFormatter,
-    percentageFormatter,
 
     // Utilities
     filterTransactionsByPeriod,
