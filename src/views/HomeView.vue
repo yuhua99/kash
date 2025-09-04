@@ -188,13 +188,13 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
         />
 
         <!-- Charts and Analysis -->
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <div class="col-span-4">
-            <TrendDisplay :transactions="sortedTransactions" :period="selectedPeriod" />
-          </div>
-          <div class="col-span-3">
-            <SpendingByCategory :transactions="periodTransactions" />
-          </div>
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+          <TrendDisplay
+            class="lg:col-span-4"
+            :transactions="sortedTransactions"
+            :period="selectedPeriod"
+          />
+          <SpendingByCategory class="lg:col-span-3" :transactions="periodTransactions" />
         </div>
       </div>
 
