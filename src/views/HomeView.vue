@@ -126,7 +126,7 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
       </div>
 
       <!-- Stats Cards Skeleton -->
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card v-for="i in 4" :key="i">
           <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
             <Skeleton class="h-4 w-24" />
@@ -142,34 +142,30 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
       <Separator />
 
       <!-- Charts Grid Skeleton (Trend + Spending by Category) -->
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <div class="col-span-4">
-          <Card>
-            <CardHeader>
-              <Skeleton class="h-6 w-40 mb-2" />
-              <Skeleton class="h-4 w-64" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton class="h-64 w-full" />
-            </CardContent>
-          </Card>
-        </div>
-        <div class="col-span-3">
-          <Card>
-            <CardHeader>
-              <Skeleton class="h-6 w-56 mb-2" />
-              <Skeleton class="h-4 w-40" />
-            </CardHeader>
-            <CardContent>
-              <div class="space-y-3">
-                <div v-for="i in 6" :key="i" class="flex items-center gap-3">
-                  <Skeleton class="h-3 w-24" />
-                  <Skeleton class="h-3 w-16 ml-auto" />
-                </div>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card class="lg:col-span-4">
+          <CardHeader>
+            <Skeleton class="h-6 w-40 mb-2" />
+            <Skeleton class="h-4 w-64" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton class="h-64 w-full" />
+          </CardContent>
+        </Card>
+        <Card class="lg:col-span-3">
+          <CardHeader>
+            <Skeleton class="h-6 w-56 mb-2" />
+            <Skeleton class="h-4 w-40" />
+          </CardHeader>
+          <CardContent>
+            <div class="space-y-3">
+              <div v-for="i in 6" :key="i" class="flex items-center gap-3">
+                <Skeleton class="h-3 w-24" />
+                <Skeleton class="h-3 w-16 ml-auto" />
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
 
@@ -178,24 +174,21 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
       <!-- Dashboard Header -->
       <DashboardHeader @period-change="handlePeriodChange" />
 
-      <!-- Dashboard Overview -->
-      <div class="space-y-8">
-        <!-- Summary Cards -->
-        <StatsCards
-          :monthly-income="periodIncome"
-          :monthly-expenses="periodExpenses"
-          :savings-rate="periodSavingsRate"
-        />
+      <!-- Summary Cards -->
+      <StatsCards
+        :monthly-income="periodIncome"
+        :monthly-expenses="periodExpenses"
+        :savings-rate="periodSavingsRate"
+      />
 
-        <!-- Charts and Analysis -->
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-          <TrendDisplay
-            class="lg:col-span-4"
-            :transactions="sortedTransactions"
-            :period="selectedPeriod"
-          />
-          <SpendingByCategory class="lg:col-span-3" :transactions="periodTransactions" />
-        </div>
+      <!-- Charts and Analysis -->
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <TrendDisplay
+          class="lg:col-span-4"
+          :transactions="sortedTransactions"
+          :period="selectedPeriod"
+        />
+        <SpendingByCategory class="lg:col-span-3" :transactions="periodTransactions" />
       </div>
 
       <!-- Quick Add Floating Button -->
