@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
               </div>
             </div>
             <div
-              class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
+              class="mt-2 flex flex-wrap items-center justify-between text-xs text-muted-foreground"
             >
               <div class="flex items-center gap-1">
                 <Calendar class="h-3 w-3" />
