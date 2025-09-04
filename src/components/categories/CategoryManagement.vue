@@ -19,7 +19,6 @@ const editDialogCategory = ref<{ id: string; name: string; is_income: boolean } 
 const showEditDialog = ref(false)
 const showAddDialog = ref(false)
 
-
 // Categories are loaded by parent component, no need to fetch here
 
 const handleEditCategory = (category: { id: string; name: string; is_income: boolean }) => {

@@ -50,7 +50,6 @@ export const useCategoriesStore = defineStore('categories', () => {
     return getColorFromId(categoryId)
   }
 
-
   const fetchCategories = async (): Promise<boolean> => {
     const data = await executeRequest(() => api.get<CategoriesResponse>('/categories'), {
       onSuccess: (response) => {

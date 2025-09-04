@@ -16,11 +16,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://budget-api.60009000.xyz',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 })

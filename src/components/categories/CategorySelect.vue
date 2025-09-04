@@ -27,7 +27,6 @@ const emit = defineEmits<Emits>()
 
 const categoriesStore = useCategoriesStore()
 
-
 const categories = computed(() => {
   return props.filterType === TransactionType.INCOME
     ? categoriesStore.incomeCategories

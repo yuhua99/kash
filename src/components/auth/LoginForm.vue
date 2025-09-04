@@ -47,12 +47,6 @@ const handleSubmit = async (e: Event) => {
       <CardContent>
         <form @submit="handleSubmit">
           <div class="grid gap-6">
-            <div
-              v-if="authStore.error"
-              class="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded"
-            >
-              {{ authStore.error }}
-            </div>
             <div class="grid gap-6">
               <div class="grid gap-3">
                 <Label for="username">Username</Label>
