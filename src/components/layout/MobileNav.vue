@@ -28,11 +28,11 @@ const navigation = [
           <Menu class="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" class="p-0">
-        <div class="p-4 border-b">
-          <SheetHeader>
-            <SheetTitle class="text-lg">My Budget</SheetTitle>
-            <SheetDescription class="sr-only">Main navigation menu</SheetDescription>
+      <SheetContent side="top" class="p-0">
+        <div class="border-b">
+          <SheetHeader class="h-14 px-4 pl-6 items-center flex-row gap-0">
+            <SheetTitle class="text-base font-semibold">My Budget</SheetTitle>
+            <SheetDescription class="sr-only" />
           </SheetHeader>
         </div>
         <nav class="p-2">
