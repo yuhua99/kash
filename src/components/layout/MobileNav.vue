@@ -2,6 +2,7 @@
 import { RouterLink } from 'vue-router'
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -35,15 +36,17 @@ const navigation = [
           </SheetHeader>
         </div>
         <nav class="p-2">
-          <RouterLink
-            v-for="item in navigation"
-            :key="item.name"
-            :to="item.href"
-            class="flex items-center gap-3 px-4 py-3 text-sm rounded-md hover:bg-accent hover:text-accent-foreground"
-          >
-            <component :is="item.icon" class="h-4 w-4" />
-            <span>{{ item.name }}</span>
-          </RouterLink>
+          <template v-for="item in navigation" :key="item.name">
+            <SheetClose as-child>
+              <RouterLink
+                :to="item.href"
+                class="flex items-center gap-3 px-4 py-3 text-sm rounded-md hover:bg-accent hover:text-accent-foreground"
+              >
+                <component :is="item.icon" class="h-4 w-4" />
+                <span>{{ item.name }}</span>
+              </RouterLink>
+            </SheetClose>
+          </template>
         </nav>
       </SheetContent>
     </Sheet>
