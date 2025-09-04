@@ -160,7 +160,7 @@ defineExpose({
     <div class="space-y-2">
       <Label for="type">Type</Label>
       <Select v-model="formData.type">
-        <SelectTrigger>
+        <SelectTrigger class="w-full">
           <SelectValue placeholder="Select type" />
         </SelectTrigger>
         <SelectContent>

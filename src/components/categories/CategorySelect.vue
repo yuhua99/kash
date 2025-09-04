@@ -42,7 +42,7 @@ const handleValueChange = (value: unknown) => {
 
 <template>
   <Select :model-value="modelValue" @update:model-value="handleValueChange" :disabled="disabled">
-    <SelectTrigger>
+    <SelectTrigger class="w-full">
       <SelectValue :placeholder="placeholder || 'Select category'" />
     </SelectTrigger>
     <SelectContent>

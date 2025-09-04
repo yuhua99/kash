@@ -12,7 +12,14 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { TransactionType } from '@/types'
 import { useCategoriesStore } from '@/stores/categories'
 import { useDialog } from '@/composables/useDialog'
 
@@ -115,6 +122,13 @@ const handleSubmit = async () => {
 const handleCancel = () => {
   isOpen.value = false
 }
+
+const categoryType = computed({
+  get: () => (categoryForm.value.is_income ? TransactionType.INCOME : TransactionType.EXPENSE),
+  set: (val: TransactionType) => {
+    categoryForm.value.is_income = val === TransactionType.INCOME
+  },
+})
 </script>
 
 <template>
@@ -140,15 +154,18 @@ const handleCancel = () => {
           />
         </div>
 
-        <!-- Only show income toggle for create mode -->
-        <div v-if="!isEditMode" class="flex items-center justify-between">
-          <div class="grid gap-2">
-            <Label for="category-type">Category Type</Label>
-            <p class="text-sm text-muted-foreground">
-              {{ categoryForm.is_income ? 'Income category' : 'Expense category' }}
-            </p>
-          </div>
-          <Switch id="category-type" v-model:checked="categoryForm.is_income" />
+        <!-- Only show type select for create mode -->
+        <div v-if="!isEditMode" class="space-y-2">
+          <Label for="category-type">Category Type</Label>
+          <Select v-model="categoryType">
+            <SelectTrigger id="category-type" class="w-full">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem :value="TransactionType.EXPENSE">Expense</SelectItem>
+              <SelectItem :value="TransactionType.INCOME">Income</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <!-- Show read-only type for edit mode -->
