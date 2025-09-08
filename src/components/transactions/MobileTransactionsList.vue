@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { Badge } from '@/components/ui/badge'
-import { Trash2, Calendar } from 'lucide-vue-next'
+import { Separator } from '@/components/ui/separator'
+import { Trash2 } from 'lucide-vue-next'
 import { useCategoriesStore } from '@/stores/categories'
 import { formatDate, formatSignedCurrency } from '@/lib/formatters'
 import type { Transaction } from '@/types'
@@ -148,83 +149,95 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerdown', onGlobalPointerDown)
-  window.removeEventListener('scroll', onGlobalScroll, { capture: true } as any)
+  window.removeEventListener('scroll', onGlobalScroll, { capture: true })
 })
+
+// Grouping helpers
+const dayKey = (timestamp: number): string => {
+  const d = new Date(timestamp * 1000)
+  const y = d.getFullYear()
+  const m = (d.getMonth() + 1).toString().padStart(2, '0')
+  const day = d.getDate().toString().padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
 </script>
 
 <template>
   <!-- Mobile: Card list -->
   <div class="md:hidden space-y-2" ref="mobileListRef" @click.self="closeAll">
-    <div v-for="transaction in transactions" :key="transaction.id" class="relative">
-      <!-- Hidden Delete Action (revealed on swipe) -->
+    <div v-for="(transaction, idx) in transactions" :key="transaction.id">
+      <!-- Date separator when day changes -->
       <div
-        class="absolute inset-y-0 right-0 flex items-stretch transition-opacity"
-        :style="{ opacity: getRevealOpacity(transaction.id) }"
-        :class="
-          openId === transaction.id || activeId === transaction.id
-            ? 'pointer-events-auto'
-            : 'pointer-events-none'
+        v-if="
+          idx === 0 || dayKey(transaction.timestamp) !== dayKey(transactions[idx - 1].timestamp)
         "
+        class="text-xs text-muted-foreground flex items-center gap-2 my-3"
       >
-        <button
-          class="h-full w-20 rounded-md bg-destructive text-destructive-foreground flex items-center justify-center text-sm font-medium shadow-sm active:scale-[.98]"
-          @click="emit('deleteTransaction', transaction.id)"
-        >
-          <Trash2 class="h-4 w-4" />
-          <span class="sr-only">Delete</span>
-        </button>
+        <Separator class="flex-1" />
+        <span class="px-2 font-medium">{{ formatDate(transaction.timestamp) }}</span>
+        <Separator class="flex-1" />
       </div>
+      <div class="relative">
+        <!-- Hidden Delete Action (revealed on swipe) -->
+        <div
+          class="absolute inset-y-0 right-0 w-20 bg-destructive rounded-md shadow-sm transition-opacity flex items-center justify-center"
+          :style="{ opacity: getRevealOpacity(transaction.id) }"
+          :class="
+            openId === transaction.id || activeId === transaction.id
+              ? 'pointer-events-auto'
+              : 'pointer-events-none'
+          "
+        >
+          <button
+            class="h-full w-full text-destructive-foreground flex items-center justify-center text-sm font-medium active:scale-[.98]"
+            @click="emit('deleteTransaction', transaction.id)"
+            aria-label="Delete"
+          >
+            <Trash2 class="h-4 w-4" />
+          </button>
+        </div>
 
-      <!-- Swipeable Card -->
-      <div
-        class="rounded-lg border p-3 bg-background border-l-4 cursor-pointer hover:bg-muted active:bg-muted transition-colors"
-        :style="{
-          borderLeftColor: (categoriesStore.getCategoryId(transaction.category)
-            ? categoriesStore.getCategoryColor(
-                categoriesStore.getCategoryId(transaction.category) as string,
-              )
-            : 'var(--border)') as string,
-          width: `calc(100% + ${swipeOffsets[transaction.id] || 0}px)`,
-          transition: activeId === transaction.id ? 'none' : 'width 200ms ease',
-          willChange: 'width',
-        }"
-        @touchstart.passive="onTouchStart(transaction.id, $event)"
-        @touchmove.passive="onTouchMove(transaction.id, $event)"
-        @touchend="onTouchEnd(transaction.id)"
-        @touchcancel="onTouchEnd(transaction.id)"
-        @click="onCardClick(transaction)"
-      >
-        <div class="flex items-start gap-3">
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-3">
-              <div class="font-medium break-words leading-tight">{{ transaction.name }}</div>
-              <div class="text-right font-mono whitespace-nowrap leading-tight">
-                <span
-                  :class="[
-                    'font-semibold text-base',
-                    transaction.amount > 0
-                      ? 'text-[hsl(var(--vis-secondary-color))]'
-                      : 'text-[hsl(var(--vis-primary-color))]',
-                  ]"
-                >
-                  {{ formatSignedCurrency(transaction.amount) }}
-                </span>
-              </div>
+        <!-- Swipeable Card -->
+        <div
+          class="rounded-lg border p-3 bg-background border-l-4 cursor-pointer hover:bg-muted active:bg-muted transition-colors"
+          :style="{
+            borderLeftColor: (categoriesStore.getCategoryId(transaction.category)
+              ? categoriesStore.getCategoryColor(
+                  categoriesStore.getCategoryId(transaction.category) as string,
+                )
+              : 'var(--border)') as string,
+            width: `calc(100% + ${swipeOffsets[transaction.id] || 0}px)`,
+            transition: activeId === transaction.id ? 'none' : 'width 200ms ease',
+            willChange: 'width',
+          }"
+          @touchstart.passive="onTouchStart(transaction.id, $event)"
+          @touchmove.passive="onTouchMove(transaction.id, $event)"
+          @touchend="onTouchEnd(transaction.id)"
+          @touchcancel="onTouchEnd(transaction.id)"
+          @click="onCardClick(transaction)"
+        >
+          <div class="flex items-center justify-between gap-3 min-w-0">
+            <div class="flex-1 min-w-0 font-medium break-words leading-tight">
+              {{ transaction.name }}
             </div>
-            <div
-              class="mt-2 flex flex-wrap items-center justify-between text-xs text-muted-foreground"
-            >
-              <div class="flex items-center gap-1">
-                <Calendar class="h-3 w-3" />
-                <span class="font-mono">{{ formatDate(transaction.timestamp) }}</span>
-              </div>
-              <div class="flex items-center min-w-0">
-                <div class="flex items-center min-w-0">
-                  <Badge variant="secondary" class="max-w-full truncate">
-                    {{ transaction.category }}
-                  </Badge>
-                </div>
-              </div>
+            <div class="flex flex-col items-end">
+              <span
+                class="font-mono whitespace-nowrap leading-tight"
+                :class="[
+                  'font-semibold text-base',
+                  transaction.amount > 0
+                    ? 'text-[hsl(var(--vis-secondary-color))]'
+                    : 'text-[hsl(var(--vis-primary-color))]',
+                ]"
+              >
+                {{ formatSignedCurrency(transaction.amount) }}
+              </span>
+              <Badge
+                variant="secondary"
+                class="max-w-full truncate text-xs text-muted-foreground mt-2"
+              >
+                {{ transaction.category }}
+              </Badge>
             </div>
           </div>
         </div>
