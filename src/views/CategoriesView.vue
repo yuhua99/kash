@@ -111,25 +111,6 @@ onMounted(() => {
     <!-- Page Header -->
     <CategoryHeader @category-saved="onCategorySaved" />
 
-    <!-- Error State -->
-    <div
-      v-if="authStore.error || categoriesStore.error || recordsStore.error"
-      class="p-4 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded"
-    >
-      <p v-if="authStore.error">Authentication Error: {{ authStore.error }}</p>
-      <p v-if="categoriesStore.error">Categories Error: {{ categoriesStore.error }}</p>
-      <p v-if="recordsStore.error">Records Error: {{ recordsStore.error }}</p>
-      <div class="mt-2 space-x-2">
-        <button
-          @click="(authStore.clearError(), categoriesStore.clearError(), recordsStore.clearError())"
-          class="text-destructive underline text-sm"
-        >
-          Dismiss
-        </button>
-        <button @click="loadData" class="text-destructive underline text-sm">Retry</button>
-      </div>
-    </div>
-
     <!-- Loading State -->
     <div v-if="isLoading" class="space-y-6">
       <div class="grid gap-4 md:grid-cols-2">
@@ -161,23 +142,19 @@ onMounted(() => {
           </CardHeader>
           <CardContent>
             <!-- Table header -->
-            <div class="grid grid-cols-5 gap-2 mb-3">
+            <div class="grid grid-cols-3 gap-2 mb-3">
               <Skeleton class="h-4 w-24" />
               <Skeleton class="h-4 w-12 justify-self-end" />
-              <Skeleton class="h-4 w-16 justify-self-end" />
-              <Skeleton class="h-4 w-16 justify-self-end" />
               <Skeleton class="h-4 w-16 justify-self-end" />
             </div>
             <!-- Table rows -->
             <div class="space-y-2">
-              <div v-for="i in 7" :key="i" class="grid grid-cols-5 gap-2 items-center">
+              <div v-for="i in 7" :key="i" class="grid grid-cols-3 gap-2 items-center">
                 <div class="flex items-center gap-2">
                   <Skeleton class="h-3 w-3 rounded-full" />
                   <Skeleton class="h-3 w-28" />
                 </div>
                 <Skeleton class="h-3 w-8 justify-self-end" />
-                <Skeleton class="h-3 w-16 justify-self-end" />
-                <Skeleton class="h-3 w-16 justify-self-end" />
                 <Skeleton class="h-3 w-16 justify-self-end" />
               </div>
             </div>
@@ -273,9 +250,7 @@ onMounted(() => {
                 <TableRow>
                   <TableHead>Category</TableHead>
                   <TableHead class="text-right">Count</TableHead>
-                  <TableHead class="text-right">Spent</TableHead>
-                  <TableHead class="text-right">Income</TableHead>
-                  <TableHead class="text-right">Net</TableHead>
+                  <TableHead class="text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -292,33 +267,27 @@ onMounted(() => {
                     </div>
                   </TableCell>
                   <TableCell class="text-right text-sm">{{ stat.transactionCount }}</TableCell>
-                  <TableCell class="text-right text-[hsl(var(--vis-primary-color))] text-sm">
-                    {{
-                      stat.totalSpent > 0
-                        ? formatSignedCurrency(-stat.totalSpent)
-                        : formatCurrency(0)
-                    }}
-                  </TableCell>
-                  <TableCell class="text-right text-[hsl(var(--vis-secondary-color))] text-sm">
-                    {{
-                      stat.totalIncome > 0
-                        ? formatSignedCurrency(stat.totalIncome)
-                        : formatCurrency(0)
-                    }}
-                  </TableCell>
                   <TableCell
                     class="text-right font-medium text-sm"
                     :class="
-                      stat.netAmount >= 0
+                      stat.is_income
                         ? 'text-[hsl(var(--vis-secondary-color))]'
                         : 'text-[hsl(var(--vis-primary-color))]'
                     "
                   >
-                    {{ formatSignedCurrency(stat.netAmount) }}
+                    {{
+                      stat.is_income
+                        ? stat.totalIncome > 0
+                          ? formatSignedCurrency(stat.totalIncome)
+                          : formatCurrency(0)
+                        : stat.totalSpent > 0
+                          ? formatSignedCurrency(-stat.totalSpent)
+                          : formatCurrency(0)
+                    }}
                   </TableCell>
                 </TableRow>
                 <TableRow v-if="categoryStats.length === 0">
-                  <TableCell colspan="5" class="text-center text-muted-foreground py-6 text-sm">
+                  <TableCell colspan="3" class="text-center text-muted-foreground py-6 text-sm">
                     No categories found
                   </TableCell>
                 </TableRow>
