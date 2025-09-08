@@ -1,31 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import CategoryHeader from '@/components/categories/CategoryHeader.vue'
 import CategoryDialog from '@/components/categories/CategoryDialog.vue'
-import { Search, MoreHorizontal, Edit, Trash2, Plus } from 'lucide-vue-next'
+import CategoriesLoadingSkeleton from '@/components/categories/CategoriesLoadingSkeleton.vue'
+import CategoriesManagementPanel from '@/components/categories/CategoriesManagementPanel.vue'
+import CategoryStatsTable from '@/components/categories/CategoryStatsTable.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCategoriesStore } from '@/stores/categories'
 import { useRecordsStore } from '@/stores/records'
-import { formatCurrency, formatSignedCurrency } from '@/lib/formatters'
+// formatting handled inside child components
 
 const authStore = useAuthStore()
 const categoriesStore = useCategoriesStore()
@@ -69,7 +53,6 @@ const categoryStats = computed(() => {
       transactionCount: totalTransactions,
       totalSpent,
       totalIncome,
-      netAmount: totalIncome - totalSpent,
     }
   })
 
@@ -113,54 +96,7 @@ onMounted(() => {
 
     <!-- Loading State -->
     <div v-if="isLoading" class="space-y-6">
-      <div class="grid gap-4 md:grid-cols-2">
-        <!-- Category Management Skeleton -->
-        <Card>
-          <CardHeader>
-            <Skeleton class="h-6 w-40 mb-2" />
-            <Skeleton class="h-4 w-64" />
-          </CardHeader>
-          <CardContent>
-            <!-- Search bar skeleton -->
-            <Skeleton class="h-10 w-full mb-4" />
-            <!-- Category list skeleton -->
-            <div class="space-y-3">
-              <div v-for="i in 6" :key="i" class="flex items-center space-x-3">
-                <Skeleton class="h-4 w-4 rounded-full" />
-                <Skeleton class="h-4 w-28" />
-                <Skeleton class="h-8 w-8 ml-auto" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <!-- Category Statistics Skeleton (table-like) -->
-        <Card>
-          <CardHeader>
-            <Skeleton class="h-6 w-48 mb-2" />
-            <Skeleton class="h-4 w-72" />
-          </CardHeader>
-          <CardContent>
-            <!-- Table header -->
-            <div class="grid grid-cols-3 gap-2 mb-3">
-              <Skeleton class="h-4 w-24" />
-              <Skeleton class="h-4 w-12 justify-self-end" />
-              <Skeleton class="h-4 w-16 justify-self-end" />
-            </div>
-            <!-- Table rows -->
-            <div class="space-y-2">
-              <div v-for="i in 7" :key="i" class="grid grid-cols-3 gap-2 items-center">
-                <div class="flex items-center gap-2">
-                  <Skeleton class="h-3 w-3 rounded-full" />
-                  <Skeleton class="h-3 w-28" />
-                </div>
-                <Skeleton class="h-3 w-8 justify-self-end" />
-                <Skeleton class="h-3 w-16 justify-self-end" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <CategoriesLoadingSkeleton />
     </div>
 
     <!-- Main Content -->
@@ -177,62 +113,15 @@ onMounted(() => {
             </div>
           </CardHeader>
           <CardContent>
-            <!-- Search Bar -->
-            <div class="relative mb-4">
-              <Search
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
-              />
-              <Input v-model="searchQuery" placeholder="Search categories..." class="pl-10" />
-            </div>
-
-            <div v-if="categoriesStore.categories.length === 0" class="text-center py-8">
-              <p class="text-muted-foreground mb-4">No categories found</p>
-              <CategoryDialog @category-saved="onCategorySaved">
-                <Button variant="outline">
-                  <Plus class="h-4 w-4 mr-2" />
-                  Create your first category
-                </Button>
-              </CategoryDialog>
-            </div>
-
-            <div v-else class="space-y-2">
-              <div
-                v-for="category in filteredCategories"
-                :key="category.id"
-                class="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-              >
-                <div class="flex items-center space-x-3">
-                  <div
-                    class="w-4 h-4 rounded-full border border-border flex-shrink-0"
-                    :style="{
-                      backgroundColor: categoriesStore.getCategoryColor(category.id),
-                    }"
-                  ></div>
-                  <Badge variant="secondary">{{ category.name }}</Badge>
-                </div>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger as-child>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal class="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem @click="handleEditCategory(category)">
-                      <Edit class="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      @click="handleDeleteCategory(category.id)"
-                      class="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 class="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
+            <CategoriesManagementPanel
+              :categories="filteredCategories"
+              :get-category-color="categoriesStore.getCategoryColor"
+              v-model:searchQuery="searchQuery"
+              :is-searching="searchQuery.trim().length > 0"
+              @edit="handleEditCategory"
+              @delete="handleDeleteCategory"
+              @category-saved="onCategorySaved"
+            />
           </CardContent>
         </Card>
 
@@ -245,54 +134,10 @@ onMounted(() => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Category</TableHead>
-                  <TableHead class="text-right">Count</TableHead>
-                  <TableHead class="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow v-for="stat in categoryStats" :key="stat.id" class="hover:bg-muted/50">
-                  <TableCell>
-                    <div class="flex items-center space-x-2">
-                      <div
-                        class="w-3 h-3 rounded-full flex-shrink-0"
-                        :style="{
-                          backgroundColor: categoriesStore.getCategoryColor(stat.id),
-                        }"
-                      ></div>
-                      <span class="font-medium text-sm">{{ stat.name }}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell class="text-right text-sm">{{ stat.transactionCount }}</TableCell>
-                  <TableCell
-                    class="text-right font-medium text-sm"
-                    :class="
-                      stat.is_income
-                        ? 'text-[hsl(var(--vis-secondary-color))]'
-                        : 'text-[hsl(var(--vis-primary-color))]'
-                    "
-                  >
-                    {{
-                      stat.is_income
-                        ? stat.totalIncome > 0
-                          ? formatSignedCurrency(stat.totalIncome)
-                          : formatCurrency(0)
-                        : stat.totalSpent > 0
-                          ? formatSignedCurrency(-stat.totalSpent)
-                          : formatCurrency(0)
-                    }}
-                  </TableCell>
-                </TableRow>
-                <TableRow v-if="categoryStats.length === 0">
-                  <TableCell colspan="3" class="text-center text-muted-foreground py-6 text-sm">
-                    No categories found
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            <CategoryStatsTable
+              :stats="categoryStats"
+              :get-category-color="categoriesStore.getCategoryColor"
+            />
           </CardContent>
         </Card>
       </div>
