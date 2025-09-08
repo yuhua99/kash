@@ -125,8 +125,6 @@
   --rp-highlight-high: #56526e;
 
   /* Variables below still reference mapped tokens */
-  --vis-text-color: var(--foreground);
-
   /* Rosé Pine HSL triplets to drive Unovis colors (Moon) */
   --rp-primary-hsl: 267 57% 78%; /* iris */
   --rp-secondary-hsl: 42 86% 67%; /* gold-ish */
