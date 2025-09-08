@@ -35,7 +35,9 @@ const onCategorySaved = () => emit('category-saved')
 <template>
   <!-- Search Bar -->
   <div class="relative mb-4">
-    <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <Search
+      class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
+    />
     <Input
       :model-value="props.searchQuery"
       @update:modelValue="(val) => emit('update:searchQuery', val as string)"
@@ -84,7 +86,10 @@ const onCategorySaved = () => emit('category-saved')
             <Edit class="h-4 w-4 mr-2" />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem @click="emit('delete', category.id)" class="text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            @click="emit('delete', category.id)"
+            class="text-destructive focus:text-destructive"
+          >
             <Trash2 class="h-4 w-4 mr-2" />
             Delete
           </DropdownMenuItem>

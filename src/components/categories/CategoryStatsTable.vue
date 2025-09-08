@@ -55,8 +55,12 @@ const props = defineProps<{
         >
           {{
             stat.is_income
-              ? (stat.totalIncome > 0 ? formatSignedCurrency(stat.totalIncome) : formatCurrency(0))
-              : (stat.totalSpent > 0 ? formatSignedCurrency(-stat.totalSpent) : formatCurrency(0))
+              ? stat.totalIncome > 0
+                ? formatSignedCurrency(stat.totalIncome)
+                : formatCurrency(0)
+              : stat.totalSpent > 0
+                ? formatSignedCurrency(-stat.totalSpent)
+                : formatCurrency(0)
           }}
         </TableCell>
       </TableRow>

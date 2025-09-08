@@ -53,4 +53,3 @@ import { Skeleton } from '@/components/ui/skeleton'
     </Card>
   </div>
 </template>
-
