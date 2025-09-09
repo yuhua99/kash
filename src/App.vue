@@ -9,24 +9,20 @@ const authStore = useAuthStore()
 </script>
 
 <template>
-  <!-- Authenticated Layout -->
-  <!-- Authenticated: render mobile and desktop wrappers side-by-side, hidden by breakpoints -->
-  <template v-if="authStore.isAuthenticated">
-    <!-- Mobile (below md) -->
-    <div class="flex md:hidden min-h-screen flex-col">
-      <MobileNav>
-        <template #actions>
-          <UserNav />
-        </template>
-      </MobileNav>
-      <div class="flex-1 p-4 pt-4">
-        <RouterView />
+  <div class="min-h-screen bg-background flex flex-col">
+    <!-- Top navigation (rendered once, not wrapping RouterView) -->
+    <div v-if="authStore.isAuthenticated">
+      <!-- Mobile header -->
+      <div class="md:hidden">
+        <MobileNav>
+          <template #actions>
+            <UserNav />
+          </template>
+        </MobileNav>
       </div>
-    </div>
 
-    <!-- Desktop / Tablet (md and up) -->
-    <div class="hidden flex-col md:flex">
-      <div class="border-b">
+      <!-- Desktop/Tablet header -->
+      <div class="hidden md:block border-b">
         <div class="flex h-16 items-center px-4">
           <MainNav class="mx-6" />
           <div class="ml-auto flex items-center space-x-4">
@@ -34,14 +30,11 @@ const authStore = useAuthStore()
           </div>
         </div>
       </div>
-      <div class="flex-1 space-y-4 p-8 pt-6">
-        <RouterView />
-      </div>
     </div>
-  </template>
 
-  <!-- Unauthenticated Layout -->
-  <div v-else class="min-h-screen bg-background">
-    <RouterView />
+    <!-- Single RouterView for all layouts -->
+    <main class="flex-1 p-4 pt-4 md:p-8 md:pt-6">
+      <RouterView />
+    </main>
   </div>
 </template>

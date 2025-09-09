@@ -142,7 +142,7 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
       <Separator />
 
       <!-- Charts Grid Skeleton (Trend + Spending by Category) -->
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
         <Card class="lg:col-span-4">
           <CardHeader>
             <Skeleton class="h-6 w-40 mb-2" />
@@ -182,7 +182,7 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
       />
 
       <!-- Charts and Analysis -->
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
         <TrendDisplay
           class="lg:col-span-4"
           :transactions="sortedTransactions"
