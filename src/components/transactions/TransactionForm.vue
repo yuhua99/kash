@@ -10,8 +10,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import CategorySelect from '@/components/categories/CategorySelect.vue'
 import { useFormValidation } from '@/composables/useFormValidation'
+import { useTransactionHelpers } from '@/composables/useTransactionHelpers'
 import { useCategoriesStore } from '@/stores/categories'
 import type { TransactionFormData, Transaction } from '@/types'
 import { TransactionType } from '@/types'
@@ -35,6 +37,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>()
 
 const { transactionValidation } = useFormValidation()
+const { suggestName } = useTransactionHelpers()
 const categoriesStore = useCategoriesStore()
 
 const isEditMode = computed(() => props.transaction !== null && props.transaction !== undefined)
@@ -105,6 +108,10 @@ watch(
   },
   { deep: true },
 )
+
+const suggestedNames = computed(() => {
+  return suggestName(formData.value.amount, formData.value.category)
+})
 
 const isFormValid = computed(() => {
   return transactionValidation.isValidTransactionForm({
@@ -183,6 +190,17 @@ defineExpose({
     <div class="space-y-2">
       <Label for="name">Description</Label>
       <Input id="name" v-model="formData.name" placeholder="Transaction description" />
+      <div v-if="suggestedNames.length > 0" class="flex flex-wrap gap-2">
+        <Badge
+          v-for="suggestion in suggestedNames"
+          :key="suggestion"
+          variant="secondary"
+          class="cursor-pointer hover:bg-secondary/80"
+          @click="formData.name = suggestion"
+        >
+          {{ suggestion }}
+        </Badge>
+      </div>
     </div>
 
     <div v-if="showActions" class="flex justify-end gap-2 pt-4">
