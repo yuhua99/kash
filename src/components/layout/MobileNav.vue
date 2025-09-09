@@ -10,13 +10,12 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { Menu, Home, List, Folder, Info } from 'lucide-vue-next'
+import { Menu, Home, List, Folder } from 'lucide-vue-next'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Transactions', href: '/transactions', icon: List },
   { name: 'Categories', href: '/categories', icon: Folder },
-  { name: 'About', href: '/about', icon: Info },
 ]
 </script>
 
