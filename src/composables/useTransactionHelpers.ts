@@ -6,8 +6,8 @@ export function useTransactionHelpers() {
   const suggestName = (amount: string, category: string): string[] => {
     if (!amount || !category || isNaN(parseFloat(amount))) return []
 
-    const targetAmount = parseFloat(amount)
-    const existingTransactions = recordsStore.transactions
+    const targetAmount = Math.abs(parseFloat(amount))
+    const existingTransactions = [...recordsStore.transactions]
 
     // Filter to recent transactions (last 6 months)
     const sixMonthsAgo = Math.floor(Date.now() / 1000) - 6 * 30 * 24 * 60 * 60
@@ -20,13 +20,14 @@ export function useTransactionHelpers() {
     )
 
     // Sort by amount difference (smallest difference first)
-    const sortedBySimilarity = sameCategoryTransactions
-      .sort((a, b) => {
-        const diffA = Math.abs(a.amount - targetAmount)
-        const diffB = Math.abs(b.amount - targetAmount)
-        return diffA - diffB
-      })
-      .slice(0, 50) // Early exit
+    const sortedBySimilarity = sameCategoryTransactions.sort((a, b) => {
+      const diffA = Math.abs(Math.abs(a.amount) - targetAmount)
+      const diffB = Math.abs(Math.abs(b.amount) - targetAmount)
+      if (diffA === diffB) {
+        return b.timestamp - a.timestamp // recent first
+      }
+      return diffA - diffB
+    })
 
     const suggestions = [
       ...new Set(sortedBySimilarity.map((transaction) => transaction.name)),
