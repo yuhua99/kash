@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import {
   Select,
   SelectContent,
@@ -109,9 +110,19 @@ watch(
   { deep: true },
 )
 
-const suggestedNames = computed(() => {
-  return suggestName(formData.value.amount, formData.value.category)
-})
+const suggestedNames = ref<string[]>([])
+
+const debouncedUpdateSuggestions = useDebounceFn(() => {
+  suggestedNames.value = suggestName(formData.value.amount, formData.value.category)
+}, 300)
+
+watch(
+  () => [formData.value.amount, formData.value.category],
+  () => {
+    debouncedUpdateSuggestions()
+  },
+  { immediate: true },
+)
 
 const isFormValid = computed(() => {
   return transactionValidation.isValidTransactionForm({
