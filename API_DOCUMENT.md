@@ -115,7 +115,7 @@ CRUD operations for income and expense categories. All endpoints require authent
 
 **GET** `/` - Server status with visitor counter
 
-**Response**: `<h1>My Budget Server</h1><p>API Ready - Visit count: {number}</p>`
+**Response**: `<h1>Kash! Server</h1><p>API Ready - Visit count: {number}</p>`
 
 ---
 

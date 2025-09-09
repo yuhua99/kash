@@ -1,7 +1,7 @@
 {
-  "id": "app.my-budget",
-  "name": "My budget",
-  "short_name": "Budget",
+  "id": "app.kash",
+  "name": "Kash!",
+  "short_name": "Kash",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

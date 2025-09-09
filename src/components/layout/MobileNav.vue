@@ -31,7 +31,7 @@ const navigation = [
       <SheetContent side="top" class="p-0">
         <div class="border-b">
           <SheetHeader class="h-14 px-4 pl-6 items-center flex-row gap-0">
-            <SheetTitle class="text-base font-semibold">My Budget</SheetTitle>
+            <SheetTitle class="text-base font-semibold">Kash!</SheetTitle>
             <SheetDescription class="sr-only" />
           </SheetHeader>
         </div>
@@ -51,7 +51,7 @@ const navigation = [
       </SheetContent>
     </Sheet>
 
-    <div class="mx-2 text-base font-semibold select-none">My Budget</div>
+    <div class="mx-2 text-base font-semibold select-none">Kash!</div>
 
     <div class="ml-auto">
       <!-- Placeholder slot for actions (e.g., user avatar) -->
