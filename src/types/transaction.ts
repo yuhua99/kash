@@ -42,7 +42,7 @@ export interface TransactionFormData {
   amount: string
   category: string
   type: TransactionType
-  date: string
+  date: Date
 }
 
 /**

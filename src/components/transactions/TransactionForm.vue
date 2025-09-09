@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { DatePicker } from '@/components/ui/date-picker'
 import CategorySelect from '@/components/categories/CategorySelect.vue'
 import { useFormValidation } from '@/composables/useFormValidation'
 import { useTransactionHelpers } from '@/composables/useTransactionHelpers'
@@ -49,7 +50,7 @@ const defaultFormData: TransactionFormData = {
   amount: '',
   category: '',
   type: TransactionType.EXPENSE,
-  date: new Date().toISOString().split('T')[0],
+  date: new Date(),
 }
 
 const formData = ref<TransactionFormData>({ ...defaultFormData })
@@ -62,12 +63,12 @@ const initializeFormData = (transaction?: Transaction | null) => {
       amount: Math.abs(transaction.amount).toString(),
       category: transaction.category,
       type: transaction.type,
-      date: new Date(transaction.timestamp * 1000).toISOString().split('T')[0],
+      date: new Date(transaction.timestamp * 1000),
     }
   } else {
     formData.value = {
       ...defaultFormData,
-      date: new Date().toISOString().split('T')[0],
+      date: new Date(),
     }
   }
 }
@@ -132,6 +133,8 @@ const isFormValid = computed(() => {
   })
 })
 
+const maxDate = new Date()
+
 const resetForm = () => {
   initializeFormData()
   emit('update:modelValue', formData.value)
@@ -147,7 +150,7 @@ const handleSubmit = () => {
     amount: formData.value.type === TransactionType.EXPENSE ? -Math.abs(amount) : Math.abs(amount),
     category: formData.value.category,
     type: formData.value.type,
-    timestamp: Math.floor(new Date(formData.value.date).getTime() / 1000),
+    timestamp: Math.floor(formData.value.date.getTime() / 1000),
   }
 
   if (isEditMode.value && props.transaction?.id) {
@@ -195,7 +198,7 @@ defineExpose({
 
     <div class="space-y-2">
       <Label for="date">Date</Label>
-      <Input id="date" v-model="formData.date" type="date" />
+      <DatePicker v-model="formData.date" :max-value="maxDate" />
     </div>
 
     <div class="space-y-2">
