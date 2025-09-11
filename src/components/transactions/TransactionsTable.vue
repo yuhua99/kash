@@ -21,6 +21,7 @@ import { Edit, Trash2, MoreHorizontal } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
 import MobileTransactionsList from './MobileTransactionsList.vue'
 import { useCategoriesStore } from '@/stores/categories'
+import { useGlobalStore } from '@/stores/global'
 import type { Transaction } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
 
@@ -36,6 +37,7 @@ interface Emits {
 defineProps<Props>()
 const emit = defineEmits<Emits>()
 const categoriesStore = useCategoriesStore()
+const global = useGlobalStore()
 
 const editDialogOpen = ref(false)
 const editingTransaction = ref<Transaction | null>(null)
@@ -57,13 +59,14 @@ const handleEditTransaction = (transaction: Transaction) => {
   <div>
     <!-- Mobile: Card list -->
     <MobileTransactionsList
+      v-if="global.isMobile"
       :transactions="transactions"
       @delete-transaction="(id: string) => $emit('deleteTransaction', id)"
       @open-edit="openEditDialog"
     />
 
     <!-- Desktop: Table -->
-    <div class="hidden md:block">
+    <div v-else>
       <Table>
         <TableHeader>
           <TableRow>

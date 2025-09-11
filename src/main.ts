@@ -7,6 +7,7 @@ import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth'
 import { useSettingsStore } from './stores/settings'
+import { useGlobalStore } from './stores/global'
 import { registerSW } from './sw-register'
 
 const app = createApp(App)
@@ -16,6 +17,7 @@ app.use(pinia)
 
 // Initialize UI preferences (theme, cents) before UI renders
 useSettingsStore().initialize()
+useGlobalStore().initialize()
 
 // Check for existing session BEFORE setting up router
 const authStore = useAuthStore()

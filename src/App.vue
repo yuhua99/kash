@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useGlobalStore } from '@/stores/global'
 import MainNav from '@/components/layout/MainNav.vue'
 import UserNav from '@/components/layout/UserNav.vue'
 import MobileNav from '@/components/layout/MobileNav.vue'
 
 const authStore = useAuthStore()
+const global = useGlobalStore()
 </script>
 
 <template>
@@ -13,7 +15,7 @@ const authStore = useAuthStore()
     <!-- Top navigation (rendered once, not wrapping RouterView) -->
     <div v-if="authStore.isAuthenticated">
       <!-- Mobile header -->
-      <div class="md:hidden">
+      <div v-if="global.isMobile">
         <MobileNav>
           <template #actions>
             <UserNav />
@@ -22,7 +24,7 @@ const authStore = useAuthStore()
       </div>
 
       <!-- Desktop/Tablet header -->
-      <div class="hidden md:block border-b">
+      <div v-else class="border-b">
         <div class="flex h-16 items-center px-4">
           <MainNav class="mx-6" />
           <div class="ml-auto flex items-center space-x-4">
