@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign, TrendingUp, TrendingDown, PiggyBank } from 'lucide-vue-next'
+import { formatCurrency, formatPercent } from '@/lib/formatters'
 
 interface Props {
   monthlyIncome: number
@@ -9,11 +10,6 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
-
-const formatPercent = (value: number) => `${value.toFixed(1)}%`
 </script>
 
 <template>

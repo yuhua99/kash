@@ -1,10 +1,15 @@
-export const formatCurrency = (amount: number): string =>
-  new Intl.NumberFormat('en-US', {
+import { useSettingsStore } from '@/stores/settings'
+
+export const formatCurrency = (amount: number): string => {
+  const settings = useSettingsStore()
+  const fractionDigits = settings.showCents ? 2 : 0
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   }).format(amount)
+}
 
 export const formatSignedCurrency = (amount: number): string => {
   const sign = amount >= 0 ? '+' : '-'

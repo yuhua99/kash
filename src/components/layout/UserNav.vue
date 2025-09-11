@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAvatarGenerator } from '@/composables/useAvatarGenerator'
-import { useTheme } from '@/composables/useTheme'
+import { useSettingsStore } from '@/stores/settings'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import SettingsDialog from '@/components/settings/SettingsDialog.vue'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +21,7 @@ import { Sun, Moon } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const { isDark, toggleTheme } = useTheme()
+const settings = useSettingsStore()
 
 const { avatarDataUrl } = useAvatarGenerator({
   size: 32,
@@ -46,6 +47,8 @@ const handleLogout = async () => {
   await authStore.logout()
   router.push('/login')
 }
+
+const isSettingsOpen = ref(false)
 </script>
 
 <template>
@@ -71,21 +74,22 @@ const handleLogout = async () => {
       <DropdownMenuGroup>
         <DropdownMenuItem> Profile </DropdownMenuItem>
         <DropdownMenuItem> Billing </DropdownMenuItem>
-        <DropdownMenuItem> Settings </DropdownMenuItem>
+        <DropdownMenuItem @click="isSettingsOpen = true"> Settings </DropdownMenuItem>
         <DropdownMenuItem
           class="flex items-center justify-between"
           @select="(event) => event.preventDefault()"
         >
           <div class="flex items-center gap-2">
-            <span>{{ isDark ? 'Dark' : 'Light' }} mode</span>
-            <Sun v-if="!isDark" class="h-4 w-4" />
+            <span>{{ settings.isDark ? 'Dark' : 'Light' }} mode</span>
+            <Sun v-if="!settings.isDark" class="h-4 w-4" />
             <Moon v-else class="h-4 w-4" />
           </div>
-          <Switch :model-value="isDark" @update:model-value="toggleTheme" />
+          <Switch :model-value="settings.isDark" @update:model-value="settings.toggleTheme" />
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem @click="handleLogout"> Log out </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
+  <SettingsDialog v-model:open="isSettingsOpen" />
 </template>
