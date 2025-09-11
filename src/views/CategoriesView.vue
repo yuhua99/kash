@@ -9,6 +9,8 @@ import CategoryStatsTable from '@/components/categories/CategoryStatsTable.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCategoriesStore } from '@/stores/categories'
 import { useRecordsStore } from '@/stores/records'
+import FloatingButton from '@/components/common/FloatingButton.vue'
+import { Plus } from 'lucide-vue-next'
 // formatting handled inside child components
 
 const authStore = useAuthStore()
@@ -92,7 +94,7 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
-    <CategoryHeader @category-saved="onCategorySaved" />
+    <CategoryHeader />
 
     <!-- Loading State -->
     <div v-if="isLoading" class="space-y-6">
@@ -141,6 +143,12 @@ onMounted(() => {
           </CardContent>
         </Card>
       </div>
+
+      <CategoryDialog @category-saved="onCategorySaved">
+        <FloatingButton aria-label="Add category">
+          <Plus class="h-6 w-6" />
+        </FloatingButton>
+      </CategoryDialog>
     </div>
 
     <!-- Edit Category Dialog -->

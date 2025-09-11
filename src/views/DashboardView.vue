@@ -8,7 +8,7 @@ import StatsCards from '@/components/dashboard/StatsCards.vue'
 import TrendDisplay from '@/components/dashboard/TrendDisplay.vue'
 import SpendingByCategory from '@/components/dashboard/SpendingByCategory.vue'
 import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
-import { Button } from '@/components/ui/button'
+import FloatingButton from '@/components/common/FloatingButton.vue'
 import { Plus } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useTransactions } from '@/composables/useTransactions'
@@ -191,14 +191,10 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
         <SpendingByCategory class="lg:col-span-3" :transactions="periodTransactions" />
       </div>
 
-      <!-- Quick Add Floating Button -->
       <AddTransactionDialog @add-transaction="addTransaction">
-        <Button
-          size="icon"
-          class="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
-        >
+        <FloatingButton aria-label="Add transaction">
           <Plus class="h-6 w-6" />
-        </Button>
+        </FloatingButton>
       </AddTransactionDialog>
     </div>
   </div>

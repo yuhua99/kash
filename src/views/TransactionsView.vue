@@ -13,8 +13,10 @@ import {
 import { Badge } from '@/components/ui/badge'
 import TransactionsTable from '@/components/transactions/TransactionsTable.vue'
 import TransactionHeader from '@/components/transactions/TransactionHeader.vue'
+import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
+import FloatingButton from '@/components/common/FloatingButton.vue'
 import { Button } from '@/components/ui/button'
-import { Search, Filter } from 'lucide-vue-next'
+import { Search, Filter, Plus } from 'lucide-vue-next'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
@@ -134,7 +136,7 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
-    <TransactionHeader @add-transaction="addTransaction" />
+    <TransactionHeader />
 
     <!-- Error State -->
     <div
@@ -310,6 +312,12 @@ onMounted(() => {
           />
         </CardContent>
       </Card>
+
+      <AddTransactionDialog @add-transaction="addTransaction">
+        <FloatingButton aria-label="Add transaction">
+          <Plus class="h-6 w-6" />
+        </FloatingButton>
+      </AddTransactionDialog>
     </div>
   </div>
 </template>
