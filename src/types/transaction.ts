@@ -31,6 +31,7 @@ export interface Transaction {
   category: string
   type: TransactionType
   timestamp: number
+  timeStr: string
 }
 
 /**

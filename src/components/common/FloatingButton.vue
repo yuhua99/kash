@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button'
 
 interface Props {
-  ariaLabel: string
   bottomClass?: string
   rightClass?: string
   sizeClass?: string
@@ -20,7 +19,6 @@ defineEmits<{ (e: 'click', ev: MouseEvent): void }>()
 <template>
   <Button
     size="icon"
-    :aria-label="ariaLabel"
     type="button"
     class="fixed rounded-full shadow-lg hover:shadow-xl transition-shadow"
     :class="[bottomClass, rightClass, sizeClass]"
@@ -29,4 +27,3 @@ defineEmits<{ (e: 'click', ev: MouseEvent): void }>()
     <slot />
   </Button>
 </template>
-

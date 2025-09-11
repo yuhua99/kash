@@ -20,8 +20,6 @@ export const formatSignedCurrency = (amount: number): string => {
 export const formatPercent = (value: number, fractionDigits = 1): string =>
   `${value.toFixed(fractionDigits)}%`
 
-export const formatDate = (
-  timestampSeconds: number,
-  options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: '2-digit' },
-  locale = 'en-US',
-): string => new Date(timestampSeconds * 1000).toLocaleDateString(locale, options)
+export const formatDate = (timestampSeconds: number): string => {
+  return new Date(timestampSeconds * 1000).toLocaleDateString()
+}

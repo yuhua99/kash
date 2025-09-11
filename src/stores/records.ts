@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { api } from '@/lib/api'
 import { useApiRequest } from '@/composables/useApiRequest'
 import { useCategoriesStore } from './categories'
+import { formatDate } from '@/lib/formatters'
 import type {
   ApiRecord,
   Transaction,
@@ -24,6 +25,7 @@ export const useRecordsStore = defineStore('records', () => {
     return {
       id: record.id,
       timestamp: record.timestamp,
+      timeStr: formatDate(record.timestamp),
       name: record.name,
       amount: record.amount,
       category: categoryName,

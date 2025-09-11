@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Trash2 } from 'lucide-vue-next'
 import { useCategoriesStore } from '@/stores/categories'
-import { formatDate, formatSignedCurrency } from '@/lib/formatters'
+import { formatSignedCurrency } from '@/lib/formatters'
 import type { Transaction } from '@/types'
 
 interface Props {
@@ -174,7 +174,7 @@ const dayKey = (timestamp: number): string => {
         class="text-xs text-muted-foreground flex items-center gap-2 my-3"
       >
         <Separator class="flex-1" />
-        <span class="px-2 font-medium">{{ formatDate(transaction.timestamp) }}</span>
+        <span class="px-2 font-medium">{{ transaction.timeStr }}</span>
         <Separator class="flex-1" />
       </div>
       <div class="relative">

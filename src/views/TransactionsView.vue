@@ -22,6 +22,7 @@ import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
 import type { Transaction } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
+import PeriodRangeSelector from '@/components/transactions/PeriodRangeSelector.vue'
 
 const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
@@ -30,6 +31,14 @@ const categoriesStore = useCategoriesStore()
 // Filter and search state
 const searchQuery = ref('')
 const selectedCategory = ref('')
+const now = new Date()
+const defaultStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000)
+const defaultEnd =
+  Math.floor(new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime() / 1000) - 1
+const selectedRange = ref<{ start: number; end: number }>({ start: defaultStart, end: defaultEnd })
+const handleRangeChange = (r: { start: number; end: number }) => {
+  selectedRange.value = r
+}
 
 const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
@@ -41,17 +50,16 @@ const availableCategories = computed(() => {
   return Array.from(categories).sort()
 })
 
-const filteredAndSortedTransactions = computed(() => {
+const filteredTransactions = computed(() => {
   let filtered = [...recordsStore.transactions]
+
+  const { start, end } = selectedRange.value
+  filtered = filtered.filter((t) => t.timestamp >= start && t.timestamp <= end)
 
   // Apply search filter
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim()
-    filtered = filtered.filter(
-      (transaction) =>
-        transaction.name.toLowerCase().includes(query) ||
-        transaction.category.toLowerCase().includes(query),
-    )
+    filtered = filtered.filter((transaction) => transaction.name.toLowerCase().includes(query))
   }
 
   // Apply category filter
@@ -59,13 +67,12 @@ const filteredAndSortedTransactions = computed(() => {
     filtered = filtered.filter((transaction) => transaction.category === selectedCategory.value)
   }
 
-  // Sort by date (most recent first)
-  return filtered.sort((a, b) => b.timestamp - a.timestamp)
+  return filtered
 })
 
 // Summary statistics for filtered transactions
 const filteredStats = computed(() => {
-  const transactions = filteredAndSortedTransactions.value
+  const transactions = filteredTransactions.value
   const totalIncome = transactions.filter((t) => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
   const totalExpenses = transactions
     .filter((t) => t.amount < 0)
@@ -202,6 +209,9 @@ onMounted(() => {
     <div v-else-if="authStore.isAuthenticated" class="space-y-6">
       <!-- Search and Filters -->
       <div class="flex flex-col sm:flex-row gap-4">
+        <!-- Period Range Selector -->
+        <PeriodRangeSelector @range-change="handleRangeChange" />
+
         <!-- Search Bar -->
         <div class="relative flex-1">
           <Search
@@ -283,7 +293,7 @@ onMounted(() => {
             <div>
               <CardTitle>Transaction History</CardTitle>
               <CardDescription>
-                Showing {{ filteredAndSortedTransactions.length }} of
+                Showing {{ filteredTransactions.length }} of
                 {{ recordsStore.transactions.length }} transactions
               </CardDescription>
             </div>
@@ -306,7 +316,7 @@ onMounted(() => {
         </CardHeader>
         <CardContent class="px-6 pb-6">
           <TransactionsTable
-            :transactions="filteredAndSortedTransactions"
+            :transactions="filteredTransactions"
             @edit-transaction="editTransaction"
             @delete-transaction="deleteTransaction"
           />

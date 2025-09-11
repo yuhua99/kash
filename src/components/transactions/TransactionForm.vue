@@ -18,6 +18,7 @@ import { useFormValidation } from '@/composables/useFormValidation'
 import { useTransactionHelpers } from '@/composables/useTransactionHelpers'
 import { useCategoriesStore } from '@/stores/categories'
 import type { TransactionFormData, Transaction } from '@/types'
+import { formatDate } from '@/lib/formatters'
 import { TransactionType } from '@/types'
 
 interface Props {
@@ -151,6 +152,7 @@ const handleSubmit = () => {
     category: formData.value.category,
     type: formData.value.type,
     timestamp: Math.floor(formData.value.date.getTime() / 1000),
+    timeStr: formatDate(Math.floor(formData.value.date.getTime() / 1000)),
   }
 
   if (isEditMode.value && props.transaction?.id) {
