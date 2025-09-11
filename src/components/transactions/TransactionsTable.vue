@@ -89,11 +89,7 @@ const handleEditTransaction = (transaction: Transaction) => {
                 <div
                   class="w-3 h-3 rounded-full border border-border flex-shrink-0"
                   :style="{
-                    backgroundColor: (categoriesStore.getCategoryId(transaction.category)
-                      ? categoriesStore.getCategoryColor(
-                          categoriesStore.getCategoryId(transaction.category) as string,
-                        )
-                      : 'var(--muted)') as string,
+                    backgroundColor: categoriesStore.getCategoryColor(transaction.category_id),
                   }"
                 ></div>
                 <Badge variant="secondary">

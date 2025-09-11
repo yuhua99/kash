@@ -145,10 +145,12 @@ const handleSubmit = () => {
   if (!isFormValid.value) return
 
   const amount = parseFloat(formData.value.amount)
+  const catId = categoriesStore.getCategoryId(formData.value.category) || ''
   const transaction: Transaction = {
     id: formData.value.id || '',
     name: formData.value.name,
     amount: formData.value.type === TransactionType.EXPENSE ? -Math.abs(amount) : Math.abs(amount),
+    category_id: catId,
     category: formData.value.category,
     type: formData.value.type,
     timestamp: Math.floor(formData.value.date.getTime() / 1000),

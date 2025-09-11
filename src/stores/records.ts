@@ -28,6 +28,7 @@ export const useRecordsStore = defineStore('records', () => {
       timeStr: formatDate(record.timestamp),
       name: record.name,
       amount: record.amount,
+      category_id: record.category_id,
       category: categoryName,
       type: record.amount >= 0 ? TransactionType.INCOME : TransactionType.EXPENSE,
     }

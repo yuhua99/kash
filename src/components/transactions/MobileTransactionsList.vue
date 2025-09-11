@@ -201,11 +201,7 @@ const dayKey = (timestamp: number): string => {
         <div
           class="rounded-lg border p-3 bg-background border-l-4 cursor-pointer hover:bg-muted active:bg-muted transition-colors"
           :style="{
-            borderLeftColor: (categoriesStore.getCategoryId(transaction.category)
-              ? categoriesStore.getCategoryColor(
-                  categoriesStore.getCategoryId(transaction.category) as string,
-                )
-              : 'var(--border)') as string,
+            borderLeftColor: categoriesStore.getCategoryColor(transaction.category_id),
             width: `calc(100% + ${swipeOffsets[transaction.id] || 0}px)`,
             transition: activeId === transaction.id ? 'none' : 'width 200ms ease',
             willChange: 'width',
