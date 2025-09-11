@@ -2,9 +2,9 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useAvatarGenerator } from '@/composables/useAvatarGenerator'
+import BoringAvatar from 'vue-boring-avatars'
 import { useSettingsStore } from '@/stores/settings'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import SettingsDialog from '@/components/settings/SettingsDialog.vue'
@@ -23,25 +23,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const settings = useSettingsStore()
 
-const { avatarDataUrl } = useAvatarGenerator({
-  size: 32,
-  seed: authStore.user?.username || 'user',
-})
-
-const userInitials = computed(() => {
-  const username = authStore.user?.username
-  if (!username) return 'U'
-
-  const parts = username.split(' ')
-  if (parts.length === 1) {
-    return parts[0].substring(0, 2).toUpperCase()
-  }
-  return parts
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-})
+const name = computed(() => authStore.user?.username || 'User')
 
 const handleLogout = async () => {
   await authStore.logout()
@@ -55,9 +37,14 @@ const isSettingsOpen = ref(false)
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
       <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-        <Avatar class="h-8 w-8">
-          <AvatarImage :src="avatarDataUrl" />
-          <AvatarFallback>{{ userInitials }}</AvatarFallback>
+        <Avatar class="h-8 w-8 overflow-hidden rounded-full">
+          <BoringAvatar
+            :size="32"
+            variant="beam"
+            :name="name"
+            :title="false"
+            class="aspect-square size-full block"
+          />
         </Avatar>
       </Button>
     </DropdownMenuTrigger>
