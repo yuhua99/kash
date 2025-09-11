@@ -75,13 +75,6 @@ watch(
 
 <template>
   <div class="flex items-center gap-2">
-    <Tabs v-model="unit" class="w-auto">
-      <TabsList class="grid grid-cols-2">
-        <TabsTrigger :value="PeriodUnit.MONTH">Month</TabsTrigger>
-        <TabsTrigger :value="PeriodUnit.YEAR">Year</TabsTrigger>
-      </TabsList>
-    </Tabs>
-
     <div v-if="unit === PeriodUnit.YEAR" class="flex items-center gap-2">
       <Select v-model="selectedYearForYear">
         <SelectTrigger class="w-[120px]">
@@ -112,5 +105,12 @@ watch(
         </SelectContent>
       </Select>
     </div>
+
+    <Tabs v-model="unit" class="w-auto">
+      <TabsList class="grid grid-cols-2">
+        <TabsTrigger :value="PeriodUnit.MONTH">Month</TabsTrigger>
+        <TabsTrigger :value="PeriodUnit.YEAR">Year</TabsTrigger>
+      </TabsList>
+    </Tabs>
   </div>
 </template>

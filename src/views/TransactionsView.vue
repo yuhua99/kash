@@ -22,7 +22,6 @@ import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
 import type { Transaction } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
-import PeriodRangeSelector from '@/components/transactions/PeriodRangeSelector.vue'
 
 const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
@@ -142,8 +141,8 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <!-- Page Header -->
-    <TransactionHeader />
+    <!-- Page Header with Period Range Selector -->
+    <TransactionHeader @range-change="handleRangeChange" />
 
     <!-- Error State -->
     <div
@@ -209,9 +208,6 @@ onMounted(() => {
     <div v-else-if="authStore.isAuthenticated" class="space-y-6">
       <!-- Search and Filters -->
       <div class="flex flex-col sm:flex-row gap-4">
-        <!-- Period Range Selector -->
-        <PeriodRangeSelector @range-change="handleRangeChange" />
-
         <!-- Search Bar -->
         <div class="relative flex-1">
           <Search
