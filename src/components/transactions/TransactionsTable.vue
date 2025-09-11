@@ -70,10 +70,10 @@ const handleEditTransaction = (transaction: Transaction) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
+            <TableHead class="w-[8rem]">Date</TableHead>
+            <TableHead class="w-[12rem]">Category</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead class="text-right">Amount</TableHead>
+            <TableHead class="w-[8rem] text-right">Amount</TableHead>
             <TableHead class="w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -84,9 +84,6 @@ const handleEditTransaction = (transaction: Transaction) => {
             class="hover:bg-muted/50"
           >
             <TableCell class="font-mono text-sm">{{ transaction.timeStr }}</TableCell>
-            <TableCell class="font-medium">
-              {{ transaction.name }}
-            </TableCell>
             <TableCell>
               <div class="flex items-center space-x-2">
                 <div
@@ -103,6 +100,9 @@ const handleEditTransaction = (transaction: Transaction) => {
                   {{ transaction.category }}
                 </Badge>
               </div>
+            </TableCell>
+            <TableCell class="font-medium">
+              {{ transaction.name }}
             </TableCell>
             <TableCell class="text-right font-mono">
               <span
