@@ -8,6 +8,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatCurrency, formatSignedCurrency } from '@/lib/formatters'
+import { useCategoriesStore } from '@/stores/categories'
 
 interface StatItem {
   id: string
@@ -20,8 +21,9 @@ interface StatItem {
 
 const props = defineProps<{
   stats: StatItem[]
-  getCategoryColor: (id: string) => string
 }>()
+
+const categoriesStore = useCategoriesStore()
 </script>
 
 <template>
@@ -39,7 +41,7 @@ const props = defineProps<{
           <div class="flex items-center space-x-2">
             <div
               class="w-3 h-3 rounded-full flex-shrink-0"
-              :style="{ backgroundColor: props.getCategoryColor(stat.id) }"
+              :style="{ backgroundColor: categoriesStore.getCategoryColor(stat.id) }"
             ></div>
             <span class="font-medium text-sm">{{ stat.name }}</span>
           </div>

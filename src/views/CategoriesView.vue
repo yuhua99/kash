@@ -117,7 +117,6 @@ onMounted(() => {
           <CardContent>
             <CategoriesManagementPanel
               :categories="filteredCategories"
-              :get-category-color="categoriesStore.getCategoryColor"
               v-model:searchQuery="searchQuery"
               :is-searching="searchQuery.trim().length > 0"
               @edit="handleEditCategory"
@@ -136,10 +135,7 @@ onMounted(() => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <CategoryStatsTable
-              :stats="categoryStats"
-              :get-category-color="categoriesStore.getCategoryColor"
-            />
+            <CategoryStatsTable :stats="categoryStats" />
           </CardContent>
         </Card>
       </div>

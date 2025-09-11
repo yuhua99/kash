@@ -13,9 +13,10 @@ import CategoryDialog from '@/components/categories/CategoryDialog.vue'
 import { Search, MoreHorizontal, Edit, Trash2, Plus } from 'lucide-vue-next'
 import type { Category } from '@/types/category'
 
+import { useCategoriesStore } from '@/stores/categories'
+
 const props = defineProps<{
   categories: Category[]
-  getCategoryColor: (id: string) => string
   searchQuery: string
   isSearching?: boolean
 }>()
@@ -30,6 +31,8 @@ const emit = defineEmits<{
 const hasNoCategories = computed(() => props.categories.length === 0)
 
 const onCategorySaved = () => emit('category-saved')
+
+const categoriesStore = useCategoriesStore()
 </script>
 
 <template>
@@ -70,7 +73,7 @@ const onCategorySaved = () => emit('category-saved')
       <div class="flex items-center space-x-3">
         <div
           class="w-4 h-4 rounded-full border border-border flex-shrink-0"
-          :style="{ backgroundColor: props.getCategoryColor(category.id) }"
+          :style="{ backgroundColor: categoriesStore.getCategoryColor(category.id) }"
         ></div>
         <Badge variant="secondary">{{ category.name }}</Badge>
       </div>
