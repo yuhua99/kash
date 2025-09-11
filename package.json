@@ -28,6 +28,7 @@
     "tailwindcss": "^4.1.11",
     "tw-animate-css": "^1.3.5",
     "vue": "^3.5.17",
+    "vue-boring-avatars": "^1.4.0",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
