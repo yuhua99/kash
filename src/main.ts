@@ -7,6 +7,7 @@ import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth'
 import { useSettingsStore } from './stores/settings'
+import { registerSW } from './sw-register'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -21,4 +22,6 @@ const authStore = useAuthStore()
 authStore.checkAuthStatus().finally(() => {
   app.use(router)
   app.mount('#app')
+  // Register service worker in production to ensure updates on iOS PWA
+  registerSW()
 })
