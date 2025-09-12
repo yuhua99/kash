@@ -38,6 +38,14 @@ const localCategory = ref(props.category)
 
 const global = useGlobalStore()
 
+// Default range: current month [start, end]
+const defaultRange = computed<Range>(() => {
+  const now = new Date()
+  const start = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000)
+  const end = Math.floor(new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime() / 1000) - 1
+  return { start, end }
+})
+
 watch(
   () => props.range,
   (r) => {
@@ -59,7 +67,9 @@ const onApply = () => {
 }
 
 const onClear = () => {
-  emit('clear')
+  localCategory.value = 'all'
+  localRange.value = { ...defaultRange.value }
+  emit('apply', { range: { ...defaultRange.value }, category: 'all' })
 }
 </script>
 

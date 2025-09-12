@@ -9,8 +9,7 @@ import TransactionHeader from '@/components/transactions/TransactionHeader.vue'
 import FiltersDropdown from '@/components/transactions/FiltersDropdown.vue'
 import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
 import FloatingButton from '@/components/common/FloatingButton.vue'
-import { Button } from '@/components/ui/button'
-import { Search, Filter, Plus } from 'lucide-vue-next'
+import { Search, Plus } from 'lucide-vue-next'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
@@ -30,10 +29,6 @@ const defaultStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).g
 const defaultEnd =
   Math.floor(new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime() / 1000) - 1
 const selectedRange = ref<Range>({ start: defaultStart, end: defaultEnd })
-const hasCustomRange = computed(() => {
-  const r = selectedRange.value
-  return r.start !== defaultStart || r.end !== defaultEnd
-})
 
 const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
@@ -124,21 +119,9 @@ const loadData = async () => {
   await recordsStore.fetchRecords()
 }
 
-// Clear filters
-const clearFilters = () => {
-  searchQuery.value = ''
-  selectedCategory.value = 'all'
-  selectedRange.value = { start: defaultStart, end: defaultEnd }
-}
-
 const onFiltersApply = (payload: { range: Range; category: string }) => {
   selectedRange.value = payload.range
   selectedCategory.value = payload.category
-}
-
-const onFiltersClear = () => {
-  selectedCategory.value = 'all'
-  selectedRange.value = { start: defaultStart, end: defaultEnd }
 }
 
 onMounted(() => {
@@ -230,20 +213,8 @@ onMounted(() => {
             :category="selectedCategory"
             :categories="availableCategories"
             @apply="onFiltersApply"
-            @clear="onFiltersClear"
           />
         </div>
-
-        <!-- Clear Filters Button -->
-        <Button
-          variant="outline"
-          size="default"
-          @click="clearFilters"
-          v-if="searchQuery || selectedCategory !== 'all' || hasCustomRange"
-        >
-          <Filter class="h-4 w-4 mr-2" />
-          Clear
-        </Button>
       </div>
 
       <!-- Stats Summary (when filtered) -->
