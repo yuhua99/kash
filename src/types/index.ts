@@ -16,3 +16,6 @@ export * from './dashboard'
 
 // Transaction types
 export * from './transaction'
+
+// Common/shared types
+export * from './common'

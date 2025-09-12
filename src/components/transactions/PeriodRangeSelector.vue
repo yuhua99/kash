@@ -9,8 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PeriodUnit } from '@/types'
-
-type Range = { start: number; end: number }
+import type { Range } from '@/types'
 
 const emit = defineEmits<{ (e: 'rangeChange', range: Range): void }>()
 

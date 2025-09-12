@@ -3,16 +3,10 @@ import { computed, onMounted, ref } from 'vue'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import TransactionsTable from '@/components/transactions/TransactionsTable.vue'
 import TransactionHeader from '@/components/transactions/TransactionHeader.vue'
+import FiltersDropdown from '@/components/transactions/FiltersDropdown.vue'
 import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
 import FloatingButton from '@/components/common/FloatingButton.vue'
 import { Button } from '@/components/ui/button'
@@ -21,6 +15,7 @@ import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
 import { useAuthStore } from '@/stores/auth'
 import type { Transaction } from '@/types'
+import type { Range } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
 
 const authStore = useAuthStore()
@@ -29,15 +24,16 @@ const categoriesStore = useCategoriesStore()
 
 // Filter and search state
 const searchQuery = ref('')
-const selectedCategory = ref('')
+const selectedCategory = ref('all')
 const now = new Date()
 const defaultStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000)
 const defaultEnd =
   Math.floor(new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime() / 1000) - 1
-const selectedRange = ref<{ start: number; end: number }>({ start: defaultStart, end: defaultEnd })
-const handleRangeChange = (r: { start: number; end: number }) => {
-  selectedRange.value = r
-}
+const selectedRange = ref<Range>({ start: defaultStart, end: defaultEnd })
+const hasCustomRange = computed(() => {
+  const r = selectedRange.value
+  return r.start !== defaultStart || r.end !== defaultEnd
+})
 
 const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
@@ -62,7 +58,7 @@ const filteredTransactions = computed(() => {
   }
 
   // Apply category filter
-  if (selectedCategory.value && selectedCategory.value !== 'all') {
+  if (selectedCategory.value !== 'all') {
     filtered = filtered.filter((transaction) => transaction.category === selectedCategory.value)
   }
 
@@ -131,7 +127,18 @@ const loadData = async () => {
 // Clear filters
 const clearFilters = () => {
   searchQuery.value = ''
-  selectedCategory.value = ''
+  selectedCategory.value = 'all'
+  selectedRange.value = { start: defaultStart, end: defaultEnd }
+}
+
+const onFiltersApply = (payload: { range: Range; category: string }) => {
+  selectedRange.value = payload.range
+  selectedCategory.value = payload.category
+}
+
+const onFiltersClear = () => {
+  selectedCategory.value = 'all'
+  selectedRange.value = { start: defaultStart, end: defaultEnd }
 }
 
 onMounted(() => {
@@ -141,8 +148,8 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <!-- Page Header with Period Range Selector -->
-    <TransactionHeader @range-change="handleRangeChange" />
+    <!-- Page Header -->
+    <TransactionHeader />
 
     <!-- Error State -->
     <div
@@ -216,25 +223,23 @@ onMounted(() => {
           <Input v-model="searchQuery" placeholder="Search transactions..." class="pl-10" />
         </div>
 
-        <!-- Category Filter -->
-        <Select v-model="selectedCategory">
-          <SelectTrigger class="w-full sm:w-[180px]">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem v-for="category in availableCategories" :key="category" :value="category">
-              {{ category }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <!-- Filters: unified dropdown on all devices -->
+        <div class="w-full sm:w-auto">
+          <FiltersDropdown
+            :range="selectedRange"
+            :category="selectedCategory"
+            :categories="availableCategories"
+            @apply="onFiltersApply"
+            @clear="onFiltersClear"
+          />
+        </div>
 
         <!-- Clear Filters Button -->
         <Button
           variant="outline"
           size="default"
           @click="clearFilters"
-          v-if="searchQuery || selectedCategory"
+          v-if="searchQuery || selectedCategory !== 'all' || hasCustomRange"
         >
           <Filter class="h-4 w-4 mr-2" />
           Clear
@@ -242,7 +247,7 @@ onMounted(() => {
       </div>
 
       <!-- Stats Summary (when filtered) -->
-      <div v-if="searchQuery || selectedCategory" class="grid gap-4 md:grid-cols-4">
+      <div v-if="searchQuery || selectedCategory !== 'all'" class="grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent class="p-4">
             <div class="text-sm text-muted-foreground">Filtered Results</div>
