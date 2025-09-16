@@ -1,6 +1,7 @@
 import { computed, type Ref } from 'vue'
 import type { Transaction } from '@/types'
-import { TransactionType, DashboardPeriod } from '@/types'
+import { TransactionType, PeriodUnit } from '@/types'
+import { getRangeForPeriod } from '@/lib/timeRange'
 
 // Internal types
 type ChartDataPoint = { name: string; value: number }
@@ -81,42 +82,12 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   })
 
   /**
-   * Get timestamp range based on dashboard period
-   */
-  const getTimestampRange = (period: DashboardPeriod) => {
-    const now = new Date()
-
-    switch (period) {
-      case DashboardPeriod.THIS_MONTH: {
-        const start = new Date(now.getFullYear(), now.getMonth(), 1)
-        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
-        return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
-      }
-      case DashboardPeriod.THIS_HALF_YEAR: {
-        const start = new Date(now.getFullYear(), now.getMonth() - 6, 1)
-        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
-        return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
-      }
-      case DashboardPeriod.THIS_YEAR: {
-        const start = new Date(now.getFullYear(), 0, 1)
-        const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999)
-        return { start: Math.floor(start.getTime() / 1000), end: Math.floor(end.getTime() / 1000) }
-      }
-      default:
-        return {
-          start: Math.floor(new Date(now.getFullYear(), 0, 1).getTime() / 1000),
-          end: Math.floor(new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).getTime() / 1000),
-        }
-    }
-  }
-
-  /**
    * Filter transactions by timestamp range
    */
-  const filterTransactionsByPeriod = (period: DashboardPeriod) => {
+  const filterTransactionsByPeriod = (period: PeriodUnit) => {
     if (!transactions.value?.length) return []
 
-    const { start, end } = getTimestampRange(period)
+    const { start, end } = getRangeForPeriod(period)
 
     return transactions.value.filter((t) => {
       if (!t.timestamp || typeof t.timestamp !== 'number') return false
@@ -128,11 +99,11 @@ export function useChartData(transactions: Ref<Transaction[]>) {
    * Build buckets for the given period
    */
   const buildBuckets = (
-    dashboardPeriod: DashboardPeriod,
+    dashboardPeriod: PeriodUnit,
   ): Array<{ start: number; end: number; label: string; key: number }> => {
     const now = new Date()
 
-    if (dashboardPeriod === DashboardPeriod.THIS_MONTH) {
+    if (dashboardPeriod === PeriodUnit.MONTH) {
       const year = now.getFullYear()
       const month = now.getMonth()
       const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -145,7 +116,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
       return buckets
     }
 
-    if (dashboardPeriod === DashboardPeriod.THIS_HALF_YEAR) {
+    if (dashboardPeriod === PeriodUnit.HALF_YEAR) {
       const buckets: Array<{ start: number; end: number; label: string; key: number }> = []
       const todayTs = Math.floor(now.getTime() / 1000)
       const startOfThisWeek = startOfWeekSunday(todayTs)
@@ -175,7 +146,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
    */
   const aggregateIntoBuckets = (
     txs: Transaction[],
-    dashboardPeriod: DashboardPeriod,
+    dashboardPeriod: PeriodUnit,
   ): TrendDataPoint[] => {
     const buckets = buildBuckets(dashboardPeriod)
     const indexByKey = new Map<number, number>(buckets.map((b, i) => [b.key, i]))
@@ -185,9 +156,9 @@ export function useChartData(transactions: Ref<Transaction[]>) {
       if (!t.timestamp || typeof t.amount !== 'number' || !t.type) continue
 
       let key: number
-      if (dashboardPeriod === DashboardPeriod.THIS_MONTH) {
+      if (dashboardPeriod === PeriodUnit.MONTH) {
         key = startOfDay(t.timestamp)
-      } else if (dashboardPeriod === DashboardPeriod.THIS_HALF_YEAR) {
+      } else if (dashboardPeriod === PeriodUnit.HALF_YEAR) {
         key = startOfWeekSunday(t.timestamp)
       } else {
         key = startOfMonth(t.timestamp)
@@ -213,7 +184,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   /**
    * Generate trend data (both income and expenses)
    */
-  const getTrendData = (dashboardPeriod: DashboardPeriod): TrendDataPoint[] => {
+  const getTrendData = (dashboardPeriod: PeriodUnit): TrendDataPoint[] => {
     const filtered = filterTransactionsByPeriod(dashboardPeriod)
     return aggregateIntoBuckets(filtered, dashboardPeriod)
   }
@@ -221,7 +192,7 @@ export function useChartData(transactions: Ref<Transaction[]>) {
   /**
    * Transform trend data for a single TransactionType using enums
    */
-  const getSingleTrendData = (dashboardPeriod: DashboardPeriod, dataType: TransactionType) => {
+  const getSingleTrendData = (dashboardPeriod: PeriodUnit, dataType: TransactionType) => {
     const trend = getTrendData(dashboardPeriod)
     return trend.map((item) => ({
       period: item.period,

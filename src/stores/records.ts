@@ -11,7 +11,8 @@ import type {
   UpdateRecordPayload,
   RecordsResponse,
 } from '@/types'
-import { TransactionType } from '@/types'
+import { TransactionType, PeriodUnit } from '@/types'
+import { getRangeForPeriod } from '@/lib/timeRange'
 
 export const useRecordsStore = defineStore('records', () => {
   const records = ref<ApiRecord[]>([])
@@ -46,6 +47,11 @@ export const useRecordsStore = defineStore('records', () => {
     limit?: number
   }): Promise<boolean> => {
     let endpoint = '/records'
+    // Default to YEAR when no filters provided
+    if (!filters) {
+      const { start, end } = getRangeForPeriod(PeriodUnit.YEAR)
+      filters = { start_time: start, end_time: end }
+    }
     const params = new URLSearchParams()
 
     if (filters?.start_time) params.append('start_time', filters.start_time.toString())

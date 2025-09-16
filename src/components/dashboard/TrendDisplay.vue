@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BarChart } from '@/components/ui/chart-bar'
 import type { Transaction } from '@/types'
-import { TransactionType, DashboardPeriod } from '@/types'
+import { TransactionType, PeriodUnit } from '@/types'
 import { useChartData } from '@/composables/useChartData'
 
 interface Props {
   transactions: Transaction[]
-  period: DashboardPeriod
+  period: PeriodUnit
 }
 
 const props = defineProps<Props>()

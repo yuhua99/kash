@@ -16,13 +16,13 @@ import { useChartData } from '@/composables/useChartData'
 import { useFinancialCalculations } from '@/composables/useFinancialCalculations'
 import { useCategories } from '@/composables/useCategories'
 import type { Transaction } from '@/types'
-import { DashboardPeriod } from '@/types'
+import { PeriodUnit } from '@/types'
 
 // Router and stores
 const authStore = useAuthStore()
 
 // Period selection state
-const selectedPeriod = ref<DashboardPeriod>(DashboardPeriod.THIS_MONTH)
+const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH)
 const {
   sortedTransactions,
   isLoading: transactionsLoading,
@@ -73,7 +73,7 @@ const loadData = async () => {
 }
 
 // Handle period change from DashboardHeader
-const handlePeriodChange = (period: DashboardPeriod) => {
+const handlePeriodChange = (period: PeriodUnit) => {
   selectedPeriod.value = period
 }
 

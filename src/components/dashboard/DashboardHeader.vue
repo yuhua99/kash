@@ -8,14 +8,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CalendarDays } from 'lucide-vue-next'
-import { DashboardPeriod } from '@/types'
+import { PeriodUnit } from '@/types'
 
 interface Props {
   title?: string
 }
 
 interface Emits {
-  periodChange: [period: DashboardPeriod]
+  periodChange: [period: PeriodUnit]
 }
 
 withDefaults(defineProps<Props>(), {
@@ -24,7 +24,7 @@ withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-const selectedPeriod = ref<DashboardPeriod>(DashboardPeriod.THIS_MONTH)
+const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH)
 
 // Watch for period changes and emit to parent
 watch(
@@ -52,9 +52,9 @@ watch(
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem :value="DashboardPeriod.THIS_MONTH">This Month</SelectItem>
-            <SelectItem :value="DashboardPeriod.THIS_HALF_YEAR">This Half Year</SelectItem>
-            <SelectItem :value="DashboardPeriod.THIS_YEAR">This Year</SelectItem>
+            <SelectItem :value="PeriodUnit.MONTH">This Month</SelectItem>
+            <SelectItem :value="PeriodUnit.HALF_YEAR">This Half Year</SelectItem>
+            <SelectItem :value="PeriodUnit.YEAR">This Year</SelectItem>
           </SelectContent>
         </Select>
       </div>
