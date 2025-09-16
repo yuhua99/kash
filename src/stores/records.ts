@@ -45,6 +45,7 @@ export const useRecordsStore = defineStore('records', () => {
     start_time?: number
     end_time?: number
     limit?: number
+    offset?: number
   }): Promise<boolean> => {
     let endpoint = '/records'
     // Default to YEAR when no filters provided
@@ -52,11 +53,14 @@ export const useRecordsStore = defineStore('records', () => {
       const { start, end } = getRangeForPeriod(PeriodUnit.YEAR)
       filters = { start_time: start, end_time: end }
     }
+
+    const { start_time, end_time, limit = 500, offset = 0 } = filters
     const params = new URLSearchParams()
 
-    if (filters?.start_time) params.append('start_time', filters.start_time.toString())
-    if (filters?.end_time) params.append('end_time', filters.end_time.toString())
-    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (start_time) params.append('start_time', start_time.toString())
+    if (end_time) params.append('end_time', end_time.toString())
+    params.append('limit', limit.toString())
+    if (offset) params.append('offset', offset.toString())
 
     if (params.toString()) {
       endpoint += `?${params.toString()}`
