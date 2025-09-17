@@ -17,6 +17,72 @@ import type { Transaction } from '@/types'
 import type { Range } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
 
+const monthYearFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  year: 'numeric',
+})
+const monthDayFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+})
+const fullDateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+})
+
+const formatRangeLabel = (range?: Range): string => {
+  if (!range) return 'Transactions'
+
+  const { start, end } = range
+  const hasValidTimestamps = Number.isFinite(start) && Number.isFinite(end) && end >= start
+  if (!hasValidTimestamps) return 'Transactions'
+
+  if (start <= 0 || end <= 0) return 'All transactions'
+
+  const startDate = new Date(start * 1000)
+  const endDate = new Date(end * 1000)
+
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    return 'Transactions'
+  }
+
+  const monthStartSeconds = Math.floor(
+    new Date(startDate.getFullYear(), startDate.getMonth(), 1).getTime() / 1000,
+  )
+  const monthEndSeconds = Math.floor(
+    new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999).getTime() /
+      1000,
+  )
+  if (start === monthStartSeconds && end === monthEndSeconds) {
+    return `${monthYearFormatter.format(startDate)} transactions`
+  }
+
+  const yearStartSeconds = Math.floor(new Date(startDate.getFullYear(), 0, 1).getTime() / 1000)
+  const yearEndSeconds = Math.floor(
+    new Date(startDate.getFullYear(), 11, 31, 23, 59, 59, 999).getTime() / 1000,
+  )
+  if (start === yearStartSeconds && end === yearEndSeconds) {
+    return `${startDate.getFullYear()} transactions`
+  }
+
+  const isSameDay =
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getDate() === endDate.getDate()
+
+  if (isSameDay) {
+    return `${fullDateFormatter.format(startDate)} transactions`
+  }
+
+  const isSameYear = startDate.getFullYear() === endDate.getFullYear()
+  if (isSameYear) {
+    return `${monthDayFormatter.format(startDate)} – ${monthDayFormatter.format(endDate)} ${startDate.getFullYear()} transactions`
+  }
+
+  return `${fullDateFormatter.format(startDate)} – ${fullDateFormatter.format(endDate)} transactions`
+}
+
 const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
 const categoriesStore = useCategoriesStore()
@@ -75,6 +141,18 @@ const filteredStats = computed(() => {
     totalExpenses,
     netAmount: totalIncome - totalExpenses,
   }
+})
+
+const transactionsSubtitle = computed(() => {
+  const label = formatRangeLabel(selectedRange.value)
+  const total = Number(totalTransactions.value ?? 0)
+
+  if (!Number.isFinite(total) || total <= 0) {
+    return label
+  }
+
+  const filteredCount = filteredTransactions.value.length
+  return `${label} · ${filteredCount} of ${total}`
 })
 
 const fetchTransactionsForRange = async () => {
@@ -296,7 +374,7 @@ const onPageChange = async (page: number) => {
             <div>
               <CardTitle>Transaction History</CardTitle>
               <CardDescription>
-                Showing {{ filteredTransactions.length }} of {{ totalTransactions }} transactions
+                {{ transactionsSubtitle }}
               </CardDescription>
             </div>
             <div class="flex items-center gap-2">
