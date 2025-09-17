@@ -18,24 +18,16 @@ interface Props {
   rowKey?: string | ((row: T) => string | number)
   page?: number
   pageSize?: number
-  defaultPage?: number
-  defaultPageSize?: number
-  pageSizeOptions?: number[]
-  showHeader?: boolean
   showPageSizeSelector?: boolean
   totalItems: number
-  emptyState?: string
-  disablePagination?: boolean
 }
 
+const INITIAL_PAGE = 1
+const INITIAL_PAGE_SIZE = 20
+const EMPTY_STATE_MESSAGE = 'No records found'
+
 const props = withDefaults(defineProps<Props>(), {
-  defaultPage: 1,
-  defaultPageSize: 20,
-  pageSizeOptions: () => [20, 50, 100],
-  showHeader: true,
   showPageSizeSelector: true,
-  emptyState: 'No records found',
-  disablePagination: false,
 })
 
 defineSlots<
@@ -52,17 +44,8 @@ const emit = defineEmits<{
   (e: 'page-change', value: number): void
 }>()
 
-const innerPage = ref(props.page ?? props.defaultPage)
-const innerPageSize = ref(props.pageSize ?? props.defaultPageSize)
-
-const resolvedPageSizeOptions = computed(() => {
-  const options = (props.pageSizeOptions ?? []).filter((option) => option > 0)
-  if (!options.length) return [innerPageSize.value]
-  if (!options.includes(innerPageSize.value)) {
-    return [...options, innerPageSize.value].sort((a, b) => a - b)
-  }
-  return options.slice().sort((a, b) => a - b)
-})
+const innerPage = ref(props.page ?? INITIAL_PAGE)
+const innerPageSize = ref(props.pageSize ?? INITIAL_PAGE_SIZE)
 
 watch(
   () => props.page,
@@ -77,10 +60,9 @@ watch(
   () => props.pageSize,
   (value) => {
     if (value === undefined) {
-      const fallback = props.defaultPageSize
-      if (innerPageSize.value === fallback) return
-      innerPageSize.value = fallback
-      updatePage(1)
+      if (innerPageSize.value === INITIAL_PAGE_SIZE) return
+      innerPageSize.value = INITIAL_PAGE_SIZE
+      updatePage(INITIAL_PAGE)
       return
     }
     if (value === innerPageSize.value) return
@@ -91,7 +73,6 @@ watch(
 const totalItems = computed(() => (props.totalItems >= 0 ? props.totalItems : 0))
 
 const pageCount = computed(() => {
-  if (props.disablePagination) return 1
   if (!innerPageSize.value || innerPageSize.value <= 0) return 1
   return Math.max(1, Math.ceil(totalItems.value / innerPageSize.value))
 })
@@ -105,19 +86,19 @@ const updatePage = (value: number) => {
 }
 
 const updatePageSize = (value: number) => {
-  const fallback = resolvedPageSizeOptions.value[0] ?? props.defaultPageSize
-  const next = value > 0 ? value : fallback
+  const next = value > 0 ? value : INITIAL_PAGE_SIZE
   if (next === innerPageSize.value) return
   innerPageSize.value = next
   emit('update:pageSize', next)
-  updatePage(1)
+  updatePage(INITIAL_PAGE)
 }
 
 watch(
   () => innerPageSize.value,
   (value) => {
     if (value > 0) return
-    updatePageSize(resolvedPageSizeOptions.value[0] ?? props.defaultPageSize)
+    innerPageSize.value = INITIAL_PAGE_SIZE
+    updatePage(INITIAL_PAGE)
   },
   { immediate: true },
 )
@@ -126,7 +107,7 @@ watch(
   [() => totalItems.value, () => innerPageSize.value],
   () => {
     if (totalItems.value === 0) {
-      updatePage(1)
+      updatePage(INITIAL_PAGE)
       return
     }
     if (innerPage.value > pageCount.value) {
@@ -181,7 +162,6 @@ const visibleRows = computed<InternalRow[]>(() => {
 const hasRows = computed(() => props.items.length > 0)
 
 const shouldShowPagination = computed(() => {
-  if (props.disablePagination) return false
   if (totalItems.value === 0) return false
   if (props.items.length === 0) return false
   return pageCount.value > 1 || totalItems.value > innerPageSize.value
@@ -192,7 +172,7 @@ const shouldShowPagination = computed(() => {
   <div class="space-y-4">
     <div class="overflow-hidden rounded-md border">
       <Table>
-        <TableHeader v-if="showHeader">
+        <TableHeader>
           <TableRow>
             <TableHead
               v-for="column in columns"
@@ -250,7 +230,7 @@ const shouldShowPagination = computed(() => {
           <TableEmpty :colspan="columns.length">
             <slot name="empty">
               <div class="py-8 text-center text-sm text-muted-foreground">
-                {{ emptyState }}
+                {{ EMPTY_STATE_MESSAGE }}
               </div>
             </slot>
           </TableEmpty>
@@ -263,7 +243,6 @@ const shouldShowPagination = computed(() => {
       :page="innerPage"
       :page-count="pageCount"
       :page-size="innerPageSize"
-      :page-size-options="resolvedPageSizeOptions"
       :show-page-size-selector="showPageSizeSelector"
       :total-items="totalItems"
       @update:page="updatePage"

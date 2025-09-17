@@ -9,18 +9,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+const DEFAULT_PAGE_SIZE_OPTIONS = [20, 50, 100]
+
 const props = withDefaults(
   defineProps<{
     page: number
     pageCount: number
     pageSize: number
-    pageSizeOptions?: number[]
     totalItems: number
     disabled?: boolean
     showPageSizeSelector?: boolean
   }>(),
   {
-    pageSizeOptions: () => [20, 50, 100],
     disabled: false,
     showPageSizeSelector: true,
   },
@@ -35,9 +35,10 @@ const safePageCount = computed(() => Math.max(1, props.pageCount))
 const currentPage = computed(() => Math.min(Math.max(props.page, 1), safePageCount.value))
 
 const pageSizeOptions = computed(() => {
-  const opts = (props.pageSizeOptions ?? []).filter((option) => option > 0)
-  if (!opts.length) return [props.pageSize]
-  return Array.from(new Set([...opts, props.pageSize])).sort((a, b) => a - b)
+  if (!DEFAULT_PAGE_SIZE_OPTIONS.includes(props.pageSize)) {
+    return [...DEFAULT_PAGE_SIZE_OPTIONS, props.pageSize].sort((a, b) => a - b)
+  }
+  return DEFAULT_PAGE_SIZE_OPTIONS
 })
 
 const canGoPrevious = computed(() => !props.disabled && currentPage.value > 1)
