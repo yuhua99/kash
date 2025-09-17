@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -22,11 +22,14 @@ import { formatSignedCurrency } from '@/lib/formatters'
 interface Props {
   transactions: Transaction[]
   totalTransactions: number
+  page?: number
+  pageSize?: number
 }
 
 interface Emits {
   (e: 'deleteTransaction', id: string): void
   (e: 'editTransaction', transaction: Transaction): void
+  (e: 'page-change', page: number): void
 }
 
 const props = defineProps<Props>()
@@ -52,7 +55,15 @@ const handleDeleteTransaction = (id: string) => {
   emit('deleteTransaction', id)
 }
 
-const page = ref(1)
+const internalPage = ref(props.page ?? 1)
+
+const page = computed({
+  get: () => (props.page === undefined ? internalPage.value : props.page),
+  set: (value: number) => {
+    internalPage.value = value
+    emit('page-change', value)
+  },
+})
 
 const columns: DataTableColumn<Transaction>[] = [
   {
@@ -102,6 +113,8 @@ const columns: DataTableColumn<Transaction>[] = [
         :items="props.transactions"
         :columns="columns"
         :total-items="props.totalTransactions"
+        :page-size="props.pageSize ?? 500"
+        :default-page-size="props.pageSize ?? 500"
         :show-page-size-selector="false"
         row-key="id"
       >

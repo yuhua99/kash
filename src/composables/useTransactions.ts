@@ -10,9 +10,9 @@ export function useTransactions() {
   const store = useRecordsStore()
 
   // State
-  const records = computed(() => store.records)
-  const transactions = computed(() => store.transactions)
-  const totalTransactions = computed(() => store.totalRecords)
+  const records = computed(() => store.latestRecords)
+  const transactions = computed(() => store.latestTransactions)
+  const totalTransactions = computed(() => store.latestTotalRecords)
   const isLoading = computed(() => store.isLoading)
   const error = computed(() => store.error)
 
@@ -32,8 +32,7 @@ export function useTransactions() {
   const transactionCount = computed(() => transactions.value.length)
 
   // Methods
-  const fetchRecords = (filters?: { start_time?: number; end_time?: number; limit?: number }) =>
-    store.fetchRecords(filters)
+  const fetchRecords = () => store.fetchLatestRecords()
 
   const createRecord = (payload: CreateRecordPayload) => store.createRecord(payload)
   const updateRecord = (id: string, payload: UpdateRecordPayload) => store.updateRecord(id, payload)

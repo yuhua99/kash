@@ -49,6 +49,7 @@ defineSlots<
 const emit = defineEmits<{
   (e: 'update:page', value: number): void
   (e: 'update:pageSize', value: number): void
+  (e: 'page-change', value: number): void
 }>()
 
 const innerPage = ref(props.page ?? props.defaultPage)
@@ -100,6 +101,7 @@ const updatePage = (value: number) => {
   if (next === innerPage.value) return
   innerPage.value = next
   emit('update:page', next)
+  emit('page-change', next)
 }
 
 const updatePageSize = (value: number) => {
@@ -173,18 +175,7 @@ const buildRow = (row: T, index: number): InternalRow => ({
 })
 
 const visibleRows = computed<InternalRow[]>(() => {
-  if (props.disablePagination) {
-    return props.items.map((row, index) => buildRow(row, index))
-  }
-
-  if (!innerPageSize.value || innerPageSize.value <= 0) {
-    return []
-  }
-
-  const start = (innerPage.value - 1) * innerPageSize.value
-  return props.items
-    .slice(start, start + innerPageSize.value)
-    .map((row, index) => buildRow(row, start + index))
+  return props.items.map((row, index) => buildRow(row, index))
 })
 
 const hasRows = computed(() => props.items.length > 0)

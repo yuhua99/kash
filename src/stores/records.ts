@@ -15,8 +15,10 @@ import { TransactionType, PeriodUnit } from '@/types'
 import { getRangeForPeriod } from '@/lib/timeRange'
 
 export const useRecordsStore = defineStore('records', () => {
-  const records = ref<ApiRecord[]>([])
-  const totalRecords = ref(0)
+  const latestRecords = ref<ApiRecord[]>([])
+  const latestTotalRecords = ref(0)
+  const viewRecords = ref<ApiRecord[]>([])
+  const viewTotalRecords = ref(0)
   const { isLoading, error, clearError, executeRequest } = useApiRequest()
 
   const categoriesStore = useCategoriesStore()
@@ -36,44 +38,54 @@ export const useRecordsStore = defineStore('records', () => {
     }
   }
 
-  const transactions = computed<Transaction[]>(() => {
-    return records.value.map(convertApiRecordToTransaction)
+  const latestTransactions = computed<Transaction[]>(() => {
+    return latestRecords.value.map(convertApiRecordToTransaction)
+  })
+
+  const viewTransactions = computed<Transaction[]>(() => {
+    return viewRecords.value.map(convertApiRecordToTransaction)
   })
 
   // Aggregate summaries moved to view-level period calculations
 
-  const fetchRecords = async (filters?: {
-    start_time?: number
-    end_time?: number
-    limit?: number
-    offset?: number
-  }): Promise<boolean> => {
-    let endpoint = '/records'
-    // Default to YEAR when no filters provided
-    if (!filters) {
-      const { start, end } = getRangeForPeriod(PeriodUnit.YEAR)
-      filters = { start_time: start, end_time: end }
+  const runFetch = async (
+    filters: {
+      start_time?: number
+      end_time?: number
+      limit?: number
+      offset?: number
+    },
+    targetRecords: typeof latestRecords,
+    targetTotal: typeof latestTotalRecords,
+  ): Promise<boolean> => {
+    const params = new URLSearchParams()
+    const limit = filters.limit ?? 500
+    const offset = filters.offset ?? 0
+
+    if (filters.start_time !== undefined) {
+      params.append('start_time', filters.start_time.toString())
+    }
+    if (filters.end_time !== undefined) {
+      params.append('end_time', filters.end_time.toString())
+    }
+    params.append('limit', limit.toString())
+    if (offset > 0) {
+      params.append('offset', offset.toString())
     }
 
-    const { start_time, end_time, limit = 500, offset = 0 } = filters
-    const params = new URLSearchParams()
-
-    if (start_time) params.append('start_time', start_time.toString())
-    if (end_time) params.append('end_time', end_time.toString())
-    params.append('limit', limit.toString())
-    if (offset) params.append('offset', offset.toString())
-
-    if (params.toString()) {
-      endpoint += `?${params.toString()}`
+    let endpoint = '/records'
+    const query = params.toString()
+    if (query) {
+      endpoint += `?${query}`
     }
 
     const data = await executeRequest(() => api.get<RecordsResponse>(endpoint), {
       onSuccess: (response) => {
-        records.value = response.records
-        totalRecords.value = response.total_count ?? response.records.length
+        targetRecords.value = response.records
+        targetTotal.value = response.total_count ?? response.records.length
       },
       onError: () => {
-        totalRecords.value = 0
+        targetTotal.value = 0
       },
     })
 
@@ -84,10 +96,34 @@ export const useRecordsStore = defineStore('records', () => {
     return true
   }
 
+  const fetchLatestRecords = async (): Promise<boolean> => {
+    const { start, end } = getRangeForPeriod(PeriodUnit.YEAR)
+    return runFetch(
+      {
+        start_time: start,
+        end_time: end,
+        limit: 500,
+        offset: 0,
+      },
+      latestRecords,
+      latestTotalRecords,
+    )
+  }
+
+  const fetchRecordsForPeriod = async (filters: {
+    start_time: number
+    end_time: number
+    limit?: number
+    offset?: number
+  }): Promise<boolean> => {
+    return runFetch(filters, viewRecords, viewTotalRecords)
+  }
+
   const createRecord = async (payload: CreateRecordPayload): Promise<ApiRecord | null> => {
     const data = await executeRequest(() => api.post<ApiRecord>('/records', payload), {
       onSuccess: (newRecord) => {
-        records.value.unshift(newRecord) // Add to beginning for chronological order
+        latestRecords.value.unshift(newRecord) // Add to beginning for chronological order
+        latestTotalRecords.value += 1
       },
     })
 
@@ -97,9 +133,9 @@ export const useRecordsStore = defineStore('records', () => {
   const updateRecord = async (id: string, payload: UpdateRecordPayload): Promise<boolean> => {
     const data = await executeRequest(() => api.put<ApiRecord>(`/records/${id}`, payload), {
       onSuccess: (updatedRecord) => {
-        const index = records.value.findIndex((record) => record.id === id)
+        const index = latestRecords.value.findIndex((record) => record.id === id)
         if (index !== -1) {
-          records.value[index] = updatedRecord
+          latestRecords.value[index] = updatedRecord
         }
       },
     })
@@ -110,7 +146,8 @@ export const useRecordsStore = defineStore('records', () => {
   const deleteRecord = async (id: string): Promise<boolean> => {
     const success = await executeRequest(() => api.delete<void>(`/records/${id}`), {
       onSuccess: () => {
-        records.value = records.value.filter((record) => record.id !== id)
+        latestRecords.value = latestRecords.value.filter((record) => record.id !== id)
+        latestTotalRecords.value = Math.max(0, latestTotalRecords.value - 1)
       },
     })
 
@@ -118,12 +155,16 @@ export const useRecordsStore = defineStore('records', () => {
   }
 
   return {
-    records,
-    transactions,
-    totalRecords,
+    latestRecords,
+    latestTransactions,
+    latestTotalRecords,
+    viewRecords,
+    viewTransactions,
+    viewTotalRecords,
     isLoading,
     error,
-    fetchRecords,
+    fetchLatestRecords,
+    fetchRecordsForPeriod,
     createRecord,
     updateRecord,
     deleteRecord,

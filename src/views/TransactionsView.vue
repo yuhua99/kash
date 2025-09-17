@@ -22,6 +22,7 @@ const recordsStore = useRecordsStore()
 const categoriesStore = useCategoriesStore()
 
 // Filter and search state
+const PAGE_SIZE = 500
 const searchQuery = ref('')
 const selectedCategory = ref('all')
 const now = new Date()
@@ -29,6 +30,7 @@ const defaultStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).g
 const defaultEnd =
   Math.floor(new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime() / 1000) - 1
 const selectedRange = ref<Range>({ start: defaultStart, end: defaultEnd })
+const currentPage = ref(1)
 
 const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
@@ -36,15 +38,12 @@ const isLoading = computed(
 
 // Get unique categories for filter dropdown
 const availableCategories = computed(() => {
-  const categories = new Set(recordsStore.transactions.map((t) => t.category))
+  const categories = new Set(recordsStore.viewTransactions.map((t) => t.category))
   return Array.from(categories).sort()
 })
 
 const filteredTransactions = computed(() => {
-  let filtered = [...recordsStore.transactions]
-
-  const { start, end } = selectedRange.value
-  filtered = filtered.filter((t) => t.timestamp >= start && t.timestamp <= end)
+  let filtered = [...recordsStore.viewTransactions]
 
   // Apply search filter
   if (searchQuery.value.trim()) {
@@ -60,9 +59,7 @@ const filteredTransactions = computed(() => {
   return filtered
 })
 
-const totalTransactions = computed(() =>
-  recordsStore.totalRecords > 0 ? recordsStore.totalRecords : recordsStore.transactions.length,
-)
+const totalTransactions = computed(() => recordsStore.viewTotalRecords)
 
 // Summary statistics for filtered transactions
 const filteredStats = computed(() => {
@@ -79,6 +76,18 @@ const filteredStats = computed(() => {
     netAmount: totalIncome - totalExpenses,
   }
 })
+
+const fetchTransactionsForRange = async () => {
+  const { start, end } = selectedRange.value
+  if (!start || !end) return
+
+  await recordsStore.fetchRecordsForPeriod({
+    start_time: start,
+    end_time: end,
+    limit: PAGE_SIZE,
+    offset: (currentPage.value - 1) * PAGE_SIZE,
+  })
+}
 
 const addTransaction = async (newTransaction: Transaction) => {
   const category = categoriesStore.categories.find((cat) => cat.name === newTransaction.category)
@@ -120,17 +129,35 @@ const deleteTransaction = async (id: string) => {
 
 const loadData = async () => {
   await categoriesStore.fetchCategories()
-  await recordsStore.fetchRecords()
+  await recordsStore.fetchLatestRecords()
+  currentPage.value = 1
+  await fetchTransactionsForRange()
 }
 
-const onFiltersApply = (payload: { range: Range; category: string }) => {
-  selectedRange.value = payload.range
-  selectedCategory.value = payload.category
+const onFiltersApply = async (payload: { range: Range; category: string }) => {
+  const { range, category } = payload
+  const hasRangeChanged =
+    range.start !== selectedRange.value.start || range.end !== selectedRange.value.end
+
+  selectedRange.value = range
+  selectedCategory.value = category
+
+  if (hasRangeChanged) {
+    currentPage.value = 1
+  }
+
+  await fetchTransactionsForRange()
 }
 
 onMounted(() => {
   loadData()
 })
+
+const onPageChange = async (page: number) => {
+  if (page === currentPage.value) return
+  currentPage.value = page
+  await fetchTransactionsForRange()
+}
 </script>
 
 <template>
@@ -293,8 +320,11 @@ onMounted(() => {
           <TransactionsTable
             :transactions="filteredTransactions"
             :total-transactions="totalTransactions"
+            :page="currentPage"
+            :page-size="PAGE_SIZE"
             @edit-transaction="editTransaction"
             @delete-transaction="deleteTransaction"
+            @page-change="onPageChange"
           />
         </CardContent>
       </Card>

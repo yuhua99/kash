@@ -7,7 +7,7 @@ export function useTransactionHelpers() {
     if (!amount || !category || isNaN(parseFloat(amount))) return []
 
     const targetAmount = Math.abs(parseFloat(amount))
-    const existingTransactions = [...recordsStore.transactions]
+    const existingTransactions = [...recordsStore.latestTransactions]
 
     // Filter to recent transactions (last 6 months)
     const sixMonthsAgo = Math.floor(Date.now() / 1000) - 6 * 30 * 24 * 60 * 60

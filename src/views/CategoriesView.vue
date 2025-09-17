@@ -39,7 +39,7 @@ const filteredCategories = computed(() => {
 // Category statistics
 const categoryStats = computed(() => {
   const stats = filteredCategories.value.map((category) => {
-    const categoryTransactions = recordsStore.transactions.filter(
+    const categoryTransactions = recordsStore.latestTransactions.filter(
       (t) => t.category === category.name,
     )
     const totalTransactions = categoryTransactions.length
@@ -83,7 +83,7 @@ const onCategorySaved = () => {
 
 const loadData = async () => {
   await categoriesStore.fetchCategories()
-  await recordsStore.fetchRecords()
+  await recordsStore.fetchLatestRecords()
 }
 
 onMounted(() => {
