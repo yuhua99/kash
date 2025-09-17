@@ -22,7 +22,7 @@ const recordsStore = useRecordsStore()
 const categoriesStore = useCategoriesStore()
 
 // Filter and search state
-const PAGE_SIZE = 500
+const PAGE_SIZE = 100
 const searchQuery = ref('')
 const selectedCategory = ref('all')
 const now = new Date()

@@ -113,8 +113,7 @@ const columns: DataTableColumn<Transaction>[] = [
         :items="props.transactions"
         :columns="columns"
         :total-items="props.totalTransactions"
-        :page-size="props.pageSize ?? 500"
-        :default-page-size="props.pageSize ?? 500"
+        :page-size="props.pageSize"
         :show-page-size-selector="false"
         row-key="id"
       >
