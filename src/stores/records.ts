@@ -16,6 +16,7 @@ import { getRangeForPeriod } from '@/lib/timeRange'
 
 export const useRecordsStore = defineStore('records', () => {
   const records = ref<ApiRecord[]>([])
+  const totalRecords = ref(0)
   const { isLoading, error, clearError, executeRequest } = useApiRequest()
 
   const categoriesStore = useCategoriesStore()
@@ -69,10 +70,18 @@ export const useRecordsStore = defineStore('records', () => {
     const data = await executeRequest(() => api.get<RecordsResponse>(endpoint), {
       onSuccess: (response) => {
         records.value = response.records
+        totalRecords.value = response.total_count ?? response.records.length
+      },
+      onError: () => {
+        totalRecords.value = 0
       },
     })
 
-    return !!data
+    if (data === null) {
+      return false
+    }
+
+    return true
   }
 
   const createRecord = async (payload: CreateRecordPayload): Promise<ApiRecord | null> => {
@@ -111,6 +120,7 @@ export const useRecordsStore = defineStore('records', () => {
   return {
     records,
     transactions,
+    totalRecords,
     isLoading,
     error,
     fetchRecords,

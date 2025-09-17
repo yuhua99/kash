@@ -60,6 +60,10 @@ const filteredTransactions = computed(() => {
   return filtered
 })
 
+const totalTransactions = computed(() =>
+  recordsStore.totalRecords > 0 ? recordsStore.totalRecords : recordsStore.transactions.length,
+)
+
 // Summary statistics for filtered transactions
 const filteredStats = computed(() => {
   const transactions = filteredTransactions.value
@@ -265,8 +269,7 @@ onMounted(() => {
             <div>
               <CardTitle>Transaction History</CardTitle>
               <CardDescription>
-                Showing {{ filteredTransactions.length }} of
-                {{ recordsStore.transactions.length }} transactions
+                Showing {{ filteredTransactions.length }} of {{ totalTransactions }} transactions
               </CardDescription>
             </div>
             <div class="flex items-center gap-2">
@@ -289,6 +292,7 @@ onMounted(() => {
         <CardContent class="px-6 pb-6">
           <TransactionsTable
             :transactions="filteredTransactions"
+            :total-transactions="totalTransactions"
             @edit-transaction="editTransaction"
             @delete-transaction="deleteTransaction"
           />

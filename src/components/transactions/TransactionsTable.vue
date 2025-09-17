@@ -3,20 +3,14 @@ import { ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { DataTable } from '@/components/ui/data-table'
+import type { DataTableColumn } from '@/components/ui/data-table'
 import { Edit, Trash2, MoreHorizontal } from 'lucide-vue-next'
 import AddTransactionDialog from './AddTransactionDialog.vue'
 import MobileTransactionsList from './MobileTransactionsList.vue'
@@ -27,6 +21,7 @@ import { formatSignedCurrency } from '@/lib/formatters'
 
 interface Props {
   transactions: Transaction[]
+  totalTransactions: number
 }
 
 interface Emits {
@@ -34,8 +29,9 @@ interface Emits {
   (e: 'editTransaction', transaction: Transaction): void
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
 const categoriesStore = useCategoriesStore()
 const global = useGlobalStore()
 
@@ -52,106 +48,132 @@ const handleEditTransaction = (transaction: Transaction) => {
   emit('editTransaction', transaction)
 }
 
-// Simplify badge styling; color dot already conveys category
+const handleDeleteTransaction = (id: string) => {
+  emit('deleteTransaction', id)
+}
+
+const page = ref(1)
+
+const columns: DataTableColumn<Transaction>[] = [
+  {
+    key: 'timeStr',
+    label: 'Date',
+    cellClass: 'font-mono text-sm',
+    width: 'w-[8rem]',
+  },
+  {
+    key: 'category',
+    label: 'Category',
+    width: 'w-[12rem]',
+  },
+  {
+    key: 'name',
+    label: 'Description',
+    cellClass: 'font-medium',
+  },
+  {
+    key: 'amount',
+    label: 'Amount',
+    align: 'right',
+    cellClass: 'font-mono',
+    width: 'w-[8rem]',
+  },
+  {
+    key: 'actions',
+    label: 'Actions',
+    align: 'center',
+    width: 'w-[100px]',
+  },
+]
 </script>
 
 <template>
   <div>
-    <!-- Mobile: Card list -->
     <MobileTransactionsList
       v-if="global.isMobile"
-      :transactions="transactions"
-      @delete-transaction="(id: string) => $emit('deleteTransaction', id)"
+      :transactions="props.transactions"
+      @delete-transaction="(id: string) => handleDeleteTransaction(id)"
       @open-edit="openEditDialog"
     />
 
-    <!-- Desktop: Table -->
-    <div v-else>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead class="w-[8rem]">Date</TableHead>
-            <TableHead class="w-[12rem]">Category</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead class="w-[8rem] text-right">Amount</TableHead>
-            <TableHead class="w-[100px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow
-            v-for="transaction in transactions"
-            :key="transaction.id"
-            class="hover:bg-muted/50"
+    <template v-else>
+      <DataTable
+        v-model:page="page"
+        :items="props.transactions"
+        :columns="columns"
+        :total-items="props.totalTransactions"
+        :show-page-size-selector="false"
+        row-key="id"
+      >
+        <template #cell-category="{ row }">
+          <div class="flex items-center gap-2">
+            <div
+              class="h-3 w-3 flex-shrink-0 rounded-full border border-border"
+              :style="{ backgroundColor: categoriesStore.getCategoryColor(row.category_id) }"
+            />
+            <Badge variant="secondary">
+              {{ row.category }}
+            </Badge>
+          </div>
+        </template>
+
+        <template #cell-name="{ row }">
+          <span class="font-medium">{{ row.name }}</span>
+        </template>
+
+        <template #cell-amount="{ row }">
+          <span
+            :class="[
+              'font-semibold font-mono',
+              row.amount > 0
+                ? 'text-[hsl(var(--vis-secondary-color))]'
+                : 'text-[hsl(var(--vis-primary-color))]',
+            ]"
           >
-            <TableCell class="font-mono text-sm">{{ transaction.timeStr }}</TableCell>
-            <TableCell>
-              <div class="flex items-center space-x-2">
-                <div
-                  class="w-3 h-3 rounded-full border border-border flex-shrink-0"
-                  :style="{
-                    backgroundColor: categoriesStore.getCategoryColor(transaction.category_id),
-                  }"
-                ></div>
-                <Badge variant="secondary">
-                  {{ transaction.category }}
-                </Badge>
-              </div>
-            </TableCell>
-            <TableCell class="font-medium">
-              {{ transaction.name }}
-            </TableCell>
-            <TableCell class="text-right font-mono">
-              <span
-                :class="[
-                  'font-semibold',
-                  transaction.amount > 0
-                    ? 'text-[hsl(var(--vis-secondary-color))]'
-                    : 'text-[hsl(var(--vis-primary-color))]',
-                ]"
+            {{ formatSignedCurrency(row.amount) }}
+          </span>
+        </template>
+
+        <template #cell-actions="{ row }">
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" class="h-8 w-8 p-0">
+                <MoreHorizontal class="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @click="openEditDialog(row)">
+                <Edit class="h-4 w-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                class="text-destructive focus:text-destructive"
+                @click="handleDeleteTransaction(row.id)"
               >
-                {{ formatSignedCurrency(transaction.amount) }}
-              </span>
-            </TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button variant="ghost" class="h-8 w-8 p-0">
-                    <MoreHorizontal class="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem @click="openEditDialog(transaction)">
-                    <Edit class="h-4 w-4 mr-2" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    class="text-destructive focus:text-destructive"
-                    @click="$emit('deleteTransaction', transaction.id)"
-                  >
-                    <Trash2 class="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
+                <Trash2 class="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </template>
 
-    <!-- Empty State -->
-    <div v-if="transactions.length === 0" class="text-center py-12 border-t">
-      <div class="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-        <MoreHorizontal class="h-8 w-8 text-muted-foreground" />
-      </div>
-      <p class="text-muted-foreground text-lg font-medium mb-2">No transactions found</p>
-      <p class="text-sm text-muted-foreground">
-        Try adjusting your search or filters, or add your first transaction
-      </p>
-    </div>
+        <template #empty>
+          <div class="py-12 text-center">
+            <div
+              class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-muted"
+            >
+              <MoreHorizontal class="h-8 w-8 text-muted-foreground" />
+            </div>
+            <p class="text-lg font-medium text-muted-foreground">No transactions found</p>
+            <p class="text-sm text-muted-foreground">
+              Try adjusting your search or filters, or add your first transaction
+            </p>
+          </div>
+        </template>
+      </DataTable>
+    </template>
 
-    <!-- Edit Transaction Dialog -->
     <AddTransactionDialog
       v-model:open="editDialogOpen"
       :edit-transaction="editingTransaction"

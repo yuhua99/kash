@@ -12,6 +12,7 @@ export function useTransactions() {
   // State
   const records = computed(() => store.records)
   const transactions = computed(() => store.transactions)
+  const totalTransactions = computed(() => store.totalRecords)
   const isLoading = computed(() => store.isLoading)
   const error = computed(() => store.error)
 
@@ -56,6 +57,7 @@ export function useTransactions() {
     // Raw data
     records,
     transactions,
+    totalTransactions,
 
     // State
     isLoading,
