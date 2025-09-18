@@ -14,12 +14,19 @@ import { Search, MoreHorizontal, Edit, Trash2, Plus } from 'lucide-vue-next'
 import type { Category } from '@/types/category'
 
 import { useCategoriesStore } from '@/stores/categories'
+import { Skeleton, SkeletonCircle, SkeletonText } from '@/components/ui/skeleton'
 
-const props = defineProps<{
-  categories: Category[]
-  searchQuery: string
-  isSearching?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    categories: Category[]
+    searchQuery: string
+    isSearching?: boolean
+    loading?: boolean
+  }>(),
+  {
+    loading: false,
+  },
+)
 
 const emit = defineEmits<{
   (e: 'update:searchQuery', value: string): void
@@ -38,18 +45,23 @@ const categoriesStore = useCategoriesStore()
 <template>
   <!-- Search Bar -->
   <div class="relative mb-4">
-    <Search
-      class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
-    />
-    <Input
-      :model-value="props.searchQuery"
-      @update:modelValue="(val) => emit('update:searchQuery', val as string)"
-      placeholder="Search categories..."
-      class="pl-10"
-    />
+    <template v-if="props.loading">
+      <Skeleton variant="input" size="md" class="w-full" />
+    </template>
+    <template v-else>
+      <Search
+        class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
+      />
+      <Input
+        :model-value="props.searchQuery"
+        @update:modelValue="(val) => emit('update:searchQuery', val as string)"
+        placeholder="Search categories..."
+        class="pl-10"
+      />
+    </template>
   </div>
 
-  <div v-if="hasNoCategories" class="text-center py-8">
+  <div v-if="!props.loading && hasNoCategories" class="text-center py-8">
     <template v-if="props.isSearching">
       <p class="text-muted-foreground">No categories match your search</p>
     </template>
@@ -62,6 +74,20 @@ const categoriesStore = useCategoriesStore()
         </Button>
       </CategoryDialog>
     </template>
+  </div>
+
+  <div v-else-if="props.loading" class="space-y-2">
+    <div
+      v-for="index in 6"
+      :key="`category-skeleton-${index}`"
+      class="flex items-center justify-between p-3 rounded-lg border"
+    >
+      <div class="flex items-center space-x-3">
+        <SkeletonCircle size="sm" />
+        <SkeletonText class="w-32" size="md" />
+      </div>
+      <Skeleton variant="chip" size="sm" class="w-20" />
+    </div>
   </div>
 
   <div v-else class="space-y-2">

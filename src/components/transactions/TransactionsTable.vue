@@ -18,12 +18,14 @@ import { useCategoriesStore } from '@/stores/categories'
 import { useGlobalStore } from '@/stores/global'
 import type { Transaction } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
+import { Skeleton, SkeletonText } from '@/components/ui/skeleton'
 
 interface Props {
   transactions: Transaction[]
   totalTransactions: number
   page?: number
   pageSize?: number
+  loading?: boolean
 }
 
 interface Emits {
@@ -32,7 +34,9 @@ interface Emits {
   (e: 'page-change', page: number): void
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  loading: false,
+})
 const emit = defineEmits<Emits>()
 
 const categoriesStore = useCategoriesStore()
@@ -100,12 +104,31 @@ const columns: DataTableColumn<Transaction>[] = [
 
 <template>
   <div>
-    <MobileTransactionsList
-      v-if="global.isMobile"
-      :transactions="props.transactions"
-      @delete-transaction="(id: string) => handleDeleteTransaction(id)"
-      @open-edit="openEditDialog"
-    />
+    <template v-if="global.isMobile">
+      <div v-if="props.loading" class="space-y-3">
+        <div
+          v-for="index in 6"
+          :key="`mobile-skeleton-${index}`"
+          class="rounded-lg border p-4 space-y-3"
+        >
+          <div class="flex items-center justify-between">
+            <SkeletonText class="w-24" size="sm" />
+            <SkeletonText class="w-16" size="sm" />
+          </div>
+          <SkeletonText class="w-3/4" size="md" />
+          <div class="flex items-center justify-between">
+            <Skeleton variant="chip" size="sm" class="w-24" />
+            <SkeletonText class="w-20" size="md" />
+          </div>
+        </div>
+      </div>
+      <MobileTransactionsList
+        v-else
+        :transactions="props.transactions"
+        @delete-transaction="(id: string) => handleDeleteTransaction(id)"
+        @open-edit="openEditDialog"
+      />
+    </template>
 
     <template v-else>
       <DataTable
@@ -115,6 +138,8 @@ const columns: DataTableColumn<Transaction>[] = [
         :total-items="props.totalTransactions"
         :page-size="props.pageSize"
         :show-page-size-selector="false"
+        :loading="props.loading"
+        :skeleton-rows="10"
         row-key="id"
       >
         <template #cell-category="{ row }">

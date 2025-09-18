@@ -8,18 +8,21 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CalendarDays } from 'lucide-vue-next'
+import { Skeleton, SkeletonText } from '@/components/ui/skeleton'
 import { PeriodUnit } from '@/types'
 
 interface Props {
   title?: string
+  loading?: boolean
 }
 
 interface Emits {
   periodChange: [period: PeriodUnit]
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   title: 'Dashboard',
+  loading: false,
 })
 
 const emit = defineEmits<Emits>()
@@ -43,10 +46,12 @@ watch(
       class="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0"
     >
       <div>
-        <h2 class="text-2xl font-bold tracking-tight">{{ title }}</h2>
+        <SkeletonText v-if="props.loading" class="w-40" size="xl" />
+        <h2 v-else class="text-2xl font-bold tracking-tight">{{ props.title }}</h2>
       </div>
       <div class="flex items-center space-x-2">
-        <Select v-model="selectedPeriod">
+        <Skeleton v-if="props.loading" variant="input" size="md" class="w-48" />
+        <Select v-else v-model="selectedPeriod">
           <SelectTrigger class="w-48">
             <CalendarDays class="mr-2 h-4 w-4" />
             <SelectValue placeholder="Select period" />

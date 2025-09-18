@@ -3,7 +3,6 @@ import { computed, onMounted, ref } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import CategoryHeader from '@/components/categories/CategoryHeader.vue'
 import CategoryDialog from '@/components/categories/CategoryDialog.vue'
-import CategoriesLoadingSkeleton from '@/components/categories/CategoriesLoadingSkeleton.vue'
 import CategoriesManagementPanel from '@/components/categories/CategoriesManagementPanel.vue'
 import CategoryStatsTable from '@/components/categories/CategoryStatsTable.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -94,15 +93,10 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
-    <CategoryHeader />
-
-    <!-- Loading State -->
-    <div v-if="isLoading" class="space-y-6">
-      <CategoriesLoadingSkeleton />
-    </div>
+    <CategoryHeader :loading="isLoading" />
 
     <!-- Main Content -->
-    <div v-else-if="authStore.isAuthenticated" class="space-y-6">
+    <div v-if="authStore.isAuthenticated" class="space-y-6">
       <div class="grid gap-6 md:grid-cols-2">
         <!-- Category Management -->
         <Card>
@@ -119,6 +113,7 @@ onMounted(() => {
               :categories="filteredCategories"
               v-model:searchQuery="searchQuery"
               :is-searching="searchQuery.trim().length > 0"
+              :loading="isLoading"
               @edit="handleEditCategory"
               @delete="handleDeleteCategory"
               @category-saved="onCategorySaved"
@@ -135,12 +130,12 @@ onMounted(() => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <CategoryStatsTable :stats="categoryStats" />
+            <CategoryStatsTable :stats="categoryStats" :loading="isLoading" />
           </CardContent>
         </Card>
       </div>
 
-      <CategoryDialog @category-saved="onCategorySaved">
+      <CategoryDialog v-if="!isLoading" @category-saved="onCategorySaved">
         <FloatingButton aria-label="Add category">
           <Plus class="h-6 w-6" />
         </FloatingButton>

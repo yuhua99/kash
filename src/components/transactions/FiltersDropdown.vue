@@ -18,11 +18,13 @@ import {
 import { Filter } from 'lucide-vue-next'
 import { useGlobalStore } from '@/stores/global'
 import type { Range } from '@/types'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface Props {
   range: Range
   category: string
   categories: string[]
+  loading?: boolean
 }
 
 interface Emits {
@@ -30,7 +32,9 @@ interface Emits {
   (e: 'clear'): void
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  loading: false,
+})
 const emit = defineEmits<Emits>()
 
 const localRange = ref<Range>({ ...props.range })
@@ -74,46 +78,49 @@ const onClear = () => {
 </script>
 
 <template>
-  <DropdownMenu>
-    <DropdownMenuTrigger as-child>
-      <Button variant="outline" size="default" aria-label="Open filters">
-        <Filter class="h-4 w-4 mr-2" />
-        Filters
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent
-      :align="global.isMobile ? 'center' : 'end'"
-      side="bottom"
-      class="w-[calc(100vw-2rem)] sm:w-[28rem] max-h-[70vh] p-2"
-    >
-      <div class="space-y-4">
-        <div class="space-y-2">
-          <div class="text-xs text-muted-foreground px-1">Period</div>
-          <PeriodRangeSelector @range-change="(r) => (localRange = r)" />
-        </div>
+  <div class="w-full sm:w-auto">
+    <Skeleton v-if="props.loading" variant="input" size="md" class="w-full sm:w-[180px]" />
+    <DropdownMenu v-else>
+      <DropdownMenuTrigger as-child>
+        <Button variant="outline" size="default" aria-label="Open filters">
+          <Filter class="h-4 w-4 mr-2" />
+          Filters
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        :align="global.isMobile ? 'center' : 'end'"
+        side="bottom"
+        class="w-[calc(100vw-2rem)] sm:w-[28rem] max-h-[70vh] p-2"
+      >
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <div class="text-xs text-muted-foreground px-1">Period</div>
+            <PeriodRangeSelector @range-change="(r) => (localRange = r)" />
+          </div>
 
-        <div class="space-y-2">
-          <div class="text-xs text-muted-foreground px-1">Category</div>
-          <Select v-model="localCategory">
-            <SelectTrigger class="w-full">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem v-for="c in categories" :key="c" :value="c">{{ c }}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <div class="space-y-2">
+            <div class="text-xs text-muted-foreground px-1">Category</div>
+            <Select v-model="localCategory">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem v-for="c in categories" :key="c" :value="c">{{ c }}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div class="grid grid-cols-2 gap-2 pt-2">
-          <DropdownMenuItem as-child>
-            <Button variant="outline" @click="onClear">Clear</Button>
-          </DropdownMenuItem>
-          <DropdownMenuItem as-child>
-            <Button @click="onApply">Apply</Button>
-          </DropdownMenuItem>
+          <div class="grid grid-cols-2 gap-2 pt-2">
+            <DropdownMenuItem as-child>
+              <Button variant="outline" @click="onClear">Clear</Button>
+            </DropdownMenuItem>
+            <DropdownMenuItem as-child>
+              <Button @click="onApply">Apply</Button>
+            </DropdownMenuItem>
+          </div>
         </div>
-      </div>
-    </DropdownMenuContent>
-  </DropdownMenu>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
 </template>

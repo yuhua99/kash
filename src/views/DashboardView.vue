@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import DashboardHeader from '@/components/dashboard/DashboardHeader.vue'
 import StatsCards from '@/components/dashboard/StatsCards.vue'
 import TrendDisplay from '@/components/dashboard/TrendDisplay.vue'
@@ -113,69 +110,13 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="space-y-8">
-      <!-- Dashboard Header Skeleton (title + single period select) -->
-      <div class="flex items-center justify-between">
-        <div>
-          <Skeleton class="h-8 w-64" />
-        </div>
-        <div class="flex items-center gap-4">
-          <Skeleton class="h-10 w-48" />
-        </div>
-      </div>
-
-      <!-- Stats Cards Skeleton -->
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card v-for="i in 4" :key="i">
-          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <Skeleton class="h-4 w-24" />
-            <Skeleton class="h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton class="h-8 w-24 mb-1" />
-            <Skeleton class="h-3 w-32" />
-          </CardContent>
-        </Card>
-      </div>
-
-      <Separator />
-
-      <!-- Charts Grid Skeleton (Trend + Spending by Category) -->
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card class="lg:col-span-4">
-          <CardHeader>
-            <Skeleton class="h-6 w-40 mb-2" />
-            <Skeleton class="h-4 w-64" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton class="h-64 w-full" />
-          </CardContent>
-        </Card>
-        <Card class="lg:col-span-3">
-          <CardHeader>
-            <Skeleton class="h-6 w-56 mb-2" />
-            <Skeleton class="h-4 w-40" />
-          </CardHeader>
-          <CardContent>
-            <div class="space-y-3">
-              <div v-for="i in 6" :key="i" class="flex items-center gap-3">
-                <Skeleton class="h-3 w-24" />
-                <Skeleton class="h-3 w-16 ml-auto" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div v-else-if="authStore.isAuthenticated" class="space-y-8">
+    <div v-if="authStore.isAuthenticated" class="space-y-8">
       <!-- Dashboard Header -->
-      <DashboardHeader @period-change="handlePeriodChange" />
+      <DashboardHeader :loading="isLoading" @period-change="handlePeriodChange" />
 
       <!-- Summary Cards -->
       <StatsCards
+        :loading="isLoading"
         :monthly-income="periodIncome"
         :monthly-expenses="periodExpenses"
         :savings-rate="periodSavingsRate"
@@ -185,13 +126,18 @@ const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
         <TrendDisplay
           class="lg:col-span-4"
+          :loading="isLoading"
           :transactions="sortedTransactions"
           :period="selectedPeriod"
         />
-        <SpendingByCategory class="lg:col-span-3" :transactions="periodTransactions" />
+        <SpendingByCategory
+          class="lg:col-span-3"
+          :loading="isLoading"
+          :transactions="periodTransactions"
+        />
       </div>
 
-      <AddTransactionDialog @add-transaction="addTransaction">
+      <AddTransactionDialog v-if="!isLoading" @add-transaction="addTransaction">
         <FloatingButton aria-label="Add transaction">
           <Plus class="h-6 w-6" />
         </FloatingButton>

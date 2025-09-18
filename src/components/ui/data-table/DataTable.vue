@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/table'
 import DataTablePagination from './DataTablePagination.vue'
 import type { DataTableColumn } from './types'
+import { SkeletonText } from '@/components/ui/skeleton'
 
 interface Props {
   items: T[]
@@ -20,6 +21,8 @@ interface Props {
   pageSize?: number
   showPageSizeSelector?: boolean
   totalItems: number
+  loading?: boolean
+  skeletonRows?: number
 }
 
 const INITIAL_PAGE = 1
@@ -28,6 +31,8 @@ const EMPTY_STATE_MESSAGE = 'No records found'
 
 const props = withDefaults(defineProps<Props>(), {
   showPageSizeSelector: true,
+  loading: false,
+  skeletonRows: 5,
 })
 
 defineSlots<
@@ -159,9 +164,16 @@ const visibleRows = computed<InternalRow[]>(() => {
   return props.items.map((row, index) => buildRow(row, index))
 })
 
-const hasRows = computed(() => props.items.length > 0)
+const hasRows = computed(() => !props.loading && props.items.length > 0)
+
+const placeholderRows = computed(() => {
+  const rows = Number(props.skeletonRows)
+  if (Number.isNaN(rows) || rows <= 0) return 3
+  return Math.min(rows, 15)
+})
 
 const shouldShowPagination = computed(() => {
+  if (props.loading) return false
   if (totalItems.value === 0) return false
   if (props.items.length === 0) return false
   return pageCount.value > 1 || totalItems.value > innerPageSize.value
@@ -194,7 +206,32 @@ const shouldShowPagination = computed(() => {
           </TableRow>
         </TableHeader>
 
-        <TableBody v-if="hasRows">
+        <TableBody v-if="props.loading">
+          <TableRow
+            v-for="rowIndex in placeholderRows"
+            :key="`skeleton-${rowIndex}`"
+            class="hover:bg-transparent"
+          >
+            <TableCell
+              v-for="column in columns"
+              :key="column.key"
+              :class="[
+                'align-middle text-sm',
+                column.cellClass,
+                column.width,
+                column.align === 'right'
+                  ? 'text-right'
+                  : column.align === 'center'
+                    ? 'text-center'
+                    : 'text-left',
+              ]"
+            >
+              <SkeletonText class="w-3/4" size="md" />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+
+        <TableBody v-else-if="hasRows">
           <TableRow v-for="rowData in visibleRows" :key="rowData.key" class="hover:bg-muted/50">
             <TableCell
               v-for="cell in rowData.cells"

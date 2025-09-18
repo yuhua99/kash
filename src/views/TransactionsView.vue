@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton, SkeletonText } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -241,7 +241,7 @@ const onPageChange = async (page: number) => {
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
-    <TransactionHeader />
+    <TransactionHeader :loading="isLoading" />
 
     <!-- Error State -->
     <div
@@ -262,57 +262,26 @@ const onPageChange = async (page: number) => {
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="space-y-6">
-      <!-- Search and Filters Skeleton -->
-      <div class="flex flex-col sm:flex-row gap-4">
-        <div class="flex-1">
-          <Skeleton class="h-10 w-full" />
-        </div>
-        <Skeleton class="h-10 w-[180px]" />
-        <Skeleton class="h-10 w-24" />
-      </div>
-
-      <!-- Filtered Stats Summary Skeleton -->
-      <div class="grid gap-4 md:grid-cols-4">
-        <Card v-for="i in 4" :key="i">
-          <CardContent class="p-4 space-y-2">
-            <Skeleton class="h-4 w-24" />
-            <Skeleton class="h-6 w-20" />
-          </CardContent>
-        </Card>
-      </div>
-
-      <!-- Transactions Table Skeleton -->
-      <Card>
-        <CardHeader>
-          <Skeleton class="h-6 w-32 mb-2" />
-          <Skeleton class="h-4 w-48" />
-        </CardHeader>
-        <CardContent>
-          <div class="space-y-4">
-            <div v-for="i in 10" :key="i" class="flex items-center space-x-4">
-              <Skeleton class="h-4 w-20" />
-              <Skeleton class="h-4 w-40" />
-              <Skeleton class="h-4 w-24" />
-              <Skeleton class="h-4 w-16" />
-              <Skeleton class="h-4 w-8" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-
     <!-- Main Content -->
-    <div v-else-if="authStore.isAuthenticated" class="space-y-6">
+    <div v-if="authStore.isAuthenticated" class="space-y-6">
       <!-- Search and Filters -->
       <div class="flex flex-col sm:flex-row gap-4">
         <!-- Search Bar -->
         <div class="relative flex-1">
-          <Search
-            class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
-          />
-          <Input v-model="searchQuery" placeholder="Search transactions..." class="pl-10" />
+          <template v-if="isLoading">
+            <Skeleton variant="input" size="md" class="w-full" />
+          </template>
+          <template v-else>
+            <Search
+              class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            />
+            <Input
+              v-model="searchQuery"
+              placeholder="Search transactions..."
+              class="pl-10"
+              :disabled="isLoading"
+            />
+          </template>
         </div>
 
         <!-- Filters: unified dropdown on all devices -->
@@ -321,50 +290,64 @@ const onPageChange = async (page: number) => {
             :range="selectedRange"
             :category="selectedCategory"
             :categories="availableCategories"
+            :loading="isLoading"
             @apply="onFiltersApply"
           />
         </div>
       </div>
 
       <!-- Stats Summary (when filtered) -->
-      <div v-if="searchQuery || selectedCategory !== 'all'" class="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardContent class="p-4">
-            <div class="text-sm text-muted-foreground">Filtered Results</div>
-            <div class="text-2xl font-bold">{{ filteredStats.count }}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent class="p-4">
-            <div class="text-sm text-muted-foreground">Income</div>
-            <div class="text-2xl font-bold text-[hsl(var(--vis-secondary-color))]">
-              {{ formatSignedCurrency(filteredStats.totalIncome) }}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent class="p-4">
-            <div class="text-sm text-muted-foreground">Expenses</div>
-            <div class="text-2xl font-bold text-[hsl(var(--vis-primary-color))]">
-              {{ formatSignedCurrency(-filteredStats.totalExpenses) }}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent class="p-4">
-            <div class="text-sm text-muted-foreground">Net</div>
-            <div
-              class="text-2xl font-bold"
-              :class="
-                filteredStats.netAmount >= 0
-                  ? 'text-[hsl(var(--vis-secondary-color))]'
-                  : 'text-[hsl(var(--vis-primary-color))]'
-              "
-            >
-              {{ formatSignedCurrency(filteredStats.netAmount) }}
-            </div>
-          </CardContent>
-        </Card>
+      <div
+        v-if="isLoading || searchQuery || selectedCategory !== 'all'"
+        class="grid gap-4 md:grid-cols-4"
+      >
+        <template v-if="isLoading">
+          <Card v-for="i in 4" :key="`summary-skeleton-${i}`">
+            <CardContent class="p-4 space-y-2">
+              <SkeletonText class="w-24" size="sm" />
+              <SkeletonText class="w-20" size="lg" />
+            </CardContent>
+          </Card>
+        </template>
+        <template v-else>
+          <Card>
+            <CardContent class="p-4">
+              <div class="text-sm text-muted-foreground">Filtered Results</div>
+              <div class="text-2xl font-bold">{{ filteredStats.count }}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="p-4">
+              <div class="text-sm text-muted-foreground">Income</div>
+              <div class="text-2xl font-bold text-[hsl(var(--vis-secondary-color))]">
+                {{ formatSignedCurrency(filteredStats.totalIncome) }}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="p-4">
+              <div class="text-sm text-muted-foreground">Expenses</div>
+              <div class="text-2xl font-bold text-[hsl(var(--vis-primary-color))]">
+                {{ formatSignedCurrency(-filteredStats.totalExpenses) }}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="p-4">
+              <div class="text-sm text-muted-foreground">Net</div>
+              <div
+                class="text-2xl font-bold"
+                :class="
+                  filteredStats.netAmount >= 0
+                    ? 'text-[hsl(var(--vis-secondary-color))]'
+                    : 'text-[hsl(var(--vis-primary-color))]'
+                "
+              >
+                {{ formatSignedCurrency(filteredStats.netAmount) }}
+              </div>
+            </CardContent>
+          </Card>
+        </template>
       </div>
 
       <!-- Transactions Table -->
@@ -372,14 +355,23 @@ const onPageChange = async (page: number) => {
         <CardHeader>
           <div class="flex items-center justify-between">
             <div>
-              <CardTitle>Transaction History</CardTitle>
-              <CardDescription>
-                {{ transactionsSubtitle }}
-              </CardDescription>
+              <template v-if="isLoading">
+                <SkeletonText class="w-40" size="lg" />
+                <SkeletonText class="w-48 mt-2" size="sm" />
+              </template>
+              <template v-else>
+                <CardTitle>Transaction History</CardTitle>
+                <CardDescription>
+                  {{ transactionsSubtitle }}
+                </CardDescription>
+              </template>
             </div>
             <div class="flex items-center gap-2">
               <!-- Active filters display -->
-              <div v-if="searchQuery || selectedCategory" class="flex items-center gap-2 mr-4">
+              <div
+                v-if="!isLoading && (searchQuery || selectedCategory)"
+                class="flex items-center gap-2 mr-4"
+              >
                 <Badge v-if="searchQuery" variant="secondary" class="text-xs">
                   Search: {{ searchQuery }}
                 </Badge>
@@ -400,6 +392,7 @@ const onPageChange = async (page: number) => {
             :total-transactions="totalTransactions"
             :page="currentPage"
             :page-size="PAGE_SIZE"
+            :loading="isLoading"
             @edit-transaction="editTransaction"
             @delete-transaction="deleteTransaction"
             @page-change="onPageChange"
@@ -407,7 +400,7 @@ const onPageChange = async (page: number) => {
         </CardContent>
       </Card>
 
-      <AddTransactionDialog @add-transaction="addTransaction">
+      <AddTransactionDialog v-if="!isLoading" @add-transaction="addTransaction">
         <FloatingButton aria-label="Add transaction">
           <Plus class="h-6 w-6" />
         </FloatingButton>

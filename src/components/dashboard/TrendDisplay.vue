@@ -6,13 +6,17 @@ import { BarChart } from '@/components/ui/chart-bar'
 import type { Transaction } from '@/types'
 import { TransactionType, PeriodUnit } from '@/types'
 import { useChartData } from '@/composables/useChartData'
+import { Skeleton, SkeletonText } from '@/components/ui/skeleton'
 
 interface Props {
   transactions: Transaction[]
   period: PeriodUnit
+  loading?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  loading: false,
+})
 
 const selectedDataType = ref<TransactionType>(TransactionType.EXPENSE)
 const transactionsRef = toRef(props, 'transactions')
@@ -36,20 +40,27 @@ const chartColors = computed(() => [
   <Card>
     <CardHeader>
       <div class="flex items-center justify-between">
-        <CardTitle
-          >{{ selectedDataType === TransactionType.INCOME ? 'Income' : 'Expense' }} Trend</CardTitle
-        >
-        <!-- Data Type Tabs -->
-        <Tabs v-model="selectedDataType" class="w-auto">
-          <TabsList class="grid w-full grid-cols-2">
-            <TabsTrigger :value="TransactionType.INCOME">Income</TabsTrigger>
-            <TabsTrigger :value="TransactionType.EXPENSE">Expenses</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <template v-if="props.loading">
+          <SkeletonText class="w-32" size="lg" />
+          <Skeleton variant="chip" size="md" class="w-32" />
+        </template>
+        <template v-else>
+          <CardTitle>
+            {{ selectedDataType === TransactionType.INCOME ? 'Income' : 'Expense' }} Trend
+          </CardTitle>
+          <Tabs v-model="selectedDataType" class="w-auto">
+            <TabsList class="grid w-full grid-cols-2">
+              <TabsTrigger :value="TransactionType.INCOME">Income</TabsTrigger>
+              <TabsTrigger :value="TransactionType.EXPENSE">Expenses</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </template>
       </div>
     </CardHeader>
     <CardContent class="p-4">
+      <Skeleton v-if="props.loading" variant="block" size="xl" class="h-80 w-full" />
       <BarChart
+        v-else
         :data="chartData"
         index="period"
         :categories="['value']"

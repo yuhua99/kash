@@ -43,7 +43,7 @@ const baseClasses = computed(() =>
 <template>
   <div
     data-slot="skeleton"
-    :class="cn(baseClasses.value, props.class)"
+    :class="cn(baseClasses, props.class)"
     role="presentation"
     aria-hidden="true"
   />
