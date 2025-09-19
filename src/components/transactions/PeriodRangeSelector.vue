@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
@@ -11,6 +11,7 @@ import {
 import { PeriodUnit } from '@/types'
 import type { Range } from '@/types'
 
+const props = defineProps<{ range: Range }>()
 const emit = defineEmits<{ (e: 'rangeChange', range: Range): void }>()
 
 const unit = ref<PeriodUnit>(PeriodUnit.MONTH)
@@ -48,6 +49,8 @@ const monthNames = [
 
 const months = Array.from({ length: 12 }, (_, i) => String(i + 1)) // '1'..'12'
 
+const toEpochSeconds = (date: Date) => Math.floor(date.getTime() / 1000)
+
 const computeRange = (): Range => {
   if (unit.value === PeriodUnit.YEAR) {
     const y = parseInt(selectedYearForYear.value, 10) || currentYear
@@ -63,17 +66,53 @@ const computeRange = (): Range => {
   return { start, end }
 }
 
+let suppressEmit = false
+
+const syncFromRange = async (range: Range) => {
+  if (!range) return
+
+  const startDate = new Date(range.start * 1000)
+  if (Number.isNaN(startDate.getTime())) return
+
+  const yearStart = new Date(startDate.getFullYear(), 0, 1)
+  const yearEnd = new Date(startDate.getFullYear() + 1, 0, 1)
+
+  suppressEmit = true
+
+  if (range.start === toEpochSeconds(yearStart) && range.end === toEpochSeconds(yearEnd) - 1) {
+    const year = String(startDate.getFullYear())
+    unit.value = PeriodUnit.YEAR
+    selectedYearForYear.value = year
+    selectedYearForMonth.value = year
+  } else {
+    const year = String(startDate.getFullYear())
+    unit.value = PeriodUnit.MONTH
+    selectedYearForMonth.value = year
+    selectedYearForYear.value = year
+    selectedMonth.value = String(startDate.getMonth() + 1)
+  }
+
+  await nextTick()
+  suppressEmit = false
+}
+
 watch(
-  [unit, selectedYearForYear, selectedYearForMonth, selectedMonth],
-  () => {
-    emit('rangeChange', computeRange())
+  () => props.range,
+  (range) => {
+    if (!range) return
+    void syncFromRange(range)
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
+
+watch([unit, selectedYearForYear, selectedYearForMonth, selectedMonth], () => {
+  if (suppressEmit) return
+  emit('rangeChange', computeRange())
+})
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-2 justify-between w-full">
     <div v-if="unit === PeriodUnit.YEAR" class="flex items-center gap-2">
       <Select v-model="selectedYearForYear">
         <SelectTrigger class="w-[120px]">

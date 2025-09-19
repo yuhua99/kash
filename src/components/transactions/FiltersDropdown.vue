@@ -40,6 +40,10 @@ const emit = defineEmits<Emits>()
 const localRange = ref<Range>({ ...props.range })
 const localCategory = ref(props.category)
 
+const onRangeChange = (range: Range) => {
+  localRange.value = { ...range }
+}
+
 const global = useGlobalStore()
 
 // Default range: current month [start, end]
@@ -95,7 +99,7 @@ const onClear = () => {
         <div class="space-y-4">
           <div class="space-y-2">
             <div class="text-xs text-muted-foreground px-1">Period</div>
-            <PeriodRangeSelector @range-change="(r) => (localRange = r)" />
+            <PeriodRangeSelector :range="localRange" @range-change="onRangeChange" />
           </div>
 
           <div class="space-y-2">
