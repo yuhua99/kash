@@ -181,7 +181,10 @@ const addTransaction = async (newTransaction: Transaction) => {
     timestamp: newTransaction.timestamp,
   }
 
-  await recordsStore.createRecord(payload)
+  const created = await recordsStore.createRecord(payload)
+  if (!created) {
+    console.error('Failed to create transaction')
+  }
 }
 
 const editTransaction = async (transaction: Transaction) => {
@@ -198,11 +201,37 @@ const editTransaction = async (transaction: Transaction) => {
     timestamp: transaction.timestamp,
   }
 
-  await recordsStore.updateRecord(transaction.id, payload)
+  const updated = await recordsStore.updateRecord(transaction.id, payload)
+  if (!updated) {
+    console.error('Failed to update transaction', transaction.id)
+  }
 }
 
 const deleteTransaction = async (id: string) => {
-  await recordsStore.deleteRecord(id)
+  const success = await recordsStore.deleteRecord(id)
+  if (!success) {
+    console.error('Failed to delete transaction', id)
+    return
+  }
+
+  const total = recordsStore.viewTotalRecords ?? 0
+  if (total <= 0) {
+    currentPage.value = 1
+    return
+  }
+
+  const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  if (currentPage.value > maxPage) {
+    currentPage.value = maxPage
+    await fetchTransactionsForRange()
+    return
+  }
+
+  const offset = (currentPage.value - 1) * PAGE_SIZE
+  const expectedCount = Math.max(0, Math.min(PAGE_SIZE, total - offset))
+  if (recordsStore.viewRecords.length < expectedCount) {
+    await fetchTransactionsForRange()
+  }
 }
 
 const loadData = async () => {

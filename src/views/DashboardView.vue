@@ -59,7 +59,10 @@ const addTransaction = async (newTransaction: Transaction) => {
     timestamp: newTransaction.timestamp,
   }
 
-  await createRecord(payload)
+  const created = await createRecord(payload)
+  if (!created) {
+    console.error('Failed to create transaction from dashboard')
+  }
 }
 
 // Load data function

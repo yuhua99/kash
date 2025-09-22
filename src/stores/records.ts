@@ -124,23 +124,32 @@ export const useRecordsStore = defineStore('records', () => {
       onSuccess: (newRecord) => {
         latestRecords.value.unshift(newRecord) // Add to beginning for chronological order
         latestTotalRecords.value += 1
+        viewRecords.value.unshift(newRecord)
+        viewTotalRecords.value += 1
       },
     })
 
     return data
   }
 
-  const updateRecord = async (id: string, payload: UpdateRecordPayload): Promise<boolean> => {
+  const updateRecord = async (
+    id: string,
+    payload: UpdateRecordPayload,
+  ): Promise<ApiRecord | null> => {
     const data = await executeRequest(() => api.put<ApiRecord>(`/records/${id}`, payload), {
       onSuccess: (updatedRecord) => {
         const index = latestRecords.value.findIndex((record) => record.id === id)
         if (index !== -1) {
           latestRecords.value[index] = updatedRecord
         }
+        const viewIndex = viewRecords.value.findIndex((record) => record.id === id)
+        if (viewIndex !== -1) {
+          viewRecords.value.splice(viewIndex, 1, updatedRecord)
+        }
       },
     })
 
-    return !!data
+    return data
   }
 
   const deleteRecord = async (id: string): Promise<boolean> => {
@@ -148,6 +157,11 @@ export const useRecordsStore = defineStore('records', () => {
       onSuccess: () => {
         latestRecords.value = latestRecords.value.filter((record) => record.id !== id)
         latestTotalRecords.value = Math.max(0, latestTotalRecords.value - 1)
+        const beforeLength = viewRecords.value.length
+        viewRecords.value = viewRecords.value.filter((record) => record.id !== id)
+        if (viewRecords.value.length !== beforeLength) {
+          viewTotalRecords.value = Math.max(0, viewTotalRecords.value - 1)
+        }
       },
     })
 
