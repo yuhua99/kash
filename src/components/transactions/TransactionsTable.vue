@@ -69,6 +69,10 @@ const page = computed({
   },
 })
 
+const handleMobilePageChange = (value: number) => {
+  page.value = value
+}
+
 const columns: DataTableColumn<Transaction>[] = [
   {
     key: 'timeStr',
@@ -125,8 +129,13 @@ const columns: DataTableColumn<Transaction>[] = [
       <MobileTransactionsList
         v-else
         :transactions="props.transactions"
+        :page="page"
+        :page-size="props.pageSize"
+        :total-transactions="props.totalTransactions"
+        :loading="props.loading"
         @delete-transaction="(id: string) => handleDeleteTransaction(id)"
         @open-edit="openEditDialog"
+        @page-change="handleMobilePageChange"
       />
     </template>
 

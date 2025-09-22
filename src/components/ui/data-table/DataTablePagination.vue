@@ -79,7 +79,7 @@ const changePageSize = (value: number) => {
       <span v-else>No records to display</span>
     </div>
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+    <div class="flex flex-row gap-3 justify-between">
       <div
         v-if="props.showPageSizeSelector"
         class="flex items-center gap-2 text-sm text-muted-foreground"

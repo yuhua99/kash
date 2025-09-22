@@ -1,22 +1,30 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, computed } from 'vue'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Trash2 } from 'lucide-vue-next'
 import { useCategoriesStore } from '@/stores/categories'
 import { formatSignedCurrency } from '@/lib/formatters'
+import DataTablePagination from '@/components/ui/data-table/DataTablePagination.vue'
 import type { Transaction } from '@/types'
 
 interface Props {
   transactions: Transaction[]
+  page?: number
+  pageSize?: number
+  totalTransactions?: number
+  loading?: boolean
 }
 
 interface Emits {
   (e: 'deleteTransaction', id: string): void
   (e: 'openEdit', transaction: Transaction): void
+  (e: 'page-change', page: number): void
 }
 
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  loading: false,
+})
 const emit = defineEmits<Emits>()
 const categoriesStore = useCategoriesStore()
 
@@ -160,11 +168,51 @@ const dayKey = (timestamp: number): string => {
   const day = d.getDate().toString().padStart(2, '0')
   return `${y}-${m}-${day}`
 }
+
+const resolvedPageSize = computed(() => {
+  const size = props.pageSize
+  if (typeof size === 'number' && Number.isFinite(size) && size > 0) {
+    return size
+  }
+  const length = props.transactions.length
+  return length > 0 ? length : 1
+})
+
+const totalItems = computed(() => {
+  const total = props.totalTransactions
+  if (typeof total === 'number' && Number.isFinite(total) && total >= 0) {
+    return total
+  }
+  return props.transactions.length
+})
+
+const pageCount = computed(() => {
+  const size = resolvedPageSize.value
+  const total = totalItems.value
+  if (total <= 0 || size <= 0) {
+    return 1
+  }
+  return Math.max(1, Math.ceil(total / size))
+})
+
+const currentPage = computed(() => {
+  const value = props.page ?? 1
+  return value > 0 ? value : 1
+})
+
+const shouldShowPagination = computed(() => {
+  if (props.loading) return false
+  return totalItems.value > resolvedPageSize.value
+})
+
+const handlePageChange = (page: number) => {
+  emit('page-change', page)
+}
 </script>
 
 <template>
   <!-- Mobile: Card list -->
-  <div class="md:hidden space-y-2" ref="mobileListRef" @click.self="closeAll">
+  <div class="md:hidden space-y-4" ref="mobileListRef" @click.self="closeAll">
     <div v-for="(transaction, idx) in transactions" :key="transaction.id">
       <!-- Date separator when day changes -->
       <div
@@ -239,5 +287,15 @@ const dayKey = (timestamp: number): string => {
         </div>
       </div>
     </div>
+    <DataTablePagination
+      v-if="shouldShowPagination"
+      :page="currentPage"
+      :page-count="pageCount"
+      :page-size="resolvedPageSize"
+      :total-items="totalItems"
+      :disabled="loading"
+      :show-page-size-selector="false"
+      @update:page="handlePageChange"
+    />
   </div>
 </template>
