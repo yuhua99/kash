@@ -28,6 +28,16 @@ class ApiClient {
 
       const response = await fetch(`${this.baseURL}${endpoint}`, config)
 
+      if (response.status === 401) {
+        // Dispatch a global event to notify the UI of session expiry
+        window.dispatchEvent(new Event('unauthorized'))
+        // Return a standard error to let the caller know the request failed
+        return {
+          error: 'Unauthorized',
+          success: false,
+        }
+      }
+
       if (response.ok) {
         let data: T
         const contentType = response.headers.get('content-type')

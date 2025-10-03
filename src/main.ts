@@ -19,11 +19,17 @@ app.use(pinia)
 useSettingsStore().initialize()
 useGlobalStore().initialize()
 
-// Check for existing session BEFORE setting up router
-const authStore = useAuthStore()
-authStore.checkAuthStatus().finally(() => {
+// Initialize auth status before mounting the app
+async function initializeApp() {
+  const authStore = useAuthStore()
+  // Check for existing session BEFORE setting up router
+  await authStore.checkAuthStatus()
+
   app.use(router)
   app.mount('#app')
+
   // Register service worker in production to ensure updates on iOS PWA
   registerSW()
-})
+}
+
+initializeApp()

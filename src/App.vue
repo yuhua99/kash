@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { onMounted, onUnmounted } from 'vue'
+import { RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useGlobalStore } from '@/stores/global'
 import MainNav from '@/components/layout/MainNav.vue'
@@ -8,6 +9,20 @@ import MobileNav from '@/components/layout/MobileNav.vue'
 
 const authStore = useAuthStore()
 const global = useGlobalStore()
+const router = useRouter()
+
+function handleUnauthorized() {
+  authStore.clearAuth()
+  router.push({ name: 'login' })
+}
+
+onMounted(() => {
+  window.addEventListener('unauthorized', handleUnauthorized)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('unauthorized', handleUnauthorized)
+})
 </script>
 
 <template>

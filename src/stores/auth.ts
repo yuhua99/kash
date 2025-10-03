@@ -10,6 +10,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => user.value !== null)
 
+  const clearAuth = () => {
+    user.value = null
+  }
+
   const login = async (credentials: LoginPayload): Promise<boolean> => {
     const data = await executeRequest(() => api.post<PublicUser>('/auth/login', credentials), {
       onSuccess: (userData) => {
@@ -35,7 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
       },
     })
     // Always clear local state regardless of server response
-    user.value = null
+    clearAuth()
   }
 
   const checkAuthStatus = async (): Promise<boolean> => {
@@ -43,15 +47,14 @@ export const useAuthStore = defineStore('auth', () => {
       onSuccess: (userData) => {
         user.value = userData
       },
-      onError: (err) => {
-        // Network error or server error
-        user.value = null
-        console.warn('Auth check failed:', err)
+      onError: () => {
+        // Any error in fetching user status means they are not authenticated
+        clearAuth()
       },
     })
 
     if (!data) {
-      user.value = null
+      clearAuth()
     }
 
     return !!data
@@ -66,6 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     checkAuthStatus,
+    clearAuth,
     clearError,
   }
 })
