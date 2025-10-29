@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { CalendarIcon } from 'lucide-vue-next'
 import type { DateValue } from 'reka-ui'
 import { CalendarDate } from '@internationalized/date'
@@ -26,6 +26,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+const isOpen = ref(false)
 
 // Convert Date to CalendarDate
 const dateToCalendarDate = (date: Date): CalendarDate => {
@@ -62,11 +63,12 @@ const displayValue = computed(() => {
 
 const handleSelect = (date: DateValue | undefined) => {
   emit('update:modelValue', date ? dateValueToDate(date) : undefined)
+  if (date) isOpen.value = false
 }
 </script>
 
 <template>
-  <Popover>
+  <Popover v-model:open="isOpen">
     <PopoverTrigger as-child>
       <Button
         variant="outline"
