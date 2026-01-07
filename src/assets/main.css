@@ -4,8 +4,14 @@
   color-scheme: light;
 }
 
-.ui-base {
-  @apply border border-black bg-white font-mono text-black;
+/* Base styles for interactive elements */
+button,
+input,
+select,
+textarea {
+  border: 1px solid #000;
+  font-family: Helvetica, Arial, sans-serif;
+  color: #000;
 }
 
 * {
@@ -29,7 +35,6 @@ body {
   margin: 0;
   background: #fff;
   color: #000;
-  font-family: Helvetica, Arial, sans-serif;
 }
 
 a {

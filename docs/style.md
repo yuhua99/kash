@@ -118,15 +118,24 @@ When updating existing code:
 
 ### Component Styling
 
-#### Shared Base Class
+#### Global Base Styles for Interactive Elements
+
+All interactive form elements receive automatic base styling via global CSS selectors in `main.css`:
 
 ```css
-.ui-base {
-  @apply border border-black bg-white font-mono text-black;
+button,
+input,
+select,
+textarea {
+  border: 1px solid #000;
+  font-family: 'Courier New', Courier, monospace;
+  color: #000;
 }
 ```
 
-Applied to: buttons, inputs, selects, textareas
+**Applied to:** All `<button>`, `<input>`, `<select>`, and `<textarea>` elements automatically
+
+**Why global?** This ensures consistent styling across all interactive elements without needing to add classes to each component. Components then layer on specific styles (backgrounds, hover states, etc.) using Tailwind utilities.
 
 #### Interactive States
 
@@ -209,7 +218,8 @@ button {
 
 ```vue
 <label class="text-xs uppercase tracking-widest">Username</label>
-<input class="ui-base w-full px-3 py-2" />
+<!-- Border, font-mono, and text-black applied automatically via global CSS -->
+<input class="bg-white w-full px-3 py-2" />
 ```
 
 #### Secondary Background (Good)
@@ -244,8 +254,8 @@ button {
 ### Checklist for New Components
 
 - [ ] Uses only xs/sm/lg/2xl text sizes
-- [ ] Has `ui-base` class if it's an interactive element
-- [ ] Has 1px black border
+- [ ] Interactive elements (button, input, select, textarea) get base styling automatically
+- [ ] Has 1px black border (automatic for form elements)
 - [ ] Has NO border-radius
 - [ ] Has NO box-shadow
 - [ ] Uses only white/black/gray-200 colors
