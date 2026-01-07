@@ -9,9 +9,8 @@
     "preview": "vite preview",
     "lint:type-check": "vue-tsc --build",
     "lint:oxlint": "oxlint . --fix -D correctness --ignore-path .gitignore --ignore-pattern 'src/components/ui/**'",
-    "lint:eslint": "eslint . --fix",
-    "lint": "run-s lint:*",
-    "format": "prettier --write src/"
+    "lint": "bun run lint:type-check && bun run lint:oxlint",
+    "format": "oxfmt src"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
