@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { Button } from "@/components/ui";
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const username = ref("");
 const password = ref("");
+
+const submitButtonText = computed(() => (authStore.isLoading ? "Signing in..." : "Enter"));
 
 const handleSubmit = async () => {
   if (!username.value || !password.value) return;
@@ -59,14 +62,12 @@ const handleSubmit = async () => {
             {{ authStore.error }}
           </div>
 
-          <button
+          <Button
             type="submit"
-            class="w-full border border-black px-4 py-3 text-xs uppercase tracking-widest"
+            :text="submitButtonText"
             :disabled="authStore.isLoading"
-          >
-            <span v-if="authStore.isLoading">Signing in...</span>
-            <span v-else>Enter</span>
-          </button>
+            class="w-full"
+          />
         </form>
 
         <div class="mt-6 text-xs uppercase tracking-widest">

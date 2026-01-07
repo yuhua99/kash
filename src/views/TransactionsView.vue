@@ -8,6 +8,7 @@ import { formatSignedCurrency } from "@/lib/formatters";
 import { getRangeForPeriod } from "@/lib/timeRange";
 import type { Transaction } from "@/types";
 import { PeriodUnit, TransactionType } from "@/types";
+import { Button } from "@/components/ui";
 
 const router = useRouter();
 const route = useRoute();
@@ -80,6 +81,14 @@ const transactionsSubtitle = computed(() => {
   const end = new Date(range.end * 1000).toLocaleDateString();
   return `${start} → ${end} · ${filtered} of ${total}`;
 });
+
+const saveButtonText = computed(() =>
+  formMode.value === "add" ? "Save transaction" : "Update transaction",
+);
+
+const categoryButtonText = computed(() =>
+  editingCategoryId.value ? "Update category" : "Add category",
+);
 
 const fetchTransactionsForRange = async () => {
   const { start, end } = selectedRange.value;
@@ -245,28 +254,29 @@ onMounted(() => {
       <div class="flex items-start justify-between gap-6">
         <div>
           <div class="text-xs uppercase tracking-widest">Transactions</div>
-          <h1 class="mt-2 text-3xl font-semibold uppercase tracking-widest">Ledger</h1>
+          <h1 class="mt-2 text-2xl font-semibold uppercase tracking-widest">Ledger</h1>
           <p class="mt-2 text-sm text-black/70">
             {{ transactionsSubtitle }}
           </p>
         </div>
 
         <div class="relative">
-          <button
+          <Button
             type="button"
-            class="border border-black px-3 py-2 text-xs uppercase tracking-widest"
+            text="More"
             :aria-expanded="showOverflowMenu"
             @click="showOverflowMenu = !showOverflowMenu"
-          >
-            More
-          </button>
+          />
           <div
             v-if="showOverflowMenu"
             class="absolute right-0 top-full z-10 mt-2 w-48 border border-black bg-white p-3 text-xs uppercase tracking-widest"
           >
-            <button type="button" class="text-left" @click="openCategoryDrawer">
-              Manage categories
-            </button>
+            <Button
+              type="button"
+              text="Manage categories"
+              @click="openCategoryDrawer"
+              class="text-left"
+            />
           </div>
         </div>
       </div>
@@ -302,29 +312,24 @@ onMounted(() => {
         </div>
 
         <div class="flex items-end">
-          <button
-            type="button"
-            class="border border-black px-4 py-3 text-xs uppercase tracking-widest"
-            @click="openAddForm"
-          >
-            Add transaction
-          </button>
+          <Button type="button" text="Add transaction" @click="openAddForm" />
         </div>
       </div>
     </header>
 
     <div v-if="authStore.error || recordsStore.error || categoriesStore.error" class="space-y-2">
       <div class="border border-black px-4 py-3 text-xs">
-        <div v-if="authStore.error">Auth: {{ authStore.error }}</div>
+        <div v-if="authStore.error || recordsStore.error || categoriesStore.error">
+          Auth: {{ authStore.error }}
+        </div>
         <div v-if="recordsStore.error">Records: {{ recordsStore.error }}</div>
         <div v-if="categoriesStore.error">Categories: {{ categoriesStore.error }}</div>
-        <button
+        <Button
           type="button"
-          class="mt-2 underline"
+          text="Dismiss"
           @click="(authStore.clearError(), recordsStore.clearError(), categoriesStore.clearError())"
-        >
-          Dismiss
-        </button>
+          class="mt-2 underline"
+        />
       </div>
     </div>
 
@@ -356,12 +361,18 @@ onMounted(() => {
                 {{ formatSignedCurrency(transaction.amount) }}
               </td>
               <td class="px-4 py-3 text-right">
-                <button type="button" class="mr-3 underline" @click="openEditForm(transaction)">
-                  Edit
-                </button>
-                <button type="button" class="underline" @click="deleteTransaction(transaction.id)">
-                  Delete
-                </button>
+                <Button
+                  type="button"
+                  text="Edit"
+                  @click="openEditForm(transaction)"
+                  class="mr-3 underline"
+                />
+                <Button
+                  type="button"
+                  text="Delete"
+                  @click="deleteTransaction(transaction.id)"
+                  class="underline"
+                />
               </td>
             </tr>
             <tr v-if="!isLoading && filteredTransactions.length === 0">
@@ -380,23 +391,19 @@ onMounted(() => {
     </div>
 
     <div class="flex items-center justify-between text-xs uppercase tracking-widest">
-      <button
+      <Button
         type="button"
-        class="border border-black px-3 py-2"
+        text="Prev"
         :disabled="currentPage <= 1"
         @click="currentPage = Math.max(1, currentPage - 1)"
-      >
-        Prev
-      </button>
+      />
       <div>Page {{ currentPage }} of {{ totalPages }}</div>
-      <button
+      <Button
         type="button"
-        class="border border-black px-3 py-2"
+        text="Next"
         :disabled="currentPage >= totalPages"
         @click="currentPage = Math.min(totalPages, currentPage + 1)"
-      >
-        Next
-      </button>
+      />
     </div>
   </section>
 
@@ -408,11 +415,9 @@ onMounted(() => {
           <div class="text-xs uppercase tracking-widest">
             {{ formMode === "add" ? "Add" : "Edit" }} transaction
           </div>
-          <div class="mt-2 text-xl font-semibold uppercase tracking-widest">Entry</div>
+          <div class="mt-2 text-lg font-semibold uppercase tracking-widest">Entry</div>
         </div>
-        <button type="button" class="text-xs uppercase tracking-widest" @click="showForm = false">
-          Close
-        </button>
+        <Button type="button" text="Close" @click="showForm = false" />
       </div>
 
       <form class="mt-6 space-y-4" @submit.prevent="saveTransaction">
@@ -444,25 +449,19 @@ onMounted(() => {
               {{ cat.name }}
             </option>
           </select>
-          <button
+          <Button
             type="button"
-            class="mt-2 text-xs uppercase tracking-widest underline"
+            text="Manage categories"
             @click="openCategoryDrawer"
-          >
-            Manage categories
-          </button>
+            class="mt-2 underline"
+          />
         </div>
         <div class="space-y-2">
           <label class="text-xs uppercase tracking-widest">Date</label>
           <input v-model="formDate" type="date" class="w-full border border-black px-3 py-2" />
         </div>
 
-        <button
-          type="submit"
-          class="w-full border border-black px-4 py-3 text-xs uppercase tracking-widest"
-        >
-          {{ formMode === "add" ? "Save transaction" : "Update transaction" }}
-        </button>
+        <Button type="submit" :text="saveButtonText" class="w-full" />
       </form>
     </div>
   </div>
@@ -473,15 +472,9 @@ onMounted(() => {
       <div class="flex items-start justify-between border-b border-black pb-4">
         <div>
           <div class="text-xs uppercase tracking-widest">Categories</div>
-          <div class="mt-2 text-xl font-semibold uppercase tracking-widest">Management</div>
+          <div class="mt-2 text-lg font-semibold uppercase tracking-widest">Management</div>
         </div>
-        <button
-          type="button"
-          class="text-xs uppercase tracking-widest"
-          @click="closeCategoryDrawer"
-        >
-          Close
-        </button>
+        <Button type="button" text="Close" @click="closeCategoryDrawer" />
       </div>
 
       <form class="mt-6 space-y-4" @submit.prevent="saveCategory">
@@ -498,20 +491,13 @@ onMounted(() => {
           />
           <label for="isIncome" class="text-xs uppercase tracking-widest">Income category</label>
         </div>
-        <button
-          type="submit"
-          class="border border-black px-4 py-3 text-xs uppercase tracking-widest"
-        >
-          {{ editingCategoryId ? "Update category" : "Add category" }}
-        </button>
-        <button
+        <Button type="submit" :text="categoryButtonText" />
+        <Button
           v-if="editingCategoryId"
           type="button"
-          class="border border-black px-4 py-3 text-xs uppercase tracking-widest"
+          text="Cancel edit"
           @click="resetCategoryForm"
-        >
-          Cancel edit
-        </button>
+        />
       </form>
 
       <div class="mt-8 border-t border-black pt-4">
@@ -529,12 +515,18 @@ onMounted(() => {
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" class="underline" @click="startEditCategory(category.id)">
-                Edit
-              </button>
-              <button type="button" class="underline" @click="deleteCategory(category.id)">
-                Delete
-              </button>
+              <Button
+                type="button"
+                text="Edit"
+                @click="startEditCategory(category.id)"
+                class="underline"
+              />
+              <Button
+                type="button"
+                text="Delete"
+                @click="deleteCategory(category.id)"
+                class="underline"
+              />
             </div>
           </div>
           <div v-if="availableCategories.length === 0" class="text-xs uppercase tracking-widest">

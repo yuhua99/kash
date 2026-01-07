@@ -93,7 +93,7 @@ onMounted(() => {
       <div class="flex items-start justify-between gap-6">
         <div>
           <div class="text-xs uppercase tracking-widest">Analytics</div>
-          <h1 class="mt-2 text-3xl font-semibold uppercase tracking-widest">Dashboard</h1>
+          <h1 class="mt-2 text-2xl font-semibold uppercase tracking-widest">Dashboard</h1>
           <p class="mt-2 text-sm text-black/70">Period focus, visual summaries, zero CRUD.</p>
         </div>
         <div class="min-w-[180px]">

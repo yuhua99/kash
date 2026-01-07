@@ -4,6 +4,10 @@
   color-scheme: light;
 }
 
+.ui-base {
+  @apply border border-black bg-white font-mono text-black;
+}
+
 * {
   border-radius: 0;
   box-shadow: none;
@@ -39,8 +43,11 @@ button {
 
 input,
 select,
-textarea,
-button {
+textarea {
   font: inherit;
+  color: inherit;
+}
+
+button {
   color: inherit;
 }

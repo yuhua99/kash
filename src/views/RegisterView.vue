@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { Button } from "@/components/ui";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -10,6 +11,8 @@ const username = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 const localError = ref("");
+
+const submitButtonText = computed(() => (authStore.isLoading ? "Creating..." : "Register"));
 
 const handleSubmit = async () => {
   localError.value = "";
@@ -83,14 +86,12 @@ const handleSubmit = async () => {
             {{ localError || authStore.error }}
           </div>
 
-          <button
+          <Button
             type="submit"
-            class="w-full border border-black px-4 py-3 text-xs uppercase tracking-widest"
+            :text="submitButtonText"
             :disabled="authStore.isLoading"
-          >
-            <span v-if="authStore.isLoading">Creating...</span>
-            <span v-else>Register</span>
-          </button>
+            class="w-full"
+          />
         </form>
 
         <div class="mt-6 text-xs uppercase tracking-widest">

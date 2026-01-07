@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { Button } from "@/components/ui";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -23,14 +24,13 @@ const openCategories = () => {
 
 <template>
   <div class="relative">
-    <button
+    <Button
       type="button"
-      class="flex items-center gap-3 border border-black px-3 py-2 text-xs uppercase tracking-widest"
+      :text="username"
       :aria-expanded="isOpen"
       @click="isOpen = !isOpen"
-    >
-      <span>{{ username }}</span>
-    </button>
+      class="flex items-center gap-3"
+    />
 
     <div
       v-if="isOpen"
@@ -41,12 +41,8 @@ const openCategories = () => {
         <div class="mt-1 font-semibold">{{ username }}</div>
       </div>
       <div class="mt-2 flex flex-col gap-2">
-        <button type="button" class="text-left uppercase tracking-widest" @click="openCategories">
-          Manage categories
-        </button>
-        <button type="button" class="text-left uppercase tracking-widest" @click="handleLogout">
-          Log out
-        </button>
+        <Button type="button" text="Manage categories" @click="openCategories" class="text-left" />
+        <Button type="button" text="Log out" @click="handleLogout" class="text-left" />
       </div>
     </div>
   </div>
