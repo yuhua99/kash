@@ -1,25 +1,25 @@
-import { computed, type Ref } from 'vue'
-import type { Transaction } from '@/types'
-import { TransactionType } from '@/types'
-import { formatCurrency, formatPercent as formatPercentage } from '@/lib/formatters'
+import { computed, type Ref } from "vue";
+import type { Transaction } from "@/types";
+import { TransactionType } from "@/types";
+import { formatCurrency, formatPercent as formatPercentage } from "@/lib/formatters";
 
 export interface FinancialSummary {
-  totalIncome: number
-  totalExpenses: number
-  netIncome: number
-  savingsRate: number
-  transactionCount: number
-  averageExpense: number
-  largestExpense: number
-  largestIncome: number
+  totalIncome: number;
+  totalExpenses: number;
+  netIncome: number;
+  savingsRate: number;
+  transactionCount: number;
+  averageExpense: number;
+  largestExpense: number;
+  largestIncome: number;
 }
 
 export interface CategoryBreakdown {
-  category: string
-  totalSpent: number
-  transactionCount: number
-  averageTransaction: number
-  percentage: number
+  category: string;
+  totalSpent: number;
+  transactionCount: number;
+  averageTransaction: number;
+  percentage: number;
 }
 
 /**
@@ -30,16 +30,16 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
    * Basic financial summary
    */
   const financialSummary = computed((): FinancialSummary => {
-    const income = transactions.value.filter((t) => t.type === TransactionType.INCOME)
-    const expenses = transactions.value.filter((t) => t.type === TransactionType.EXPENSE)
+    const income = transactions.value.filter((t) => t.type === TransactionType.INCOME);
+    const expenses = transactions.value.filter((t) => t.type === TransactionType.EXPENSE);
 
-    const totalIncome = income.reduce((sum, t) => sum + t.amount, 0)
-    const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0)
-    const netIncome = totalIncome - totalExpenses
-    const savingsRate = totalIncome > 0 ? (netIncome / totalIncome) * 100 : 0
+    const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const netIncome = totalIncome - totalExpenses;
+    const savingsRate = totalIncome > 0 ? (netIncome / totalIncome) * 100 : 0;
 
-    const expenseAmounts = expenses.map((t) => Math.abs(t.amount))
-    const incomeAmounts = income.map((t) => t.amount)
+    const expenseAmounts = expenses.map((t) => Math.abs(t.amount));
+    const incomeAmounts = income.map((t) => t.amount);
 
     return {
       totalIncome,
@@ -53,59 +53,62 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
           : 0,
       largestExpense: expenseAmounts.length > 0 ? Math.max(...expenseAmounts) : 0,
       largestIncome: incomeAmounts.length > 0 ? Math.max(...incomeAmounts) : 0,
-    }
-  })
+    };
+  });
 
   /**
    * Category breakdown analysis
    */
   const categoryBreakdown = computed((): CategoryBreakdown[] => {
-    const categoryMap = new Map<string, Transaction[]>()
+    const categoryMap = new Map<string, Transaction[]>();
 
     // Group expenses by category
     transactions.value
       .filter((t) => t.type === TransactionType.EXPENSE)
       .forEach((transaction) => {
-        const existing = categoryMap.get(transaction.category) || []
-        categoryMap.set(transaction.category, [...existing, transaction])
-      })
+        const existing = categoryMap.get(transaction.category) || [];
+        categoryMap.set(transaction.category, [...existing, transaction]);
+      });
 
-    const totalExpenses = financialSummary.value.totalExpenses
+    const totalExpenses = financialSummary.value.totalExpenses;
 
     return Array.from(categoryMap.entries())
       .map(([category, categoryTransactions]) => {
-        const totalSpent = categoryTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0)
+        const totalSpent = categoryTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
         return {
           category,
           totalSpent,
           transactionCount: categoryTransactions.length,
           averageTransaction: totalSpent / categoryTransactions.length,
           percentage: totalExpenses > 0 ? (totalSpent / totalExpenses) * 100 : 0,
-        }
+        };
       })
-      .sort((a, b) => b.totalSpent - a.totalSpent)
-  })
+      .sort((a, b) => b.totalSpent - a.totalSpent);
+  });
 
   /**
    * Monthly analysis
    */
   const monthlyAnalysis = computed(() => {
-    const monthlyMap = new Map<string, { income: number; expenses: number; transactions: number }>()
+    const monthlyMap = new Map<
+      string,
+      { income: number; expenses: number; transactions: number }
+    >();
 
     transactions.value.forEach((transaction) => {
-      const date = new Date(transaction.timestamp * 1000)
-      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}` // YYYY-MM
-      const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0, transactions: 0 }
+      const date = new Date(transaction.timestamp * 1000);
+      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`; // YYYY-MM
+      const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0, transactions: 0 };
 
-      current.transactions++
+      current.transactions++;
       if (transaction.type === TransactionType.INCOME) {
-        current.income += transaction.amount
+        current.income += transaction.amount;
       } else {
-        current.expenses += Math.abs(transaction.amount)
+        current.expenses += Math.abs(transaction.amount);
       }
 
-      monthlyMap.set(monthKey, current)
-    })
+      monthlyMap.set(monthKey, current);
+    });
 
     return Array.from(monthlyMap.entries())
       .map(([month, data]) => ({
@@ -116,50 +119,50 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
         transactions: data.transactions,
         savingsRate: data.income > 0 ? ((data.income - data.expenses) / data.income) * 100 : 0,
       }))
-      .sort((a, b) => a.month.localeCompare(b.month))
-  })
+      .sort((a, b) => a.month.localeCompare(b.month));
+  });
 
   /**
    * Budget health indicators
    */
   const budgetHealth = computed(() => {
-    const summary = financialSummary.value
+    const summary = financialSummary.value;
 
     return {
       isHealthy: summary.savingsRate >= 20, // 20% savings rate considered healthy
       savingsRateCategory:
         summary.savingsRate >= 30
-          ? 'excellent'
+          ? "excellent"
           : summary.savingsRate >= 20
-            ? 'good'
+            ? "good"
             : summary.savingsRate >= 10
-              ? 'fair'
-              : 'poor',
+              ? "fair"
+              : "poor",
       expenseToIncomeRatio:
         summary.totalIncome > 0 ? (summary.totalExpenses / summary.totalIncome) * 100 : 0,
       recommendations: getRecommendations(summary),
-    }
-  })
+    };
+  });
 
   /**
    * Get financial recommendations based on current data
    */
   function getRecommendations(summary: FinancialSummary): string[] {
-    const recommendations: string[] = []
+    const recommendations: string[] = [];
 
     if (summary.savingsRate < 10) {
-      recommendations.push('Consider reducing expenses to increase your savings rate')
+      recommendations.push("Consider reducing expenses to increase your savings rate");
     }
 
     if (summary.savingsRate < 0) {
-      recommendations.push('You are spending more than you earn - create a budget plan')
+      recommendations.push("You are spending more than you earn - create a budget plan");
     }
 
     if (summary.savingsRate > 30) {
-      recommendations.push('Great savings rate! Consider investment opportunities')
+      recommendations.push("Great savings rate! Consider investment opportunities");
     }
 
-    return recommendations
+    return recommendations;
   }
 
   // Use centralized formatters from lib/formatters
@@ -174,5 +177,5 @@ export function useFinancialCalculations(transactions: Ref<Transaction[]>) {
     // Utilities
     formatCurrency,
     formatPercentage,
-  }
+  };
 }

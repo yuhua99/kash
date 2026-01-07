@@ -1,242 +1,242 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { useRecordsStore } from '@/stores/records'
-import { useCategoriesStore } from '@/stores/categories'
-import { formatSignedCurrency } from '@/lib/formatters'
-import { getRangeForPeriod } from '@/lib/timeRange'
-import type { Transaction } from '@/types'
-import { PeriodUnit, TransactionType } from '@/types'
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+import { useRecordsStore } from "@/stores/records";
+import { useCategoriesStore } from "@/stores/categories";
+import { formatSignedCurrency } from "@/lib/formatters";
+import { getRangeForPeriod } from "@/lib/timeRange";
+import type { Transaction } from "@/types";
+import { PeriodUnit, TransactionType } from "@/types";
 
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-const recordsStore = useRecordsStore()
-const categoriesStore = useCategoriesStore()
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+const recordsStore = useRecordsStore();
+const categoriesStore = useCategoriesStore();
 
-const PAGE_SIZE = 100
+const PAGE_SIZE = 100;
 
-const searchQuery = ref('')
-const selectedCategoryId = ref('all')
-const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH)
-const currentPage = ref(1)
+const searchQuery = ref("");
+const selectedCategoryId = ref("all");
+const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH);
+const currentPage = ref(1);
 
-const showForm = ref(false)
-const showOverflowMenu = ref(false)
-const formMode = ref<'add' | 'edit'>('add')
-const editingId = ref<string | null>(null)
+const showForm = ref(false);
+const showOverflowMenu = ref(false);
+const formMode = ref<"add" | "edit">("add");
+const editingId = ref<string | null>(null);
 
-const formName = ref('')
-const formAmount = ref('')
-const formCategoryId = ref('')
-const formType = ref<TransactionType>(TransactionType.EXPENSE)
-const formDate = ref(new Date().toISOString().slice(0, 10))
+const formName = ref("");
+const formAmount = ref("");
+const formCategoryId = ref("");
+const formType = ref<TransactionType>(TransactionType.EXPENSE);
+const formDate = ref(new Date().toISOString().slice(0, 10));
 
-const categoryDrawerOpen = ref(false)
-const categoryName = ref('')
-const categoryIsIncome = ref(false)
-const editingCategoryId = ref<string | null>(null)
+const categoryDrawerOpen = ref(false);
+const categoryName = ref("");
+const categoryIsIncome = ref(false);
+const editingCategoryId = ref<string | null>(null);
 
 const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
-)
+);
 
 const periodOptions = [
-  { label: 'Month', value: PeriodUnit.MONTH },
-  { label: 'Half year', value: PeriodUnit.HALF_YEAR },
-  { label: 'Year', value: PeriodUnit.YEAR },
-]
+  { label: "Month", value: PeriodUnit.MONTH },
+  { label: "Half year", value: PeriodUnit.HALF_YEAR },
+  { label: "Year", value: PeriodUnit.YEAR },
+];
 
-const selectedRange = computed(() => getRangeForPeriod(selectedPeriod.value))
+const selectedRange = computed(() => getRangeForPeriod(selectedPeriod.value));
 
-const availableCategories = computed(() => categoriesStore.categories)
+const availableCategories = computed(() => categoriesStore.categories);
 
 const filteredTransactions = computed(() => {
-  let list = [...recordsStore.viewTransactions]
+  let list = [...recordsStore.viewTransactions];
 
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
-    list = list.filter((transaction) => transaction.name.toLowerCase().includes(query))
+    const query = searchQuery.value.toLowerCase();
+    list = list.filter((transaction) => transaction.name.toLowerCase().includes(query));
   }
 
-  if (selectedCategoryId.value !== 'all') {
-    list = list.filter((transaction) => transaction.category_id === selectedCategoryId.value)
+  if (selectedCategoryId.value !== "all") {
+    list = list.filter((transaction) => transaction.category_id === selectedCategoryId.value);
   }
 
-  return list
-})
+  return list;
+});
 
 const totalPages = computed(() => {
-  const total = recordsStore.viewTotalRecords ?? 0
-  return Math.max(1, Math.ceil(total / PAGE_SIZE))
-})
+  const total = recordsStore.viewTotalRecords ?? 0;
+  return Math.max(1, Math.ceil(total / PAGE_SIZE));
+});
 
 const transactionsSubtitle = computed(() => {
-  const total = recordsStore.viewTotalRecords ?? 0
-  const filtered = filteredTransactions.value.length
-  const range = selectedRange.value
-  const start = new Date(range.start * 1000).toLocaleDateString()
-  const end = new Date(range.end * 1000).toLocaleDateString()
-  return `${start} → ${end} · ${filtered} of ${total}`
-})
+  const total = recordsStore.viewTotalRecords ?? 0;
+  const filtered = filteredTransactions.value.length;
+  const range = selectedRange.value;
+  const start = new Date(range.start * 1000).toLocaleDateString();
+  const end = new Date(range.end * 1000).toLocaleDateString();
+  return `${start} → ${end} · ${filtered} of ${total}`;
+});
 
 const fetchTransactionsForRange = async () => {
-  const { start, end } = selectedRange.value
+  const { start, end } = selectedRange.value;
   await recordsStore.fetchRecordsForPeriod({
     start_time: start,
     end_time: end,
     limit: PAGE_SIZE,
     offset: (currentPage.value - 1) * PAGE_SIZE,
-  })
-}
+  });
+};
 
 const loadData = async () => {
-  await categoriesStore.fetchCategories()
-  await fetchTransactionsForRange()
-}
+  await categoriesStore.fetchCategories();
+  await fetchTransactionsForRange();
+};
 
 const resetForm = () => {
-  formName.value = ''
-  formAmount.value = ''
-  formCategoryId.value = ''
-  formType.value = TransactionType.EXPENSE
-  formDate.value = new Date().toISOString().slice(0, 10)
-  editingId.value = null
-  formMode.value = 'add'
-}
+  formName.value = "";
+  formAmount.value = "";
+  formCategoryId.value = "";
+  formType.value = TransactionType.EXPENSE;
+  formDate.value = new Date().toISOString().slice(0, 10);
+  editingId.value = null;
+  formMode.value = "add";
+};
 
 const openAddForm = () => {
-  resetForm()
+  resetForm();
   if (categoriesStore.categories.length) {
-    formCategoryId.value = categoriesStore.categories[0].id
+    formCategoryId.value = categoriesStore.categories[0].id;
   }
-  showForm.value = true
-}
+  showForm.value = true;
+};
 
 const openEditForm = (transaction: Transaction) => {
-  formMode.value = 'edit'
-  editingId.value = transaction.id
-  formName.value = transaction.name
-  formAmount.value = Math.abs(transaction.amount).toString()
-  formCategoryId.value = transaction.category_id
-  formType.value = transaction.amount >= 0 ? TransactionType.INCOME : TransactionType.EXPENSE
-  formDate.value = new Date(transaction.timestamp * 1000).toISOString().slice(0, 10)
-  showForm.value = true
-}
+  formMode.value = "edit";
+  editingId.value = transaction.id;
+  formName.value = transaction.name;
+  formAmount.value = Math.abs(transaction.amount).toString();
+  formCategoryId.value = transaction.category_id;
+  formType.value = transaction.amount >= 0 ? TransactionType.INCOME : TransactionType.EXPENSE;
+  formDate.value = new Date(transaction.timestamp * 1000).toISOString().slice(0, 10);
+  showForm.value = true;
+};
 
 const saveTransaction = async () => {
-  if (!formName.value || !formAmount.value || !formCategoryId.value) return
+  if (!formName.value || !formAmount.value || !formCategoryId.value) return;
 
-  const amountValue = Math.abs(Number(formAmount.value))
-  if (!Number.isFinite(amountValue)) return
+  const amountValue = Math.abs(Number(formAmount.value));
+  if (!Number.isFinite(amountValue)) return;
 
-  const timestamp = Math.floor(new Date(formDate.value).getTime() / 1000)
-  if (!Number.isFinite(timestamp)) return
-  const amount = formType.value === TransactionType.INCOME ? amountValue : -amountValue
+  const timestamp = Math.floor(new Date(formDate.value).getTime() / 1000);
+  if (!Number.isFinite(timestamp)) return;
+  const amount = formType.value === TransactionType.INCOME ? amountValue : -amountValue;
 
-  if (formMode.value === 'add') {
+  if (formMode.value === "add") {
     await recordsStore.createRecord({
       name: formName.value,
       amount,
       category_id: formCategoryId.value,
       timestamp,
-    })
+    });
   } else if (editingId.value) {
     await recordsStore.updateRecord(editingId.value, {
       name: formName.value,
       amount,
       category_id: formCategoryId.value,
       timestamp,
-    })
+    });
   }
 
-  await fetchTransactionsForRange()
-  showForm.value = false
-  resetForm()
-}
+  await fetchTransactionsForRange();
+  showForm.value = false;
+  resetForm();
+};
 
 const deleteTransaction = async (id: string) => {
-  const confirmed = window.confirm('Delete this transaction?')
-  if (!confirmed) return
-  await recordsStore.deleteRecord(id)
-  const total = recordsStore.viewTotalRecords ?? 0
-  const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const confirmed = window.confirm("Delete this transaction?");
+  if (!confirmed) return;
+  await recordsStore.deleteRecord(id);
+  const total = recordsStore.viewTotalRecords ?? 0;
+  const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
   if (currentPage.value > maxPage) {
-    currentPage.value = maxPage
-    return
+    currentPage.value = maxPage;
+    return;
   }
-  await fetchTransactionsForRange()
-}
+  await fetchTransactionsForRange();
+};
 
 const openCategoryDrawer = () => {
-  categoryDrawerOpen.value = true
-  showOverflowMenu.value = false
-}
+  categoryDrawerOpen.value = true;
+  showOverflowMenu.value = false;
+};
 
 const closeCategoryDrawer = () => {
-  categoryDrawerOpen.value = false
-  router.replace({ query: { ...route.query, manageCategories: undefined } })
-}
+  categoryDrawerOpen.value = false;
+  router.replace({ query: { ...route.query, manageCategories: undefined } });
+};
 
 const startEditCategory = (categoryId: string) => {
-  const target = categoriesStore.categories.find((cat) => cat.id === categoryId)
-  if (!target) return
-  editingCategoryId.value = target.id
-  categoryName.value = target.name
-  categoryIsIncome.value = target.is_income
-}
+  const target = categoriesStore.categories.find((cat) => cat.id === categoryId);
+  if (!target) return;
+  editingCategoryId.value = target.id;
+  categoryName.value = target.name;
+  categoryIsIncome.value = target.is_income;
+};
 
 const resetCategoryForm = () => {
-  categoryName.value = ''
-  categoryIsIncome.value = false
-  editingCategoryId.value = null
-}
+  categoryName.value = "";
+  categoryIsIncome.value = false;
+  editingCategoryId.value = null;
+};
 
 const saveCategory = async () => {
-  if (!categoryName.value.trim()) return
+  if (!categoryName.value.trim()) return;
 
   if (editingCategoryId.value) {
     await categoriesStore.updateCategory(editingCategoryId.value, {
       name: categoryName.value.trim(),
       is_income: categoryIsIncome.value,
-    })
+    });
   } else {
     await categoriesStore.createCategory({
       name: categoryName.value.trim(),
       is_income: categoryIsIncome.value,
-    })
+    });
   }
 
-  resetCategoryForm()
-}
+  resetCategoryForm();
+};
 
 const deleteCategory = async (categoryId: string) => {
-  const confirmed = window.confirm('Delete this category?')
-  if (!confirmed) return
-  await categoriesStore.deleteCategory(categoryId)
-}
+  const confirmed = window.confirm("Delete this category?");
+  if (!confirmed) return;
+  await categoriesStore.deleteCategory(categoryId);
+};
 
 watch(
   () => route.query.manageCategories,
   (value) => {
     if (value) {
-      categoryDrawerOpen.value = true
+      categoryDrawerOpen.value = true;
     }
   },
   { immediate: true },
-)
+);
 
 watch(selectedPeriod, async () => {
-  currentPage.value = 1
-  await fetchTransactionsForRange()
-})
+  currentPage.value = 1;
+  await fetchTransactionsForRange();
+});
 
-watch(currentPage, fetchTransactionsForRange)
+watch(currentPage, fetchTransactionsForRange);
 
 onMounted(() => {
-  loadData()
-})
+  loadData();
+});
 </script>
 
 <template>
@@ -356,11 +356,7 @@ onMounted(() => {
                 {{ formatSignedCurrency(transaction.amount) }}
               </td>
               <td class="px-4 py-3 text-right">
-                <button
-                  type="button"
-                  class="mr-3 underline"
-                  @click="openEditForm(transaction)"
-                >
+                <button type="button" class="mr-3 underline" @click="openEditForm(transaction)">
                   Edit
                 </button>
                 <button type="button" class="underline" @click="deleteTransaction(transaction.id)">
@@ -406,13 +402,11 @@ onMounted(() => {
 
   <div v-if="showForm" class="fixed inset-0 z-30">
     <div class="absolute inset-0 bg-black/10" @click="showForm = false"></div>
-    <div
-      class="absolute right-0 top-0 h-full w-full max-w-md border-l border-black bg-white p-6"
-    >
+    <div class="absolute right-0 top-0 h-full w-full max-w-md border-l border-black bg-white p-6">
       <div class="flex items-start justify-between border-b border-black pb-4">
         <div>
           <div class="text-xs uppercase tracking-widest">
-            {{ formMode === 'add' ? 'Add' : 'Edit' }} transaction
+            {{ formMode === "add" ? "Add" : "Edit" }} transaction
           </div>
           <div class="mt-2 text-xl font-semibold uppercase tracking-widest">Entry</div>
         </div>
@@ -467,7 +461,7 @@ onMounted(() => {
           type="submit"
           class="w-full border border-black px-4 py-3 text-xs uppercase tracking-widest"
         >
-          {{ formMode === 'add' ? 'Save transaction' : 'Update transaction' }}
+          {{ formMode === "add" ? "Save transaction" : "Update transaction" }}
         </button>
       </form>
     </div>
@@ -475,15 +469,17 @@ onMounted(() => {
 
   <div v-if="categoryDrawerOpen" class="fixed inset-0 z-30">
     <div class="absolute inset-0 bg-black/10" @click="closeCategoryDrawer"></div>
-    <div
-      class="absolute right-0 top-0 h-full w-full max-w-md border-l border-black bg-white p-6"
-    >
+    <div class="absolute right-0 top-0 h-full w-full max-w-md border-l border-black bg-white p-6">
       <div class="flex items-start justify-between border-b border-black pb-4">
         <div>
           <div class="text-xs uppercase tracking-widest">Categories</div>
           <div class="mt-2 text-xl font-semibold uppercase tracking-widest">Management</div>
         </div>
-        <button type="button" class="text-xs uppercase tracking-widest" @click="closeCategoryDrawer">
+        <button
+          type="button"
+          class="text-xs uppercase tracking-widest"
+          @click="closeCategoryDrawer"
+        >
           Close
         </button>
       </div>
@@ -502,8 +498,11 @@ onMounted(() => {
           />
           <label for="isIncome" class="text-xs uppercase tracking-widest">Income category</label>
         </div>
-        <button type="submit" class="border border-black px-4 py-3 text-xs uppercase tracking-widest">
-          {{ editingCategoryId ? 'Update category' : 'Add category' }}
+        <button
+          type="submit"
+          class="border border-black px-4 py-3 text-xs uppercase tracking-widest"
+        >
+          {{ editingCategoryId ? "Update category" : "Add category" }}
         </button>
         <button
           v-if="editingCategoryId"
@@ -526,7 +525,7 @@ onMounted(() => {
             <div>
               <div class="uppercase tracking-widest">{{ category.name }}</div>
               <div class="text-[10px] uppercase tracking-widest text-black/70">
-                {{ category.is_income ? 'Income' : 'Expense' }}
+                {{ category.is_income ? "Income" : "Expense" }}
               </div>
             </div>
             <div class="flex items-center gap-3">

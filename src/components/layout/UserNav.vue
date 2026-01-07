@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 
-const router = useRouter()
-const authStore = useAuthStore()
-const isOpen = ref(false)
+const router = useRouter();
+const authStore = useAuthStore();
+const isOpen = ref(false);
 
-const username = computed(() => authStore.user?.username || 'User')
+const username = computed(() => authStore.user?.username || "User");
 
 const handleLogout = async () => {
-  isOpen.value = false
-  await authStore.logout()
-  router.push('/login')
-}
+  isOpen.value = false;
+  await authStore.logout();
+  router.push("/login");
+};
 
 const openCategories = () => {
-  router.push({ path: '/transactions', query: { manageCategories: '1' } })
-  isOpen.value = false
-}
+  router.push({ path: "/transactions", query: { manageCategories: "1" } });
+  isOpen.value = false;
+};
 </script>
 
 <template>

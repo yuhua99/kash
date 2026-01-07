@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import MainNav from '@/components/layout/MainNav.vue'
-import UserNav from '@/components/layout/UserNav.vue'
+import { RouterView } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+import MainNav from "@/components/layout/MainNav.vue";
+import UserNav from "@/components/layout/UserNav.vue";
 
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 </script>
 
 <template>

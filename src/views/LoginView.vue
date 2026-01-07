@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 
-const router = useRouter()
-const authStore = useAuthStore()
+const router = useRouter();
+const authStore = useAuthStore();
 
-const username = ref('')
-const password = ref('')
+const username = ref("");
+const password = ref("");
 
 const handleSubmit = async () => {
-  if (!username.value || !password.value) return
+  if (!username.value || !password.value) return;
 
   const success = await authStore.login({
     username: username.value,
     password: password.value,
-  })
+  });
 
   if (success) {
-    router.push('/transactions')
+    router.push("/transactions");
   }
-}
+};
 </script>
 
 <template>
@@ -29,9 +29,7 @@ const handleSubmit = async () => {
       <div class="border border-black p-8">
         <div class="text-xs uppercase tracking-widest">Access</div>
         <h1 class="mt-2 text-2xl font-semibold uppercase tracking-widest">Login</h1>
-        <p class="mt-2 text-sm text-black/70">
-          Use your account credentials to access the ledger.
-        </p>
+        <p class="mt-2 text-sm text-black/70">Use your account credentials to access the ledger.</p>
 
         <form class="mt-6 space-y-4" @submit.prevent="handleSubmit">
           <div class="space-y-2">
@@ -57,10 +55,7 @@ const handleSubmit = async () => {
             />
           </div>
 
-          <div
-            v-if="authStore.error"
-            class="border border-black bg-white px-3 py-2 text-xs"
-          >
+          <div v-if="authStore.error" class="border border-black bg-white px-3 py-2 text-xs">
             {{ authStore.error }}
           </div>
 
