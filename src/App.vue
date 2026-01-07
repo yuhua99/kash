@@ -1,41 +1,23 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useGlobalStore } from '@/stores/global'
 import MainNav from '@/components/layout/MainNav.vue'
 import UserNav from '@/components/layout/UserNav.vue'
-import MobileNav from '@/components/layout/MobileNav.vue'
 
 const authStore = useAuthStore()
-const global = useGlobalStore()
 </script>
 
 <template>
-  <div class="min-h-screen bg-background flex flex-col">
-    <!-- Top navigation (rendered once, not wrapping RouterView) -->
-    <div v-if="authStore.isAuthenticated">
-      <!-- Mobile header -->
-      <div v-if="global.isMobile">
-        <MobileNav>
-          <template #actions>
-            <UserNav />
-          </template>
-        </MobileNav>
+  <div class="min-h-screen bg-white text-black">
+    <header v-if="authStore.isAuthenticated" class="border-b border-black">
+      <div class="mx-auto flex w-full max-w-6xl items-center gap-6 px-6 py-4">
+        <div class="font-bold tracking-tight">Kash</div>
+        <MainNav class="flex-1" />
+        <UserNav />
       </div>
+    </header>
 
-      <!-- Desktop/Tablet header -->
-      <div v-else class="border-b">
-        <div class="flex h-16 items-center px-4">
-          <MainNav class="mx-6" />
-          <div class="ml-auto flex items-center space-x-4">
-            <UserNav />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Single RouterView for all layouts -->
-    <main class="flex-1 p-4 pt-4 md:p-8 md:pt-6">
+    <main class="mx-auto w-full max-w-6xl px-6 py-8">
       <RouterView />
     </main>
   </div>

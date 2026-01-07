@@ -1,164 +1,88 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { Skeleton, SkeletonText } from '@/components/ui/skeleton'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import TransactionsTable from '@/components/transactions/TransactionsTable.vue'
-import TransactionHeader from '@/components/transactions/TransactionHeader.vue'
-import FiltersDropdown from '@/components/transactions/FiltersDropdown.vue'
-import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
-import FloatingButton from '@/components/common/FloatingButton.vue'
-import { Search, Plus } from 'lucide-vue-next'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { useRecordsStore } from '@/stores/records'
 import { useCategoriesStore } from '@/stores/categories'
-import { useAuthStore } from '@/stores/auth'
-import type { Transaction } from '@/types'
-import type { Range } from '@/types'
 import { formatSignedCurrency } from '@/lib/formatters'
+import { getRangeForPeriod } from '@/lib/timeRange'
+import type { Transaction } from '@/types'
+import { PeriodUnit, TransactionType } from '@/types'
 
-const monthYearFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'long',
-  year: 'numeric',
-})
-const monthDayFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-})
-const fullDateFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-})
-
-const formatRangeLabel = (range?: Range): string => {
-  if (!range) return 'Transactions'
-
-  const { start, end } = range
-  const hasValidTimestamps = Number.isFinite(start) && Number.isFinite(end) && end >= start
-  if (!hasValidTimestamps) return 'Transactions'
-
-  if (start <= 0 || end <= 0) return 'All transactions'
-
-  const startDate = new Date(start * 1000)
-  const endDate = new Date(end * 1000)
-
-  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-    return 'Transactions'
-  }
-
-  const monthStartSeconds = Math.floor(
-    new Date(startDate.getFullYear(), startDate.getMonth(), 1).getTime() / 1000,
-  )
-  const monthEndSeconds = Math.floor(
-    new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999).getTime() /
-      1000,
-  )
-  if (start === monthStartSeconds && end === monthEndSeconds) {
-    return `${monthYearFormatter.format(startDate)} transactions`
-  }
-
-  const yearStartSeconds = Math.floor(new Date(startDate.getFullYear(), 0, 1).getTime() / 1000)
-  const yearEndSeconds = Math.floor(
-    new Date(startDate.getFullYear(), 11, 31, 23, 59, 59, 999).getTime() / 1000,
-  )
-  if (start === yearStartSeconds && end === yearEndSeconds) {
-    return `${startDate.getFullYear()} transactions`
-  }
-
-  const isSameDay =
-    startDate.getFullYear() === endDate.getFullYear() &&
-    startDate.getMonth() === endDate.getMonth() &&
-    startDate.getDate() === endDate.getDate()
-
-  if (isSameDay) {
-    return `${fullDateFormatter.format(startDate)} transactions`
-  }
-
-  const isSameYear = startDate.getFullYear() === endDate.getFullYear()
-  if (isSameYear) {
-    return `${monthDayFormatter.format(startDate)} – ${monthDayFormatter.format(endDate)} ${startDate.getFullYear()} transactions`
-  }
-
-  return `${fullDateFormatter.format(startDate)} – ${fullDateFormatter.format(endDate)} transactions`
-}
-
+const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
 const categoriesStore = useCategoriesStore()
 
-// Filter and search state
 const PAGE_SIZE = 100
+
 const searchQuery = ref('')
-const selectedCategory = ref('all')
-const now = new Date()
-const defaultStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000)
-const defaultEnd =
-  Math.floor(new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime() / 1000) - 1
-const selectedRange = ref<Range>({ start: defaultStart, end: defaultEnd })
+const selectedCategoryId = ref('all')
+const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH)
 const currentPage = ref(1)
+
+const showForm = ref(false)
+const showOverflowMenu = ref(false)
+const formMode = ref<'add' | 'edit'>('add')
+const editingId = ref<string | null>(null)
+
+const formName = ref('')
+const formAmount = ref('')
+const formCategoryId = ref('')
+const formType = ref<TransactionType>(TransactionType.EXPENSE)
+const formDate = ref(new Date().toISOString().slice(0, 10))
+
+const categoryDrawerOpen = ref(false)
+const categoryName = ref('')
+const categoryIsIncome = ref(false)
+const editingCategoryId = ref<string | null>(null)
 
 const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
 )
 
-// Get unique categories for filter dropdown
-const availableCategories = computed(() => {
-  const categories = new Set(recordsStore.viewTransactions.map((t) => t.category))
-  return Array.from(categories).sort()
-})
+const periodOptions = [
+  { label: 'Month', value: PeriodUnit.MONTH },
+  { label: 'Half year', value: PeriodUnit.HALF_YEAR },
+  { label: 'Year', value: PeriodUnit.YEAR },
+]
+
+const selectedRange = computed(() => getRangeForPeriod(selectedPeriod.value))
+
+const availableCategories = computed(() => categoriesStore.categories)
 
 const filteredTransactions = computed(() => {
-  let filtered = [...recordsStore.viewTransactions]
+  let list = [...recordsStore.viewTransactions]
 
-  // Apply search filter
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase().trim()
-    filtered = filtered.filter((transaction) => transaction.name.toLowerCase().includes(query))
+    const query = searchQuery.value.toLowerCase()
+    list = list.filter((transaction) => transaction.name.toLowerCase().includes(query))
   }
 
-  // Apply category filter
-  if (selectedCategory.value !== 'all') {
-    filtered = filtered.filter((transaction) => transaction.category === selectedCategory.value)
+  if (selectedCategoryId.value !== 'all') {
+    list = list.filter((transaction) => transaction.category_id === selectedCategoryId.value)
   }
 
-  return filtered
+  return list
 })
 
-const totalTransactions = computed(() => recordsStore.viewTotalRecords)
-
-// Summary statistics for filtered transactions
-const filteredStats = computed(() => {
-  const transactions = filteredTransactions.value
-  const totalIncome = transactions.filter((t) => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
-  const totalExpenses = transactions
-    .filter((t) => t.amount < 0)
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
-
-  return {
-    count: transactions.length,
-    totalIncome,
-    totalExpenses,
-    netAmount: totalIncome - totalExpenses,
-  }
+const totalPages = computed(() => {
+  const total = recordsStore.viewTotalRecords ?? 0
+  return Math.max(1, Math.ceil(total / PAGE_SIZE))
 })
 
 const transactionsSubtitle = computed(() => {
-  const label = formatRangeLabel(selectedRange.value)
-  const total = Number(totalTransactions.value ?? 0)
-
-  if (!Number.isFinite(total) || total <= 0) {
-    return label
-  }
-
-  const filteredCount = filteredTransactions.value.length
-  return `${label} · ${filteredCount} of ${total}`
+  const total = recordsStore.viewTotalRecords ?? 0
+  const filtered = filteredTransactions.value.length
+  const range = selectedRange.value
+  const start = new Date(range.start * 1000).toLocaleDateString()
+  const end = new Date(range.end * 1000).toLocaleDateString()
+  return `${start} → ${end} · ${filtered} of ${total}`
 })
 
 const fetchTransactionsForRange = async () => {
   const { start, end } = selectedRange.value
-  if (!start || !end) return
-
   await recordsStore.fetchRecordsForPeriod({
     start_time: start,
     end_time: end,
@@ -167,273 +91,458 @@ const fetchTransactionsForRange = async () => {
   })
 }
 
-const addTransaction = async (newTransaction: Transaction) => {
-  const category = categoriesStore.categories.find((cat) => cat.name === newTransaction.category)
-  if (!category) {
-    console.error('Category not found:', newTransaction.category)
-    return
-  }
-
-  const payload = {
-    name: newTransaction.name,
-    amount: newTransaction.amount,
-    category_id: category.id,
-    timestamp: newTransaction.timestamp,
-  }
-
-  const created = await recordsStore.createRecord(payload)
-  if (!created) {
-    console.error('Failed to create transaction')
-  }
+const loadData = async () => {
+  await categoriesStore.fetchCategories()
+  await fetchTransactionsForRange()
 }
 
-const editTransaction = async (transaction: Transaction) => {
-  const category = categoriesStore.categories.find((cat) => cat.name === transaction.category)
-  if (!category) {
-    console.error('Category not found:', transaction.category)
-    return
+const resetForm = () => {
+  formName.value = ''
+  formAmount.value = ''
+  formCategoryId.value = ''
+  formType.value = TransactionType.EXPENSE
+  formDate.value = new Date().toISOString().slice(0, 10)
+  editingId.value = null
+  formMode.value = 'add'
+}
+
+const openAddForm = () => {
+  resetForm()
+  if (categoriesStore.categories.length) {
+    formCategoryId.value = categoriesStore.categories[0].id
+  }
+  showForm.value = true
+}
+
+const openEditForm = (transaction: Transaction) => {
+  formMode.value = 'edit'
+  editingId.value = transaction.id
+  formName.value = transaction.name
+  formAmount.value = Math.abs(transaction.amount).toString()
+  formCategoryId.value = transaction.category_id
+  formType.value = transaction.amount >= 0 ? TransactionType.INCOME : TransactionType.EXPENSE
+  formDate.value = new Date(transaction.timestamp * 1000).toISOString().slice(0, 10)
+  showForm.value = true
+}
+
+const saveTransaction = async () => {
+  if (!formName.value || !formAmount.value || !formCategoryId.value) return
+
+  const amountValue = Math.abs(Number(formAmount.value))
+  if (!Number.isFinite(amountValue)) return
+
+  const timestamp = Math.floor(new Date(formDate.value).getTime() / 1000)
+  if (!Number.isFinite(timestamp)) return
+  const amount = formType.value === TransactionType.INCOME ? amountValue : -amountValue
+
+  if (formMode.value === 'add') {
+    await recordsStore.createRecord({
+      name: formName.value,
+      amount,
+      category_id: formCategoryId.value,
+      timestamp,
+    })
+  } else if (editingId.value) {
+    await recordsStore.updateRecord(editingId.value, {
+      name: formName.value,
+      amount,
+      category_id: formCategoryId.value,
+      timestamp,
+    })
   }
 
-  const payload = {
-    name: transaction.name,
-    amount: transaction.amount,
-    category_id: category.id,
-    timestamp: transaction.timestamp,
-  }
-
-  const updated = await recordsStore.updateRecord(transaction.id, payload)
-  if (!updated) {
-    console.error('Failed to update transaction', transaction.id)
-  }
+  await fetchTransactionsForRange()
+  showForm.value = false
+  resetForm()
 }
 
 const deleteTransaction = async (id: string) => {
-  const success = await recordsStore.deleteRecord(id)
-  if (!success) {
-    console.error('Failed to delete transaction', id)
-    return
-  }
-
+  const confirmed = window.confirm('Delete this transaction?')
+  if (!confirmed) return
+  await recordsStore.deleteRecord(id)
   const total = recordsStore.viewTotalRecords ?? 0
-  if (total <= 0) {
-    currentPage.value = 1
-    return
-  }
-
   const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE))
   if (currentPage.value > maxPage) {
     currentPage.value = maxPage
-    await fetchTransactionsForRange()
     return
   }
-
-  const offset = (currentPage.value - 1) * PAGE_SIZE
-  const expectedCount = Math.max(0, Math.min(PAGE_SIZE, total - offset))
-  if (recordsStore.viewRecords.length < expectedCount) {
-    await fetchTransactionsForRange()
-  }
+  await fetchTransactionsForRange()
 }
 
-const loadData = async () => {
-  await categoriesStore.fetchCategories()
-  await recordsStore.fetchLatestRecords()
+const openCategoryDrawer = () => {
+  categoryDrawerOpen.value = true
+  showOverflowMenu.value = false
+}
+
+const closeCategoryDrawer = () => {
+  categoryDrawerOpen.value = false
+  router.replace({ query: { ...route.query, manageCategories: undefined } })
+}
+
+const startEditCategory = (categoryId: string) => {
+  const target = categoriesStore.categories.find((cat) => cat.id === categoryId)
+  if (!target) return
+  editingCategoryId.value = target.id
+  categoryName.value = target.name
+  categoryIsIncome.value = target.is_income
+}
+
+const resetCategoryForm = () => {
+  categoryName.value = ''
+  categoryIsIncome.value = false
+  editingCategoryId.value = null
+}
+
+const saveCategory = async () => {
+  if (!categoryName.value.trim()) return
+
+  if (editingCategoryId.value) {
+    await categoriesStore.updateCategory(editingCategoryId.value, {
+      name: categoryName.value.trim(),
+      is_income: categoryIsIncome.value,
+    })
+  } else {
+    await categoriesStore.createCategory({
+      name: categoryName.value.trim(),
+      is_income: categoryIsIncome.value,
+    })
+  }
+
+  resetCategoryForm()
+}
+
+const deleteCategory = async (categoryId: string) => {
+  const confirmed = window.confirm('Delete this category?')
+  if (!confirmed) return
+  await categoriesStore.deleteCategory(categoryId)
+}
+
+watch(
+  () => route.query.manageCategories,
+  (value) => {
+    if (value) {
+      categoryDrawerOpen.value = true
+    }
+  },
+  { immediate: true },
+)
+
+watch(selectedPeriod, async () => {
   currentPage.value = 1
   await fetchTransactionsForRange()
-}
+})
 
-const onFiltersApply = async (payload: { range: Range; category: string }) => {
-  const { range, category } = payload
-  const hasRangeChanged =
-    range.start !== selectedRange.value.start || range.end !== selectedRange.value.end
-
-  selectedRange.value = range
-  selectedCategory.value = category
-
-  if (hasRangeChanged) {
-    currentPage.value = 1
-  }
-
-  await fetchTransactionsForRange()
-}
+watch(currentPage, fetchTransactionsForRange)
 
 onMounted(() => {
   loadData()
 })
-
-const onPageChange = async (page: number) => {
-  if (page === currentPage.value) return
-  currentPage.value = page
-  await fetchTransactionsForRange()
-}
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Page Header -->
-    <TransactionHeader :loading="isLoading" />
+  <section class="space-y-8">
+    <header class="space-y-4 border-b border-black pb-6">
+      <div class="flex items-start justify-between gap-6">
+        <div>
+          <div class="text-xs uppercase tracking-widest">Transactions</div>
+          <h1 class="mt-2 text-3xl font-semibold uppercase tracking-widest">Ledger</h1>
+          <p class="mt-2 text-sm text-black/70">
+            {{ transactionsSubtitle }}
+          </p>
+        </div>
 
-    <!-- Error State -->
-    <div
-      v-if="authStore.error || recordsStore.error || categoriesStore.error"
-      class="p-4 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded"
-    >
-      <p v-if="authStore.error">Authentication Error: {{ authStore.error }}</p>
-      <p v-if="recordsStore.error">Records Error: {{ recordsStore.error }}</p>
-      <p v-if="categoriesStore.error">Categories Error: {{ categoriesStore.error }}</p>
-      <div class="mt-2 space-x-2">
+        <div class="relative">
+          <button
+            type="button"
+            class="border border-black px-3 py-2 text-xs uppercase tracking-widest"
+            :aria-expanded="showOverflowMenu"
+            @click="showOverflowMenu = !showOverflowMenu"
+          >
+            More
+          </button>
+          <div
+            v-if="showOverflowMenu"
+            class="absolute right-0 top-full z-10 mt-2 w-48 border border-black bg-white p-3 text-xs uppercase tracking-widest"
+          >
+            <button type="button" class="text-left" @click="openCategoryDrawer">
+              Manage categories
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-end gap-4">
+        <div class="flex-1 min-w-[220px]">
+          <label class="text-xs uppercase tracking-widest">Search</label>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search by name"
+            class="mt-2 w-full border border-black px-3 py-2"
+          />
+        </div>
+
+        <div class="min-w-[180px]">
+          <label class="text-xs uppercase tracking-widest">Category</label>
+          <select v-model="selectedCategoryId" class="mt-2 w-full border border-black px-3 py-2">
+            <option value="all">All</option>
+            <option v-for="cat in availableCategories" :key="cat.id" :value="cat.id">
+              {{ cat.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="min-w-[180px]">
+          <label class="text-xs uppercase tracking-widest">Period</label>
+          <select v-model="selectedPeriod" class="mt-2 w-full border border-black px-3 py-2">
+            <option v-for="period in periodOptions" :key="period.value" :value="period.value">
+              {{ period.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="flex items-end">
+          <button
+            type="button"
+            class="border border-black px-4 py-3 text-xs uppercase tracking-widest"
+            @click="openAddForm"
+          >
+            Add transaction
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div v-if="authStore.error || recordsStore.error || categoriesStore.error" class="space-y-2">
+      <div class="border border-black px-4 py-3 text-xs">
+        <div v-if="authStore.error">Auth: {{ authStore.error }}</div>
+        <div v-if="recordsStore.error">Records: {{ recordsStore.error }}</div>
+        <div v-if="categoriesStore.error">Categories: {{ categoriesStore.error }}</div>
         <button
+          type="button"
+          class="mt-2 underline"
           @click="(authStore.clearError(), recordsStore.clearError(), categoriesStore.clearError())"
-          class="text-destructive underline text-sm"
         >
           Dismiss
         </button>
-        <button @click="loadData" class="text-destructive underline text-sm">Retry</button>
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div v-if="authStore.isAuthenticated" class="space-y-6">
-      <!-- Search and Filters -->
-      <div class="flex flex-col sm:flex-row gap-4">
-        <!-- Search Bar -->
-        <div class="relative flex-1">
-          <template v-if="isLoading">
-            <Skeleton variant="input" size="md" class="w-full" />
-          </template>
-          <template v-else>
-            <Search
-              class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
-            />
-            <Input
-              v-model="searchQuery"
-              placeholder="Search transactions..."
-              class="pl-10"
-              :disabled="isLoading"
-            />
-          </template>
-        </div>
+    <div class="border border-black">
+      <div class="border-b border-black px-4 py-3 text-xs uppercase tracking-widest">
+        Transactions
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="border-b border-black text-xs uppercase tracking-widest text-left">
+            <tr>
+              <th class="px-4 py-3">Date</th>
+              <th class="px-4 py-3">Name</th>
+              <th class="px-4 py-3">Category</th>
+              <th class="px-4 py-3 text-right">Amount</th>
+              <th class="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="transaction in filteredTransactions"
+              :key="transaction.id"
+              class="border-b border-black last:border-b-0"
+            >
+              <td class="px-4 py-3">{{ transaction.timeStr }}</td>
+              <td class="px-4 py-3">{{ transaction.name }}</td>
+              <td class="px-4 py-3">{{ transaction.category }}</td>
+              <td class="px-4 py-3 text-right">
+                {{ formatSignedCurrency(transaction.amount) }}
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  type="button"
+                  class="mr-3 underline"
+                  @click="openEditForm(transaction)"
+                >
+                  Edit
+                </button>
+                <button type="button" class="underline" @click="deleteTransaction(transaction.id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr v-if="!isLoading && filteredTransactions.length === 0">
+              <td colspan="5" class="px-4 py-8 text-center text-xs uppercase tracking-widest">
+                No transactions for this filter.
+              </td>
+            </tr>
+            <tr v-if="isLoading">
+              <td colspan="5" class="px-4 py-8 text-center text-xs uppercase tracking-widest">
+                Loading...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        <!-- Filters: unified dropdown on all devices -->
-        <div class="w-full sm:w-auto">
-          <FiltersDropdown
-            :range="selectedRange"
-            :category="selectedCategory"
-            :categories="availableCategories"
-            :loading="isLoading"
-            @apply="onFiltersApply"
+    <div class="flex items-center justify-between text-xs uppercase tracking-widest">
+      <button
+        type="button"
+        class="border border-black px-3 py-2"
+        :disabled="currentPage <= 1"
+        @click="currentPage = Math.max(1, currentPage - 1)"
+      >
+        Prev
+      </button>
+      <div>Page {{ currentPage }} of {{ totalPages }}</div>
+      <button
+        type="button"
+        class="border border-black px-3 py-2"
+        :disabled="currentPage >= totalPages"
+        @click="currentPage = Math.min(totalPages, currentPage + 1)"
+      >
+        Next
+      </button>
+    </div>
+  </section>
+
+  <div v-if="showForm" class="fixed inset-0 z-30">
+    <div class="absolute inset-0 bg-black/10" @click="showForm = false"></div>
+    <div
+      class="absolute right-0 top-0 h-full w-full max-w-md border-l border-black bg-white p-6"
+    >
+      <div class="flex items-start justify-between border-b border-black pb-4">
+        <div>
+          <div class="text-xs uppercase tracking-widest">
+            {{ formMode === 'add' ? 'Add' : 'Edit' }} transaction
+          </div>
+          <div class="mt-2 text-xl font-semibold uppercase tracking-widest">Entry</div>
+        </div>
+        <button type="button" class="text-xs uppercase tracking-widest" @click="showForm = false">
+          Close
+        </button>
+      </div>
+
+      <form class="mt-6 space-y-4" @submit.prevent="saveTransaction">
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-widest">Name</label>
+          <input v-model="formName" type="text" class="w-full border border-black px-3 py-2" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-widest">Amount</label>
+          <input
+            v-model="formAmount"
+            type="number"
+            step="0.01"
+            class="w-full border border-black px-3 py-2"
           />
         </div>
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-widest">Type</label>
+          <select v-model="formType" class="w-full border border-black px-3 py-2">
+            <option :value="TransactionType.INCOME">Income</option>
+            <option :value="TransactionType.EXPENSE">Expense</option>
+          </select>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-widest">Category</label>
+          <select v-model="formCategoryId" class="w-full border border-black px-3 py-2">
+            <option value="" disabled>Select category</option>
+            <option v-for="cat in availableCategories" :key="cat.id" :value="cat.id">
+              {{ cat.name }}
+            </option>
+          </select>
+          <button
+            type="button"
+            class="mt-2 text-xs uppercase tracking-widest underline"
+            @click="openCategoryDrawer"
+          >
+            Manage categories
+          </button>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-widest">Date</label>
+          <input v-model="formDate" type="date" class="w-full border border-black px-3 py-2" />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full border border-black px-4 py-3 text-xs uppercase tracking-widest"
+        >
+          {{ formMode === 'add' ? 'Save transaction' : 'Update transaction' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div v-if="categoryDrawerOpen" class="fixed inset-0 z-30">
+    <div class="absolute inset-0 bg-black/10" @click="closeCategoryDrawer"></div>
+    <div
+      class="absolute right-0 top-0 h-full w-full max-w-md border-l border-black bg-white p-6"
+    >
+      <div class="flex items-start justify-between border-b border-black pb-4">
+        <div>
+          <div class="text-xs uppercase tracking-widest">Categories</div>
+          <div class="mt-2 text-xl font-semibold uppercase tracking-widest">Management</div>
+        </div>
+        <button type="button" class="text-xs uppercase tracking-widest" @click="closeCategoryDrawer">
+          Close
+        </button>
       </div>
 
-      <!-- Stats Summary (when filtered) -->
-      <div
-        v-if="isLoading || searchQuery || selectedCategory !== 'all'"
-        class="grid gap-4 md:grid-cols-4"
-      >
-        <template v-if="isLoading">
-          <Card v-for="i in 4" :key="`summary-skeleton-${i}`">
-            <CardContent class="p-4 space-y-2">
-              <SkeletonText class="w-24" size="sm" />
-              <SkeletonText class="w-20" size="lg" />
-            </CardContent>
-          </Card>
-        </template>
-        <template v-else>
-          <Card>
-            <CardContent class="p-4">
-              <div class="text-sm text-muted-foreground">Filtered Results</div>
-              <div class="text-2xl font-bold">{{ filteredStats.count }}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent class="p-4">
-              <div class="text-sm text-muted-foreground">Income</div>
-              <div class="text-2xl font-bold text-[hsl(var(--vis-secondary-color))]">
-                {{ formatSignedCurrency(filteredStats.totalIncome) }}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent class="p-4">
-              <div class="text-sm text-muted-foreground">Expenses</div>
-              <div class="text-2xl font-bold text-[hsl(var(--vis-primary-color))]">
-                {{ formatSignedCurrency(-filteredStats.totalExpenses) }}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent class="p-4">
-              <div class="text-sm text-muted-foreground">Net</div>
-              <div
-                class="text-2xl font-bold"
-                :class="
-                  filteredStats.netAmount >= 0
-                    ? 'text-[hsl(var(--vis-secondary-color))]'
-                    : 'text-[hsl(var(--vis-primary-color))]'
-                "
-              >
-                {{ formatSignedCurrency(filteredStats.netAmount) }}
-              </div>
-            </CardContent>
-          </Card>
-        </template>
-      </div>
+      <form class="mt-6 space-y-4" @submit.prevent="saveCategory">
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-widest">Name</label>
+          <input v-model="categoryName" type="text" class="w-full border border-black px-3 py-2" />
+        </div>
+        <div class="flex items-center gap-2">
+          <input
+            id="isIncome"
+            v-model="categoryIsIncome"
+            type="checkbox"
+            class="h-4 w-4 border border-black"
+          />
+          <label for="isIncome" class="text-xs uppercase tracking-widest">Income category</label>
+        </div>
+        <button type="submit" class="border border-black px-4 py-3 text-xs uppercase tracking-widest">
+          {{ editingCategoryId ? 'Update category' : 'Add category' }}
+        </button>
+        <button
+          v-if="editingCategoryId"
+          type="button"
+          class="border border-black px-4 py-3 text-xs uppercase tracking-widest"
+          @click="resetCategoryForm"
+        >
+          Cancel edit
+        </button>
+      </form>
 
-      <!-- Transactions Table -->
-      <Card>
-        <CardHeader>
-          <div class="flex items-center justify-between">
+      <div class="mt-8 border-t border-black pt-4">
+        <div class="text-xs uppercase tracking-widest">Existing</div>
+        <div class="mt-4 space-y-3">
+          <div
+            v-for="category in availableCategories"
+            :key="category.id"
+            class="flex items-center justify-between border border-black px-3 py-2 text-xs"
+          >
             <div>
-              <template v-if="isLoading">
-                <SkeletonText class="w-40" size="lg" />
-                <SkeletonText class="w-48 mt-2" size="sm" />
-              </template>
-              <template v-else>
-                <CardTitle>Transaction History</CardTitle>
-                <CardDescription>
-                  {{ transactionsSubtitle }}
-                </CardDescription>
-              </template>
-            </div>
-            <div class="flex items-center gap-2">
-              <!-- Active filters display -->
-              <div
-                v-if="!isLoading && (searchQuery || selectedCategory)"
-                class="flex items-center gap-2 mr-4"
-              >
-                <Badge v-if="searchQuery" variant="secondary" class="text-xs">
-                  Search: {{ searchQuery }}
-                </Badge>
-                <Badge
-                  v-if="selectedCategory && selectedCategory !== 'all'"
-                  variant="secondary"
-                  class="text-xs"
-                >
-                  {{ selectedCategory }}
-                </Badge>
+              <div class="uppercase tracking-widest">{{ category.name }}</div>
+              <div class="text-[10px] uppercase tracking-widest text-black/70">
+                {{ category.is_income ? 'Income' : 'Expense' }}
               </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button type="button" class="underline" @click="startEditCategory(category.id)">
+                Edit
+              </button>
+              <button type="button" class="underline" @click="deleteCategory(category.id)">
+                Delete
+              </button>
             </div>
           </div>
-        </CardHeader>
-        <CardContent class="px-6 pb-6">
-          <TransactionsTable
-            :transactions="filteredTransactions"
-            :total-transactions="totalTransactions"
-            :page="currentPage"
-            :page-size="PAGE_SIZE"
-            :loading="isLoading"
-            @edit-transaction="editTransaction"
-            @delete-transaction="deleteTransaction"
-            @page-change="onPageChange"
-          />
-        </CardContent>
-      </Card>
-
-      <AddTransactionDialog v-if="!isLoading" @add-transaction="addTransaction">
-        <FloatingButton aria-label="Add transaction">
-          <Plus class="h-6 w-6" />
-        </FloatingButton>
-      </AddTransactionDialog>
+          <div v-if="availableCategories.length === 0" class="text-xs uppercase tracking-widest">
+            No categories.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

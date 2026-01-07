@@ -1,39 +1,37 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu'
+import { RouterLink, useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const navigation = [
-  {
-    name: 'Dashboard',
-    href: '/',
-  },
   {
     name: 'Transactions',
     href: '/transactions',
   },
   {
-    name: 'Categories',
-    href: '/categories',
+    name: 'Analytics',
+    href: '/analytics',
   },
 ]
+
+const isActive = (href: string) => {
+  if (href === '/transactions') {
+    return route.path === '/' || route.path.startsWith('/transactions')
+  }
+  return route.path.startsWith(href)
+}
 </script>
 
 <template>
-  <NavigationMenu>
-    <NavigationMenuList>
-      <NavigationMenuItem v-for="item in navigation" :key="item.name">
-        <NavigationMenuLink as-child>
-          <RouterLink :to="item.href" :class="navigationMenuTriggerStyle()">
-            {{ item.name }}
-          </RouterLink>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-    </NavigationMenuList>
-  </NavigationMenu>
+  <nav class="flex items-center gap-6 text-sm">
+    <RouterLink
+      v-for="item in navigation"
+      :key="item.name"
+      :to="item.href"
+      class="border-b-2 border-transparent pb-1 uppercase tracking-widest"
+      :class="isActive(item.href) ? 'border-black font-semibold' : 'text-black/70'"
+    >
+      {{ item.name }}
+    </RouterLink>
+  </nav>
 </template>

@@ -1,179 +1,46 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
-
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
 
 :root {
-  /* Rosé Pine palette variables (Dawn).
-     Define palette once, then map app vars to these tokens for readability. */
-  --rp-_nc: #f8f0e7;
-  --rp-base: #faf4ed;
-  --rp-surface: #fffaf3;
-  --rp-overlay: #f2e9e1;
-  --rp-muted: #9893a5;
-  --rp-subtle: #797593;
-  --rp-text: #464261;
-  --rp-love: #b4637a;
-  --rp-gold: #ea9d34;
-  --rp-rose: #d7827e;
-  --rp-pine: #286983;
-  --rp-foam: #56949f;
-  --rp-iris: #907aa9;
-  --rp-leaf: #6d8f89;
-  --rp-highlight-low: #f4ede8;
-  --rp-highlight-med: #dfdad9;
-  --rp-highlight-high: #cecacd;
-
-  /* Map app theme variables to Rosé Pine (Dawn) */
-  --background: var(--rp-base);
-  --foreground: var(--rp-text);
-  --card: var(--rp-surface);
-  --card-foreground: var(--rp-text);
-  --popover: var(--rp-surface);
-  --popover-foreground: var(--rp-text);
-  --primary: var(--rp-pine);
-  --primary-foreground: var(--rp-base);
-  --secondary: var(--rp-overlay);
-  --secondary-foreground: var(--rp-text);
-  --muted: var(--rp-highlight-low);
-  --muted-foreground: var(--rp-muted);
-  --accent: var(--rp-highlight-low);
-  --accent-foreground: var(--rp-text);
-  --destructive: var(--rp-love);
-  --destructive-foreground: var(--rp-base);
-  --border: var(--rp-highlight-high);
-  --input: var(--rp-highlight-high);
-  --ring: var(--rp-highlight-med);
-  --chart-1: var(--rp-love);
-  --chart-2: var(--rp-gold);
-  --chart-3: var(--rp-pine);
-  --chart-4: var(--rp-foam);
-  --chart-5: var(--rp-iris);
-  --radius: 0.625rem;
-  --sidebar: var(--rp-surface);
-  --sidebar-foreground: var(--rp-text);
-  --sidebar-primary: var(--rp-pine);
-  --sidebar-primary-foreground: var(--rp-base);
-  --sidebar-accent: var(--rp-highlight-low);
-  --sidebar-accent-foreground: var(--rp-text);
-  --sidebar-border: var(--rp-highlight-high);
-  --sidebar-ring: var(--rp-highlight-med);
-
-  /* Rosé Pine HSL triplets to drive Unovis colors (Dawn) */
-  --rp-primary-hsl: 197 53% 34%; /* pine */
-  --rp-secondary-hsl: 35 81% 56%; /* gold */
-  --rp-text-hsl: 248 19% 32%; /* dawn text */
+  color-scheme: light;
 }
 
-.dark {
-  /* Rosé Pine palette overrides (Moon) */
-  --rp-_nc: #1f1d30;
-  --rp-base: #232136;
-  --rp-surface: #2a273f;
-  --rp-overlay: #393552;
-  --rp-muted: #6e6a86;
-  --rp-subtle: #908caa;
-  --rp-text: #e0def4;
-  --rp-love: #eb6f92;
-  --rp-gold: #f6c177;
-  --rp-rose: #ea9a97;
-  --rp-pine: #3e8fb0;
-  --rp-foam: #9ccfd8;
-  --rp-iris: #c4a7e7;
-  --rp-leaf: #95b1ac;
-  --rp-highlight-low: #2a283e;
-  --rp-highlight-med: #44415a;
-  --rp-highlight-high: #56526e;
-
-  /* Variables below still reference mapped tokens */
-  /* Rosé Pine HSL triplets to drive Unovis colors (Moon) */
-  --rp-primary-hsl: 267 57% 78%; /* iris */
-  --rp-secondary-hsl: 42 86% 67%; /* gold-ish */
-  --rp-text-hsl: 246 50% 91%; /* moon text */
+* {
+  border-radius: 0;
+  box-shadow: none;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-    /* Respect iOS safe areas when in standalone with viewport-fit=cover */
-    padding-top: constant(safe-area-inset-top);
-    padding-top: env(safe-area-inset-top);
-    padding-right: constant(safe-area-inset-right);
-    padding-right: env(safe-area-inset-right);
-    padding-bottom: constant(safe-area-inset-bottom);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: constant(safe-area-inset-left);
-    padding-left: env(safe-area-inset-left);
-  }
-  /* Unovis tooltip container overrides to match shadcn chart docs */
-  :root {
-    --vis-tooltip-background-color: transparent !important;
-    --vis-tooltip-border-color: transparent !important;
-    --vis-tooltip-text-color: var(--foreground) !important;
-    --vis-tooltip-backdrop-filter: none !important;
-    --vis-tooltip-padding: 0 !important;
-    --vis-tooltip-border-radius: 0 !important;
-    --vis-tooltip-box-shadow: none !important;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-    /* Optional Unovis color vars (derived from Rose Pine) */
-    --vis-primary-color: var(--rp-primary-hsl);
-    --vis-secondary-color: var(--rp-secondary-hsl);
-    /* Axis labels (HSL triplets) */
-    --vis-text-color: var(--rp-text-hsl);
-  }
-  .dark {
-    --vis-tooltip-background-color: transparent !important;
-    --vis-tooltip-border-color: transparent !important;
-    --vis-tooltip-text-color: var(--foreground) !important;
-    --vis-tooltip-backdrop-filter: none !important;
-    --vis-tooltip-padding: 0 !important;
-    --vis-tooltip-border-radius: 0 !important;
-    --vis-tooltip-box-shadow: none !important;
+html,
+body,
+#app {
+  min-height: 100%;
+}
 
-    --vis-primary-color: var(--rp-primary-hsl);
-    --vis-secondary-color: var(--rp-secondary-hsl);
-    --vis-text-color: var(--rp-text-hsl);
-  }
+body {
+  margin: 0;
+  background: #fff;
+  color: #000;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  color: inherit;
 }

@@ -1,150 +1,238 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import DashboardHeader from '@/components/dashboard/DashboardHeader.vue'
-import StatsCards from '@/components/dashboard/StatsCards.vue'
-import TrendDisplay from '@/components/dashboard/TrendDisplay.vue'
-import SpendingByCategory from '@/components/dashboard/SpendingByCategory.vue'
-import AddTransactionDialog from '@/components/transactions/AddTransactionDialog.vue'
-import FloatingButton from '@/components/common/FloatingButton.vue'
-import { Plus } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
-import { useTransactions } from '@/composables/useTransactions'
+import { useRecordsStore } from '@/stores/records'
+import { useCategoriesStore } from '@/stores/categories'
 import { useChartData } from '@/composables/useChartData'
 import { useFinancialCalculations } from '@/composables/useFinancialCalculations'
-import { useCategories } from '@/composables/useCategories'
-import type { Transaction } from '@/types'
+import { formatSignedCurrency } from '@/lib/formatters'
 import { PeriodUnit } from '@/types'
 
-// Router and stores
 const authStore = useAuthStore()
+const recordsStore = useRecordsStore()
+const categoriesStore = useCategoriesStore()
 
-// Period selection state
 const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH)
-const {
-  sortedTransactions,
-  isLoading: transactionsLoading,
-  error: transactionsError,
-  fetchRecords,
-  createRecord,
-  clearError: clearTransactionsError,
-} = useTransactions()
+const periodOptions = [
+  { label: 'Month', value: PeriodUnit.MONTH },
+  { label: 'Half year', value: PeriodUnit.HALF_YEAR },
+  { label: 'Year', value: PeriodUnit.YEAR },
+]
 
-const {
-  fetchCategories,
-  isLoading: categoriesLoading,
-  error: categoriesError,
-  clearError: clearCategoriesError,
-  getCategoryByName,
-} = useCategories()
-
-// Combined loading state
 const isLoading = computed(
-  () => authStore.isLoading || transactionsLoading.value || categoriesLoading.value,
+  () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
 )
 
-// Functions
-const addTransaction = async (newTransaction: Transaction) => {
-  // Find the category by name
-  const category = getCategoryByName(newTransaction.category)
+const { filterTransactionsByPeriod, getTrendData } = useChartData(recordsStore.latestTransactions)
+const periodTransactions = computed(() => filterTransactionsByPeriod(selectedPeriod.value))
+const { categorySpending: periodCategorySpending } = useChartData(periodTransactions)
+const { financialSummary } = useFinancialCalculations(periodTransactions)
 
-  if (!category) {
-    console.error('Category not found:', newTransaction.category)
-    return
+const trendSeries = computed(() => getTrendData(selectedPeriod.value))
+const netFlowSeries = computed(() => {
+  const values = trendSeries.value.map((item) => item.income - item.expenses)
+  const max = Math.max(0, ...values.map((value) => Math.abs(value)))
+
+  return trendSeries.value.map((item, index) => {
+    const value = values[index] ?? 0
+    const width = max > 0 ? Math.round((Math.abs(value) / max) * 100) : 0
+    return {
+      label: item.period,
+      value,
+      width,
+      positive: value >= 0,
+    }
+  })
+})
+
+const incomeExpenseBar = computed(() => {
+  const income = financialSummary.value.totalIncome
+  const expenses = financialSummary.value.totalExpenses
+  const total = income + expenses
+  const incomeWidth = total > 0 ? Math.round((income / total) * 100) : 0
+  const expenseWidth = total > 0 ? Math.round((expenses / total) * 100) : 0
+  return {
+    income,
+    expenses,
+    incomeWidth,
+    expenseWidth,
   }
+})
 
-  const payload = {
-    name: newTransaction.name,
-    amount: newTransaction.amount,
-    category_id: category.id,
-    timestamp: newTransaction.timestamp,
+const topCategories = computed(() => {
+  const max = Math.max(0, ...periodCategorySpending.value.map((item) => item.amount))
+  return periodCategorySpending.value.slice(0, 4).map((item) => ({
+    ...item,
+    width: max > 0 ? Math.round((item.amount / max) * 100) : 0,
+  }))
+})
+
+const largestTransaction = computed(() => {
+  if (!periodTransactions.value.length) {
+    return null
   }
+  const sorted = [...periodTransactions.value].sort(
+    (a, b) => Math.abs(b.amount) - Math.abs(a.amount),
+  )
+  return sorted[0]
+})
 
-  const created = await createRecord(payload)
-  if (!created) {
-    console.error('Failed to create transaction from dashboard')
-  }
-}
-
-// Load data function
 const loadData = async () => {
-  // Load categories first, then records (records need categories for display)
-  await fetchCategories()
-  await fetchRecords()
+  await categoriesStore.fetchCategories()
+  await recordsStore.fetchLatestRecords()
 }
 
-// Handle period change from DashboardHeader
-const handlePeriodChange = (period: PeriodUnit) => {
-  selectedPeriod.value = period
-}
-
-// Load data on component mount
 onMounted(() => {
   loadData()
 })
-
-// Period-aware calculations for cards and category view
-const { filterTransactionsByPeriod } = useChartData(sortedTransactions)
-const periodTransactions = computed(() => filterTransactionsByPeriod(selectedPeriod.value))
-const { financialSummary } = useFinancialCalculations(periodTransactions)
-
-const periodIncome = computed(() => financialSummary.value.totalIncome)
-const periodExpenses = computed(() => financialSummary.value.totalExpenses)
-const periodSavingsRate = computed(() => financialSummary.value.savingsRate)
 </script>
 
 <template>
-  <div class="space-y-8">
-    <!-- Error State -->
-    <div
-      v-if="authStore.error || transactionsError || categoriesError"
-      class="p-4 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded"
-    >
-      <p v-if="authStore.error">Authentication Error: {{ authStore.error }}</p>
-      <p v-if="transactionsError">Records Error: {{ transactionsError }}</p>
-      <p v-if="categoriesError">Categories Error: {{ categoriesError }}</p>
-      <div class="mt-2 space-x-2">
-        <button
-          @click="(authStore.clearError(), clearTransactionsError(), clearCategoriesError())"
-          class="text-destructive underline text-sm"
-        >
-          Dismiss
-        </button>
-        <button @click="loadData" class="text-destructive underline text-sm">Retry</button>
+  <section class="space-y-8">
+    <header class="space-y-4 border-b border-black pb-6">
+      <div class="flex items-start justify-between gap-6">
+        <div>
+          <div class="text-xs uppercase tracking-widest">Analytics</div>
+          <h1 class="mt-2 text-3xl font-semibold uppercase tracking-widest">Dashboard</h1>
+          <p class="mt-2 text-sm text-black/70">
+            Period focus, visual summaries, zero CRUD.
+          </p>
+        </div>
+        <div class="min-w-[180px]">
+          <label class="text-xs uppercase tracking-widest">Period</label>
+          <select v-model="selectedPeriod" class="mt-2 w-full border border-black px-3 py-2">
+            <option v-for="period in periodOptions" :key="period.value" :value="period.value">
+              {{ period.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <div v-if="authStore.error || recordsStore.error || categoriesStore.error" class="space-y-2">
+      <div class="border border-black px-4 py-3 text-xs">
+        <div v-if="authStore.error">Auth: {{ authStore.error }}</div>
+        <div v-if="recordsStore.error">Records: {{ recordsStore.error }}</div>
+        <div v-if="categoriesStore.error">Categories: {{ categoriesStore.error }}</div>
       </div>
     </div>
 
-    <div v-if="authStore.isAuthenticated" class="space-y-8">
-      <!-- Dashboard Header -->
-      <DashboardHeader :loading="isLoading" @period-change="handlePeriodChange" />
-
-      <!-- Summary Cards -->
-      <StatsCards
-        :loading="isLoading"
-        :monthly-income="periodIncome"
-        :monthly-expenses="periodExpenses"
-        :savings-rate="periodSavingsRate"
-      />
-
-      <!-- Charts and Analysis -->
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <TrendDisplay
-          class="lg:col-span-4"
-          :loading="isLoading"
-          :transactions="sortedTransactions"
-          :period="selectedPeriod"
-        />
-        <SpendingByCategory
-          class="lg:col-span-3"
-          :loading="isLoading"
-          :transactions="periodTransactions"
-        />
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="border border-black p-4">
+        <div class="text-xs uppercase tracking-widest">Net flow trend</div>
+        <div class="mt-4 space-y-2">
+          <div
+            v-for="point in netFlowSeries"
+            :key="point.label"
+            class="flex items-center gap-3 text-xs"
+          >
+            <div class="w-16 shrink-0 text-[10px] uppercase tracking-widest text-black/70">
+              {{ point.label }}
+            </div>
+            <div class="h-2 flex-1 border border-black">
+              <div
+                class="h-full bg-black"
+                :style="{ width: `${point.width}%` }"
+                :class="point.positive ? '' : 'opacity-50'"
+              ></div>
+            </div>
+            <div class="w-20 text-right">{{ formatSignedCurrency(point.value) }}</div>
+          </div>
+          <div v-if="!netFlowSeries.length" class="text-xs uppercase tracking-widest">
+            No data.
+          </div>
+        </div>
       </div>
 
-      <AddTransactionDialog v-if="!isLoading" @add-transaction="addTransaction">
-        <FloatingButton aria-label="Add transaction">
-          <Plus class="h-6 w-6" />
-        </FloatingButton>
-      </AddTransactionDialog>
+      <div class="border border-black p-4">
+        <div class="text-xs uppercase tracking-widest">Income vs Expense</div>
+        <div class="mt-4 space-y-4 text-xs">
+          <div class="h-4 w-full border border-black">
+            <div class="flex h-full">
+              <div class="h-full border-r border-black" :style="{ width: `${incomeExpenseBar.incomeWidth}%` }"></div>
+              <div class="h-full bg-black" :style="{ width: `${incomeExpenseBar.expenseWidth}%` }"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between uppercase tracking-widest">
+            <span>Income</span>
+            <span>{{ formatSignedCurrency(incomeExpenseBar.income) }}</span>
+          </div>
+          <div class="flex items-center justify-between uppercase tracking-widest">
+            <span>Expense</span>
+            <span>{{ formatSignedCurrency(-incomeExpenseBar.expenses) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="border border-black p-4">
+        <div class="text-xs uppercase tracking-widest">Category spend</div>
+        <div class="mt-4 space-y-3 text-xs">
+          <div v-for="item in topCategories" :key="item.category" class="space-y-1">
+            <div class="flex items-center justify-between uppercase tracking-widest">
+              <span>{{ item.category }}</span>
+              <span>{{ formatSignedCurrency(-item.amount) }}</span>
+            </div>
+            <div class="h-2 border border-black">
+              <div class="h-full bg-black" :style="{ width: `${item.width}%` }"></div>
+            </div>
+          </div>
+          <div v-if="!topCategories.length" class="text-xs uppercase tracking-widest">
+            No category data.
+          </div>
+        </div>
+      </div>
+
+      <div class="border border-black p-4">
+        <div class="text-xs uppercase tracking-widest">Savings rate</div>
+        <div class="mt-4 space-y-4 text-xs">
+          <div class="h-4 border border-black">
+            <div
+              class="h-full bg-black"
+              :style="{ width: `${Math.max(0, Math.min(100, Math.round(financialSummary.savingsRate)))}%` }"
+            ></div>
+          </div>
+          <div class="flex items-center justify-between uppercase tracking-widest">
+            <span>Rate</span>
+            <span>{{ Math.round(financialSummary.savingsRate) }}%</span>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+
+    <div class="border border-black p-4">
+      <div class="text-xs uppercase tracking-widest">Quick facts</div>
+      <div class="mt-4 grid gap-4 md:grid-cols-4 text-xs">
+        <div class="border border-black p-3">
+          <div class="text-[10px] uppercase tracking-widest text-black/70">Net</div>
+          <div class="mt-2 text-sm font-semibold">
+            {{ formatSignedCurrency(financialSummary.netIncome) }}
+          </div>
+        </div>
+        <div class="border border-black p-3">
+          <div class="text-[10px] uppercase tracking-widest text-black/70">Income</div>
+          <div class="mt-2 text-sm font-semibold">
+            {{ formatSignedCurrency(financialSummary.totalIncome) }}
+          </div>
+        </div>
+        <div class="border border-black p-3">
+          <div class="text-[10px] uppercase tracking-widest text-black/70">Expenses</div>
+          <div class="mt-2 text-sm font-semibold">
+            {{ formatSignedCurrency(-financialSummary.totalExpenses) }}
+          </div>
+        </div>
+        <div class="border border-black p-3">
+          <div class="text-[10px] uppercase tracking-widest text-black/70">Largest</div>
+          <div v-if="largestTransaction" class="mt-2 text-sm font-semibold">
+            {{ largestTransaction.name }}
+          </div>
+          <div v-if="largestTransaction" class="text-[10px] uppercase tracking-widest text-black/70">
+            {{ formatSignedCurrency(largestTransaction.amount) }}
+          </div>
+          <div v-else class="mt-2 text-sm font-semibold">None</div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="isLoading" class="text-xs uppercase tracking-widest">Loading analytics...</div>
+  </section>
 </template>

@@ -2,81 +2,52 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import BoringAvatar from 'vue-boring-avatars'
-import { useSettingsStore } from '@/stores/settings'
-import { Avatar } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import SettingsDialog from '@/components/settings/SettingsDialog.vue'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Sun, Moon } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const settings = useSettingsStore()
+const isOpen = ref(false)
 
-const name = computed(() => authStore.user?.username || 'User')
+const username = computed(() => authStore.user?.username || 'User')
 
 const handleLogout = async () => {
+  isOpen.value = false
   await authStore.logout()
   router.push('/login')
 }
 
-const isSettingsOpen = ref(false)
+const openCategories = () => {
+  router.push({ path: '/transactions', query: { manageCategories: '1' } })
+  isOpen.value = false
+}
 </script>
 
 <template>
-  <DropdownMenu>
-    <DropdownMenuTrigger as-child>
-      <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-        <Avatar class="h-8 w-8 overflow-hidden rounded-full">
-          <BoringAvatar
-            :size="32"
-            variant="beam"
-            :name="name"
-            :title="false"
-            class="aspect-square size-full block"
-          />
-        </Avatar>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent class="w-56" align="end">
-      <DropdownMenuLabel class="font-normal flex">
-        <div class="flex flex-col space-y-1">
-          <p class="text-sm font-medium leading-none">
-            {{ authStore.user?.username || 'Unknown user' }}
-          </p>
-          <p class="text-xs leading-none text-muted-foreground">Pro subscription</p>
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuGroup>
-        <DropdownMenuItem> Profile </DropdownMenuItem>
-        <DropdownMenuItem> Billing </DropdownMenuItem>
-        <DropdownMenuItem @click="isSettingsOpen = true"> Settings </DropdownMenuItem>
-        <DropdownMenuItem
-          class="flex items-center justify-between"
-          @select="(event) => event.preventDefault()"
-        >
-          <div class="flex items-center gap-2">
-            <span>{{ settings.isDark ? 'Dark' : 'Light' }} mode</span>
-            <Sun v-if="!settings.isDark" class="h-4 w-4" />
-            <Moon v-else class="h-4 w-4" />
-          </div>
-          <Switch :model-value="settings.isDark" @update:model-value="settings.toggleTheme" />
-        </DropdownMenuItem>
-      </DropdownMenuGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem @click="handleLogout"> Log out </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-  <SettingsDialog v-model:open="isSettingsOpen" />
+  <div class="relative">
+    <button
+      type="button"
+      class="flex items-center gap-3 border border-black px-3 py-2 text-xs uppercase tracking-widest"
+      :aria-expanded="isOpen"
+      @click="isOpen = !isOpen"
+    >
+      <span>{{ username }}</span>
+    </button>
+
+    <div
+      v-if="isOpen"
+      class="absolute right-0 top-full z-20 mt-2 w-56 border border-black bg-white p-3 text-xs"
+    >
+      <div class="border-b border-black pb-2">
+        <div class="text-[10px] uppercase tracking-widest">Signed in</div>
+        <div class="mt-1 font-semibold">{{ username }}</div>
+      </div>
+      <div class="mt-2 flex flex-col gap-2">
+        <button type="button" class="text-left uppercase tracking-widest" @click="openCategories">
+          Manage categories
+        </button>
+        <button type="button" class="text-left uppercase tracking-widest" @click="handleLogout">
+          Log out
+        </button>
+      </div>
+    </div>
+  </div>
 </template>

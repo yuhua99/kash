@@ -1,15 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import DashboardView from '../views/DashboardView.vue'
+import AnalyticsView from '../views/DashboardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'dashboard',
-      component: DashboardView,
-      meta: { requiresAuth: true },
+      redirect: '/transactions',
     },
     {
       path: '/transactions',
@@ -18,9 +16,9 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/categories',
-      name: 'categories',
-      component: () => import('../views/CategoriesView.vue'),
+      path: '/analytics',
+      name: 'analytics',
+      component: AnalyticsView,
       meta: { requiresAuth: true },
     },
     {
@@ -53,9 +51,9 @@ router.beforeEach(async (to) => {
     // If not sure, verify; redirect authenticated users away from guest routes
     if (!authStore.isAuthenticated) {
       const ok = await authStore.checkAuthStatus()
-      if (ok) return { path: '/' }
+      if (ok) return { path: '/transactions' }
     } else {
-      return { path: '/' }
+      return { path: '/transactions' }
     }
   }
 
