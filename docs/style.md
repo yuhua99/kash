@@ -1,6 +1,6 @@
 # Style Guide
 
-## Design System: Modern Structural / Web Brutalist
+## Design System: Modern Structural / Minimalistic
 
 ### Visual Language
 
@@ -91,17 +91,6 @@ The project uses **exactly 4 text sizes**. No other sizes are permitted.
 
 - SM level is default for paragraphs and descriptions
 - Can use `text-black/70` for secondary information
-
-#### Migration Mapping
-
-When updating existing code:
-
-- `text-xs` → Keep as `text-xs`
-- `text-sm` → Keep as `text-sm`
-- `text-base` → Change to `text-sm`
-- `text-xl` → Change to `text-lg`
-- `text-2xl` → Keep as `text-2xl`
-- `text-3xl` → Change to `text-2xl`
 
 ### Layout & Spacing
 

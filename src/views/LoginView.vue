@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { Button } from "@/components/ui";
+import { Button, Input, Form } from "@/components/ui";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -36,29 +36,24 @@ const handleSubmit = async () => {
           Use your account credentials to access the ledger.
         </p>
 
-        <form class="mt-6 space-y-4" @submit.prevent="handleSubmit">
-          <div class="space-y-2">
-            <label for="username" class="text-xs uppercase tracking-widest">Username</label>
-            <input
-              id="username"
-              v-model="username"
-              type="text"
-              required
-              class="w-full border border-[var(--text-base)] px-3 py-2"
-              placeholder="Enter username"
-            />
-          </div>
-          <div class="space-y-2">
-            <label for="password" class="text-xs uppercase tracking-widest">Password</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              class="w-full border border-[var(--text-base)] px-3 py-2"
-              placeholder="Enter password"
-            />
-          </div>
+        <Form class="mt-6 space-y-4" @submit="handleSubmit">
+          <Input
+            id="username"
+            v-model="username"
+            label="Username"
+            type="text"
+            required
+            placeholder="Enter username"
+          />
+
+          <Input
+            id="password"
+            v-model="password"
+            label="Password"
+            type="password"
+            required
+            placeholder="Enter password"
+          />
 
           <div
             v-if="authStore.error"
@@ -73,7 +68,7 @@ const handleSubmit = async () => {
             :disabled="authStore.isLoading"
             class="w-full"
           />
-        </form>
+        </Form>
 
         <div class="mt-6 text-xs uppercase tracking-widest">
           New here?

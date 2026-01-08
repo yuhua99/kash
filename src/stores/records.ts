@@ -54,6 +54,8 @@ export const useRecordsStore = defineStore("records", () => {
       end_time?: number;
       limit?: number;
       offset?: number;
+      sort_column?: string;
+      sort_direction?: "asc" | "desc";
     },
     targetRecords: typeof latestRecords,
     targetTotal: typeof latestTotalRecords,
@@ -71,6 +73,10 @@ export const useRecordsStore = defineStore("records", () => {
     params.append("limit", limit.toString());
     if (offset > 0) {
       params.append("offset", offset.toString());
+    }
+    if (filters.sort_column) {
+      const prefix = filters.sort_direction === "desc" ? "-" : "";
+      params.append("ordering", `${prefix}${filters.sort_column}`);
     }
 
     let endpoint = "/records";
@@ -115,6 +121,8 @@ export const useRecordsStore = defineStore("records", () => {
     end_time: number;
     limit?: number;
     offset?: number;
+    sort_column?: string;
+    sort_direction?: "asc" | "desc";
   }): Promise<boolean> => {
     return runFetch(filters, viewRecords, viewTotalRecords);
   };

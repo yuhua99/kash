@@ -20,11 +20,6 @@ Analytics / Dashboard page (desktop)
 - Separate Analytics route for stats (no CRUD and no transaction list).
 - Period controls live here.
 - Chart-first layout with multiple panels (not a single full-width chart).
-- Suggested panels (pick 3-4 max):
-  - Net flow trend (medium size)
-  - Income vs expense comparison (stacked bars)
-  - Category spend (ranked bars list)
-  - Savings rate (gauge or small line)
 - Quick facts row at the bottom (Net, Income, Expenses, Largest transaction).
 
 Category management placement
@@ -39,7 +34,7 @@ Category management placement
 
 See `docs/style.md` for the complete style guide including:
 
-- Design system rules (Modern Structural / Web Brutalist)
+- Design system rules (Modern Structural / Minimalistic)
 - Typography hierarchy (4-level system)
 - Color palette (monochrome black/white)
 - Component styling guidelines

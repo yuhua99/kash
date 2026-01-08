@@ -1,2 +1,10 @@
 export { default as Button } from "./Button.vue";
+export { default as Input } from "./Input.vue";
+export { default as Select } from "./Select.vue";
+export { default as Checkbox } from "./Checkbox.vue";
+export { default as DatePicker } from "./DatePicker.vue";
+export { default as Dialog } from "./Dialog.vue";
+export { default as Form } from "./Form.vue";
+export { default as DataTable } from "./DataTable.vue";
 export { default as DropdownMenu } from "./DropdownMenu.vue";
+export { default as ConfirmationDialog } from "./ConfirmationDialog.vue";

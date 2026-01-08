@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { Button } from "@/components/ui";
+import { Button, Input, Form } from "@/components/ui";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -42,42 +42,33 @@ const handleSubmit = async () => {
         <h1 class="mt-2 text-2xl font-semibold uppercase tracking-widest">Register</h1>
         <p class="mt-2 text-sm text-[var(--text-muted)]">Set up your ledger access.</p>
 
-        <form class="mt-6 space-y-4" @submit.prevent="handleSubmit">
-          <div class="space-y-2">
-            <label for="username" class="text-xs uppercase tracking-widest">Username</label>
-            <input
-              id="username"
-              v-model="username"
-              type="text"
-              required
-              class="w-full border border-[var(--text-base)] px-3 py-2"
-              placeholder="Choose username"
-            />
-          </div>
-          <div class="space-y-2">
-            <label for="password" class="text-xs uppercase tracking-widest">Password</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              class="w-full border border-[var(--text-base)] px-3 py-2"
-              placeholder="Create password"
-            />
-          </div>
-          <div class="space-y-2">
-            <label for="confirmPassword" class="text-xs uppercase tracking-widest">
-              Confirm password
-            </label>
-            <input
-              id="confirmPassword"
-              v-model="confirmPassword"
-              type="password"
-              required
-              class="w-full border border-[var(--text-base)] px-3 py-2"
-              placeholder="Repeat password"
-            />
-          </div>
+        <Form class="mt-6 space-y-4" @submit="handleSubmit">
+          <Input
+            id="username"
+            v-model="username"
+            label="Username"
+            type="text"
+            required
+            placeholder="Choose username"
+          />
+
+          <Input
+            id="password"
+            v-model="password"
+            label="Password"
+            type="password"
+            required
+            placeholder="Create password"
+          />
+
+          <Input
+            id="confirmPassword"
+            v-model="confirmPassword"
+            label="Confirm password"
+            type="password"
+            required
+            placeholder="Repeat password"
+          />
 
           <div
             v-if="localError || authStore.error"
@@ -92,7 +83,7 @@ const handleSubmit = async () => {
             :disabled="authStore.isLoading"
             class="w-full"
           />
-        </form>
+        </Form>
 
         <div class="mt-6 text-xs uppercase tracking-widest">
           Already have an account?

@@ -15,6 +15,7 @@ export interface CreateCategoryPayload {
 
 export interface UpdateCategoryPayload {
   name: string;
+  is_income?: boolean;
 }
 
 export interface CategoriesResponse {

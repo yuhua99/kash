@@ -8,8 +8,20 @@ import { formatSignedCurrency } from "@/lib/formatters";
 import { getRangeForPeriod } from "@/lib/timeRange";
 import type { Transaction } from "@/types";
 import { PeriodUnit, TransactionType } from "@/types";
-import { Button, DropdownMenu } from "@/components/ui";
+import {
+  Button,
+  DropdownMenu,
+  Input,
+  Select,
+  DatePicker,
+  Checkbox,
+  Dialog,
+  Form,
+  DataTable,
+  ConfirmationDialog,
+} from "@/components/ui";
 import type { DropdownMenuItem } from "@/components/ui/DropdownMenu.vue";
+import type { Column } from "@/components/ui/DataTable.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -23,10 +35,19 @@ const searchQuery = ref("");
 const selectedCategoryId = ref("all");
 const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH);
 const currentPage = ref(1);
+const sortColumn = ref("timestamp");
+const sortDirection = ref<"asc" | "desc">("desc");
 
 const showForm = ref(false);
 const formMode = ref<"add" | "edit">("add");
 const editingId = ref<string | null>(null);
+
+const confirmOpen = ref(false);
+const confirmTitle = ref("");
+const confirmDescription = ref("");
+const confirmVariant = ref<"default" | "destructive">("default");
+const confirmLoading = ref(false);
+const confirmAction = ref<() => Promise<void>>(async () => {});
 
 const formName = ref("");
 const formAmount = ref("");
@@ -34,7 +55,7 @@ const formCategoryId = ref("");
 const formType = ref<TransactionType>(TransactionType.EXPENSE);
 const formDate = ref(new Date().toISOString().slice(0, 10));
 
-const categoryDrawerOpen = ref(false);
+const categoryDialogOpen = ref(false);
 const categoryName = ref("");
 const categoryIsIncome = ref(false);
 const editingCategoryId = ref<string | null>(null);
@@ -52,6 +73,20 @@ const periodOptions = [
 const selectedRange = computed(() => getRangeForPeriod(selectedPeriod.value));
 
 const availableCategories = computed(() => categoriesStore.categories);
+
+const categoryOptions = computed(() => [
+  { label: "All", value: "all" },
+  ...availableCategories.value.map((c) => ({ label: c.name, value: c.id })),
+]);
+
+const formCategoryOptions = computed(() =>
+  availableCategories.value.map((c) => ({ label: c.name, value: c.id })),
+);
+
+const transactionTypeOptions = [
+  { label: "Income", value: TransactionType.INCOME },
+  { label: "Expense", value: TransactionType.EXPENSE },
+];
 
 const filteredTransactions = computed(() => {
   let list = [...recordsStore.viewTransactions];
@@ -94,9 +129,28 @@ const overflowMenuItems: DropdownMenuItem[] = [
   { id: "manage-categories", label: "Manage categories", value: "manage-categories" },
 ];
 
+const columns: Column[] = [
+  { key: "timestamp", label: "Date", sortable: true },
+  { key: "name", label: "Name", sortable: true },
+  { key: "category", label: "Category" },
+  { key: "amount", label: "Amount", align: "right", sortable: true },
+  { key: "actions", label: "Actions", align: "right" },
+];
+
+const handleSort = (key: string) => {
+  if (sortColumn.value === key) {
+    sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+  } else {
+    sortColumn.value = key;
+    sortDirection.value = "desc"; // Default to newest/highest first usually
+  }
+  currentPage.value = 1;
+  fetchTransactionsForRange();
+};
+
 const handleOverflowMenuSelect = (item: DropdownMenuItem) => {
   if (item.value === "manage-categories") {
-    openCategoryDrawer();
+    openCategoryDialog();
   }
 };
 
@@ -107,6 +161,8 @@ const fetchTransactionsForRange = async () => {
     end_time: end,
     limit: PAGE_SIZE,
     offset: (currentPage.value - 1) * PAGE_SIZE,
+    sort_column: sortColumn.value,
+    sort_direction: sortDirection.value,
   });
 };
 
@@ -175,25 +231,39 @@ const saveTransaction = async () => {
   resetForm();
 };
 
-const deleteTransaction = async (id: string) => {
-  const confirmed = window.confirm("Delete this transaction?");
-  if (!confirmed) return;
-  await recordsStore.deleteRecord(id);
-  const total = recordsStore.viewTotalRecords ?? 0;
-  const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  if (currentPage.value > maxPage) {
-    currentPage.value = maxPage;
-    return;
+const requestDeleteTransaction = (id: string) => {
+  confirmTitle.value = "Delete Transaction";
+  confirmDescription.value = "Are you sure you want to delete this transaction?";
+  confirmVariant.value = "destructive";
+  confirmAction.value = async () => {
+    await recordsStore.deleteRecord(id);
+    const total = recordsStore.viewTotalRecords ?? 0;
+    const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (currentPage.value > maxPage) {
+      currentPage.value = maxPage;
+      return; // fetch will be triggered by watcher
+    }
+    await fetchTransactionsForRange();
+  };
+  confirmOpen.value = true;
+};
+
+const handleConfirmAction = async () => {
+  confirmLoading.value = true;
+  try {
+    await confirmAction.value();
+    confirmOpen.value = false;
+  } finally {
+    confirmLoading.value = false;
   }
-  await fetchTransactionsForRange();
 };
 
-const openCategoryDrawer = () => {
-  categoryDrawerOpen.value = true;
+const openCategoryDialog = () => {
+  categoryDialogOpen.value = true;
 };
 
-const closeCategoryDrawer = () => {
-  categoryDrawerOpen.value = false;
+const closeCategoryDialog = () => {
+  categoryDialogOpen.value = false;
   router.replace({ query: { ...route.query, manageCategories: undefined } });
 };
 
@@ -229,17 +299,21 @@ const saveCategory = async () => {
   resetCategoryForm();
 };
 
-const deleteCategory = async (categoryId: string) => {
-  const confirmed = window.confirm("Delete this category?");
-  if (!confirmed) return;
-  await categoriesStore.deleteCategory(categoryId);
+const requestDeleteCategory = (categoryId: string) => {
+  confirmTitle.value = "Delete Category";
+  confirmDescription.value = "Are you sure you want to delete this category?";
+  confirmVariant.value = "destructive";
+  confirmAction.value = async () => {
+    await categoriesStore.deleteCategory(categoryId);
+  };
+  confirmOpen.value = true;
 };
 
 watch(
   () => route.query.manageCategories,
   (value) => {
     if (value) {
-      categoryDrawerOpen.value = true;
+      categoryDialogOpen.value = true;
     }
   },
   { immediate: true },
@@ -278,41 +352,23 @@ onMounted(() => {
 
       <div class="flex flex-wrap items-end gap-4">
         <div class="flex-1 min-w-[220px]">
-          <label class="text-xs uppercase tracking-widest">Search</label>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search by name"
-            class="mt-2 w-full border border-[var(--text-base)] px-3 py-2"
+          <Input v-model="searchQuery" label="Search" placeholder="Search by name" type="search" />
+        </div>
+
+        <div class="min-w-[180px]">
+          <Select
+            v-model="selectedCategoryId"
+            :options="categoryOptions"
+            label="Category"
+            searchable
           />
         </div>
 
         <div class="min-w-[180px]">
-          <label class="text-xs uppercase tracking-widest">Category</label>
-          <select
-            v-model="selectedCategoryId"
-            class="mt-2 w-full border border-[var(--text-base)] px-3 py-2"
-          >
-            <option value="all">All</option>
-            <option v-for="cat in availableCategories" :key="cat.id" :value="cat.id">
-              {{ cat.name }}
-            </option>
-          </select>
+          <Select v-model="selectedPeriod" :options="periodOptions" label="Period" />
         </div>
 
-        <div class="min-w-[180px]">
-          <label class="text-xs uppercase tracking-widest">Period</label>
-          <select
-            v-model="selectedPeriod"
-            class="mt-2 w-full border border-[var(--text-base)] px-3 py-2"
-          >
-            <option v-for="period in periodOptions" :key="period.value" :value="period.value">
-              {{ period.label }}
-            </option>
-          </select>
-        </div>
-
-        <div class="flex items-end">
+        <div class="flex items-end pb-0.5">
           <Button type="button" text="Add transaction" @click="openAddForm" />
         </div>
       </div>
@@ -334,64 +390,39 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="border border-[var(--text-base)]">
-      <div class="border-b border-[var(--text-base)] px-4 py-3 text-xs uppercase tracking-widest">
-        Transactions
-      </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead
-            class="border-b border-[var(--text-base)] text-xs uppercase tracking-widest text-left"
+    <DataTable
+      :columns="columns"
+      :data="filteredTransactions"
+      :loading="isLoading"
+      :sort-column="sortColumn"
+      :sort-direction="sortDirection"
+      @sort="handleSort"
+    >
+      <template #cell-timestamp="{ value }">
+        {{ value ? new Date(value * 1000).toLocaleDateString() : "" }}
+      </template>
+      <template #cell-amount="{ value }">
+        {{ formatSignedCurrency(value) }}
+      </template>
+      <template #cell-actions="{ row }">
+        <div class="flex justify-end gap-3">
+          <button
+            type="button"
+            class="text-xs uppercase tracking-widest underline hover:text-[var(--text-muted)]"
+            @click="openEditForm(row as Transaction)"
           >
-            <tr>
-              <th class="px-4 py-3">Date</th>
-              <th class="px-4 py-3">Name</th>
-              <th class="px-4 py-3">Category</th>
-              <th class="px-4 py-3 text-right">Amount</th>
-              <th class="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="transaction in filteredTransactions"
-              :key="transaction.id"
-              class="border-b border-[var(--text-base)] last:border-b-0"
-            >
-              <td class="px-4 py-3">{{ transaction.timeStr }}</td>
-              <td class="px-4 py-3">{{ transaction.name }}</td>
-              <td class="px-4 py-3">{{ transaction.category }}</td>
-              <td class="px-4 py-3 text-right">
-                {{ formatSignedCurrency(transaction.amount) }}
-              </td>
-              <td class="px-4 py-3 text-right">
-                <Button
-                  type="button"
-                  text="Edit"
-                  @click="openEditForm(transaction)"
-                  class="mr-3 underline"
-                />
-                <Button
-                  type="button"
-                  text="Delete"
-                  @click="deleteTransaction(transaction.id)"
-                  class="underline"
-                />
-              </td>
-            </tr>
-            <tr v-if="!isLoading && filteredTransactions.length === 0">
-              <td colspan="5" class="px-4 py-8 text-center text-xs uppercase tracking-widest">
-                No transactions for this filter.
-              </td>
-            </tr>
-            <tr v-if="isLoading">
-              <td colspan="5" class="px-4 py-8 text-center text-xs uppercase tracking-widest">
-                Loading...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+            Edit
+          </button>
+          <button
+            type="button"
+            class="text-xs uppercase tracking-widest underline hover:text-[var(--text-muted)]"
+            @click="requestDeleteTransaction((row as Transaction).id)"
+          >
+            Delete
+          </button>
+        </div>
+      </template>
+    </DataTable>
 
     <div class="flex items-center justify-between text-xs uppercase tracking-widest">
       <Button
@@ -410,152 +441,107 @@ onMounted(() => {
     </div>
   </section>
 
-  <div v-if="showForm" class="fixed inset-0 z-30">
-    <div class="absolute inset-0 bg-[var(--bg-interactive)]/10" @click="showForm = false"></div>
-    <div
-      class="absolute right-0 top-0 h-full w-full max-w-md border-l border-[var(--text-base)] bg-[var(--bg-base)] p-6"
-    >
-      <div class="flex items-start justify-between border-b border-[var(--text-base)] pb-4">
-        <div>
-          <div class="text-xs uppercase tracking-widest">
-            {{ formMode === "add" ? "Add" : "Edit" }} transaction
-          </div>
-          <div class="mt-2 text-lg font-semibold uppercase tracking-widest">Entry</div>
-        </div>
-        <Button type="button" text="Close" @click="showForm = false" />
-      </div>
-
-      <form class="mt-6 space-y-4" @submit.prevent="saveTransaction">
-        <div class="space-y-2">
-          <label class="text-xs uppercase tracking-widest">Name</label>
-          <input
-            v-model="formName"
-            type="text"
-            class="w-full border border-[var(--text-base)] px-3 py-2"
-          />
-        </div>
-        <div class="space-y-2">
-          <label class="text-xs uppercase tracking-widest">Amount</label>
-          <input
-            v-model="formAmount"
-            type="number"
-            step="0.01"
-            class="w-full border border-[var(--text-base)] px-3 py-2"
-          />
-        </div>
-        <div class="space-y-2">
-          <label class="text-xs uppercase tracking-widest">Type</label>
-          <select v-model="formType" class="w-full border border-[var(--text-base)] px-3 py-2">
-            <option :value="TransactionType.INCOME">Income</option>
-            <option :value="TransactionType.EXPENSE">Expense</option>
-          </select>
-        </div>
-        <div class="space-y-2">
-          <label class="text-xs uppercase tracking-widest">Category</label>
-          <select
-            v-model="formCategoryId"
-            class="w-full border border-[var(--text-base)] px-3 py-2"
-          >
-            <option value="" disabled>Select category</option>
-            <option v-for="cat in availableCategories" :key="cat.id" :value="cat.id">
-              {{ cat.name }}
-            </option>
-          </select>
-          <Button
+  <!-- Add/Edit Transaction Dialog -->
+  <Dialog
+    v-model:open="showForm"
+    :title="formMode === 'add' ? 'Add Transaction' : 'Edit Transaction'"
+    description="Enter transaction details below."
+  >
+    <Form class="mt-4" @submit="saveTransaction">
+      <Input v-model="formName" label="Name" required />
+      <Input v-model="formAmount" label="Amount" type="number" required />
+      <Select v-model="formType" :options="transactionTypeOptions" label="Type" required />
+      <div class="space-y-2">
+        <Select
+          v-model="formCategoryId"
+          :options="formCategoryOptions"
+          label="Category"
+          searchable
+          required
+        />
+        <div class="text-right">
+          <button
             type="button"
-            text="Manage categories"
-            @click="openCategoryDrawer"
-            class="mt-2 underline"
-          />
+            class="text-xs uppercase tracking-widest underline"
+            @click="openCategoryDialog"
+          >
+            Manage categories
+          </button>
         </div>
-        <div class="space-y-2">
-          <label class="text-xs uppercase tracking-widest">Date</label>
-          <input
-            v-model="formDate"
-            type="date"
-            class="w-full border border-[var(--text-base)] px-3 py-2"
-          />
-        </div>
-
-        <Button type="submit" :text="saveButtonText" class="w-full" />
-      </form>
-    </div>
-  </div>
-
-  <div v-if="categoryDrawerOpen" class="fixed inset-0 z-30">
-    <div class="absolute inset-0 bg-[var(--bg-interactive)]/10" @click="closeCategoryDrawer"></div>
-    <div
-      class="absolute right-0 top-0 h-full w-full max-w-md border-l border-[var(--text-base)] bg-[var(--bg-base)] p-6"
-    >
-      <div class="flex items-start justify-between border-b border-[var(--text-base)] pb-4">
-        <div>
-          <div class="text-xs uppercase tracking-widest">Categories</div>
-          <div class="mt-2 text-lg font-semibold uppercase tracking-widest">Management</div>
-        </div>
-        <Button type="button" text="Close" @click="closeCategoryDrawer" />
       </div>
+      <DatePicker v-model="formDate" label="Date" required />
 
-      <form class="mt-6 space-y-4" @submit.prevent="saveCategory">
-        <div class="space-y-2">
-          <label class="text-xs uppercase tracking-widest">Name</label>
-          <input
-            v-model="categoryName"
-            type="text"
-            class="w-full border border-[var(--text-base)] px-3 py-2"
-          />
-        </div>
-        <div class="flex items-center gap-2">
-          <input
-            id="isIncome"
-            v-model="categoryIsIncome"
-            type="checkbox"
-            class="h-4 w-4 border border-[var(--text-base)]"
-          />
-          <label for="isIncome" class="text-xs uppercase tracking-widest">Income category</label>
-        </div>
-        <Button type="submit" :text="categoryButtonText" />
+      <Button type="submit" :text="saveButtonText" class="w-full mt-4" />
+    </Form>
+  </Dialog>
+
+  <!-- Manage Categories Dialog -->
+  <Dialog
+    v-model:open="categoryDialogOpen"
+    title="Manage Categories"
+    description="Add or edit your transaction categories."
+    @close="closeCategoryDialog"
+  >
+    <Form class="mt-4 border-b border-[var(--text-base)] pb-6 mb-6" @submit="saveCategory">
+      <Input v-model="categoryName" label="Name" required />
+      <Checkbox v-model="categoryIsIncome" label="Income category" />
+      <div class="flex gap-2 mt-4">
+        <Button type="submit" :text="categoryButtonText" class="flex-1" />
         <Button
           v-if="editingCategoryId"
           type="button"
-          text="Cancel edit"
+          text="Cancel"
           @click="resetCategoryForm"
+          class="flex-1"
         />
-      </form>
+      </div>
+    </Form>
 
-      <div class="mt-8 border-t border-[var(--text-base)] pt-4">
-        <div class="text-xs uppercase tracking-widest">Existing</div>
-        <div class="mt-4 space-y-3">
-          <div
-            v-for="category in availableCategories"
-            :key="category.id"
-            class="flex items-center justify-between border border-[var(--text-base)] px-3 py-2 text-xs"
+    <div class="space-y-3 max-h-[40vh] overflow-y-auto pr-2">
+      <div
+        v-if="availableCategories.length === 0"
+        class="text-xs uppercase tracking-widest text-center py-4"
+      >
+        No categories found.
+      </div>
+      <div
+        v-for="category in availableCategories"
+        :key="category.id"
+        class="flex items-center justify-between border border-[var(--text-base)] px-3 py-2 text-xs"
+      >
+        <div>
+          <div class="uppercase tracking-widest">{{ category.name }}</div>
+          <div class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+            {{ category.is_income ? "Income" : "Expense" }}
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="uppercase tracking-widest underline"
+            @click="startEditCategory(category.id)"
           >
-            <div>
-              <div class="uppercase tracking-widest">{{ category.name }}</div>
-              <div class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                {{ category.is_income ? "Income" : "Expense" }}
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <Button
-                type="button"
-                text="Edit"
-                @click="startEditCategory(category.id)"
-                class="underline"
-              />
-              <Button
-                type="button"
-                text="Delete"
-                @click="deleteCategory(category.id)"
-                class="underline"
-              />
-            </div>
-          </div>
-          <div v-if="availableCategories.length === 0" class="text-xs uppercase tracking-widest">
-            No categories.
-          </div>
+            Edit
+          </button>
+          <button
+            type="button"
+            class="uppercase tracking-widest underline"
+            @click="requestDeleteCategory(category.id)"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
-  </div>
+  </Dialog>
+
+  <ConfirmationDialog
+    v-model:open="confirmOpen"
+    :title="confirmTitle"
+    :description="confirmDescription"
+    :variant="confirmVariant"
+    :loading="confirmLoading"
+    confirm-text="Delete"
+    @confirm="handleConfirmAction"
+  />
 </template>

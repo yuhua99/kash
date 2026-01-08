@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import { useRecordsStore } from "@/stores/records";
 import { useCategoriesStore } from "@/stores/categories";
@@ -7,10 +8,12 @@ import { useChartData } from "@/composables/useChartData";
 import { useFinancialCalculations } from "@/composables/useFinancialCalculations";
 import { formatSignedCurrency } from "@/lib/formatters";
 import { PeriodUnit } from "@/types";
+import { Select } from "@/components/ui";
 
 const authStore = useAuthStore();
 const recordsStore = useRecordsStore();
 const categoriesStore = useCategoriesStore();
+const { latestTransactions } = storeToRefs(recordsStore);
 
 const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH);
 const periodOptions = [
@@ -23,7 +26,7 @@ const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
 );
 
-const { filterTransactionsByPeriod, getTrendData } = useChartData(recordsStore.latestTransactions);
+const { filterTransactionsByPeriod, getTrendData } = useChartData(latestTransactions);
 const periodTransactions = computed(() => filterTransactionsByPeriod(selectedPeriod.value));
 const { categorySpending: periodCategorySpending } = useChartData(periodTransactions);
 const { financialSummary } = useFinancialCalculations(periodTransactions);
@@ -99,15 +102,7 @@ onMounted(() => {
           </p>
         </div>
         <div class="min-w-[180px]">
-          <label class="text-xs uppercase tracking-widest">Period</label>
-          <select
-            v-model="selectedPeriod"
-            class="mt-2 w-full border border-[var(--text-base)] px-3 py-2"
-          >
-            <option v-for="period in periodOptions" :key="period.value" :value="period.value">
-              {{ period.label }}
-            </option>
-          </select>
+          <Select v-model="selectedPeriod" :options="periodOptions" label="Period" />
         </div>
       </div>
     </header>

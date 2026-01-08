@@ -236,7 +236,7 @@ defineExpose({
               @mouseenter="() => (focusedIndex = enabledItems.findIndex((i) => i.id === item.id))"
               :disabled="item.disabled"
               :class="[
-                'w-full text-left px-4 py-2 text-xs uppercase tracking-widest transition-colors',
+                'w-full text-left px-4 py-2 text-sm transition-colors',
                 item.disabled
                   ? 'text-[var(--text-muted)] cursor-not-allowed bg-[var(--bg-contrast)]'
                   : focusedIndex === enabledItems.findIndex((i) => i.id === item.id)
