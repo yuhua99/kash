@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile Budget Demo 3 - Grid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #e5e5e5;
+        color: #000000;
+      }
+      .font-mono {
+        font-family: "Courier New", Courier, monospace;
+      }
+      .card-hover:hover {
+        background-color: #000000;
+        color: #ffffff;
+      }
+      .card-hover:hover .text-gray-400,
+      .card-hover:hover .text-gray-500 {
+        color: #999999;
+      }
+      .card-hover:hover .border-black {
+        border-color: #ffffff;
+      }
+      .card-hover:hover input::placeholder {
+        color: #666666;
+      }
+      .card-hover:hover input {
+        border-color: #ffffff;
+        color: #ffffff;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen p-4 flex justify-center items-center bg-[#e5e5e5]">
+    <div class="max-w-md w-full grid grid-cols-2 gap-4">
+      <div
+        class="col-span-2 bg-white p-6 border border-black card-hover transition-colors duration-300"
+      >
+        <div class="flex justify-between items-start mb-2">
+          <span
+            class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1"
+            >Balance</span
+          >
+        </div>
+        <h2 class="text-5xl font-bold tracking-tighter py-2">$4,250</h2>
+      </div>
+
+      <div
+        class="col-span-2 bg-white p-6 border border-black card-hover transition-colors duration-300"
+      >
+        <span
+          class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1 mb-4 inline-block"
+          >Add</span
+        >
+        <input
+          type="text"
+          placeholder="Amount..."
+          class="w-full bg-transparent border-b border-black font-mono text-lg py-1 focus:outline-none placeholder-gray-400"
+        />
+      </div>
+
+      <div
+        class="bg-white p-4 border border-black h-32 flex flex-col justify-between card-hover transition-colors duration-300"
+      >
+        <span
+          class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1 w-max"
+          >In</span
+        >
+        <div>
+          <p class="text-2xl font-bold">+$3.2k</p>
+          <p class="font-mono text-xs text-gray-500 mt-1">This Month</p>
+        </div>
+      </div>
+
+      <div
+        class="bg-white p-4 border border-black h-32 flex flex-col justify-between card-hover transition-colors duration-300"
+      >
+        <span
+          class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1 w-max"
+          >Out</span
+        >
+        <div>
+          <p class="text-2xl font-bold">-$1.8k</p>
+          <p class="font-mono text-xs text-gray-500 mt-1">This Month</p>
+        </div>
+      </div>
+
+      <div
+        class="bg-white p-4 border border-black h-32 flex flex-col justify-between card-hover transition-colors duration-300"
+      >
+        <span
+          class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1 w-max"
+          >Save</span
+        >
+        <div class="w-full">
+          <div class="flex justify-between text-xs font-mono mb-1">
+            <span>Goal</span>
+            <span>64%</span>
+          </div>
+          <div class="w-full bg-gray-200 h-2">
+            <div class="bg-current h-full w-[64%]"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bg-white p-4 border border-black h-32 flex flex-col justify-between card-hover transition-colors duration-300"
+      >
+        <span
+          class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1 w-max"
+          >Trend</span
+        >
+        <div class="flex items-end gap-1 h-12">
+          <div class="flex-1 bg-current h-[40%] opacity-40"></div>
+          <div class="flex-1 bg-current h-[60%] opacity-60"></div>
+          <div class="flex-1 bg-current h-[30%] opacity-30"></div>
+          <div class="flex-1 bg-current h-[80%]"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

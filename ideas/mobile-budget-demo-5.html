@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile Budget Demo 5 - Tabs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #e5e5e5;
+        color: #000000;
+      }
+      .font-mono {
+        font-family: "Courier New", Courier, monospace;
+      }
+      .card-hover:hover {
+        background-color: #000000;
+        color: #ffffff;
+      }
+      .card-hover:hover .text-gray-400,
+      .card-hover:hover .text-gray-500 {
+        color: #999999;
+      }
+      .card-hover:hover .border-black {
+        border-color: #ffffff;
+      }
+      .tab-active {
+        background-color: #000000;
+        color: #ffffff;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen p-4 md:p-8 flex justify-center bg-[#e5e5e5]">
+    <div class="max-w-md w-full flex flex-col h-full">
+      <div
+        class="bg-white p-6 border border-black border-b-0 card-hover transition-colors duration-300 z-10"
+      >
+        <div class="flex justify-between items-start">
+          <span
+            class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1"
+            >Balance</span
+          >
+          <span class="font-mono text-xs">USD</span>
+        </div>
+        <h2 class="text-5xl font-bold tracking-tighter mt-4">$4,250</h2>
+      </div>
+
+      <div class="bg-white border border-black border-b-0 grid grid-cols-3">
+        <button
+          class="py-3 font-mono text-xs uppercase tracking-widest border-r border-black tab-active hover:bg-gray-100 transition-colors"
+        >
+          Overview
+        </button>
+        <button
+          class="py-3 font-mono text-xs uppercase tracking-widest border-r border-black hover:bg-black hover:text-white transition-colors"
+        >
+          Add
+        </button>
+        <button
+          class="py-3 font-mono text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors"
+        >
+          History
+        </button>
+      </div>
+
+      <div
+        class="bg-white border border-black flex-1 p-6 card-hover transition-colors duration-300"
+      >
+        <div class="space-y-6">
+          <div class="flex justify-between items-start">
+            <span
+              class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1"
+              >This Month</span
+            >
+          </div>
+
+          <div class="grid grid-cols-2 gap-8">
+            <div>
+              <p class="font-mono text-xs text-gray-500 mb-2">INCOME</p>
+              <p class="text-2xl font-bold">+$3,200</p>
+            </div>
+            <div>
+              <p class="font-mono text-xs text-gray-500 mb-2">EXPENSES</p>
+              <p class="text-2xl font-bold">-$1,450</p>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-gray-200">
+            <div class="flex justify-between items-center mb-4">
+              <span class="font-bold text-sm">Groceries</span>
+              <span class="font-mono text-sm">$450 / $600</span>
+            </div>
+            <div class="w-full bg-gray-200 h-2 mb-6">
+              <div class="bg-current h-full w-[75%]"></div>
+            </div>
+
+            <div class="flex justify-between items-center mb-4">
+              <span class="font-bold text-sm">Dining</span>
+              <span class="font-mono text-sm">$200 / $300</span>
+            </div>
+            <div class="w-full bg-gray-200 h-2">
+              <div class="bg-current h-full w-[66%]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

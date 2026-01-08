@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Budget Demo 28 - Mobile Quick Add</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #e5e5e5;
+        color: #000000;
+      }
+      .font-mono {
+        font-family: "Courier New", Courier, monospace;
+      }
+      .safe-pb {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .caret-blink {
+        animation: blink 1s step-end infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex items-center justify-center bg-[#e5e5e5]">
+    <div
+      class="w-full max-w-md h-[100dvh] bg-white flex flex-col border-x border-black relative"
+    >
+      <div class="flex justify-between items-center p-6 border-b border-black">
+        <button class="font-mono text-xs uppercase underline">Cancel</button>
+        <div class="flex flex-col items-end">
+          <span
+            class="font-mono text-[10px] text-gray-500 uppercase tracking-widest"
+            >Current Balance</span
+          >
+          <span class="font-bold text-sm">$4,250.00</span>
+        </div>
+      </div>
+
+      <div class="flex-1 flex flex-col justify-center px-8 relative">
+        <div class="mb-2">
+          <span
+            class="font-mono text-xs text-gray-400 uppercase tracking-widest"
+            >Amount</span
+          >
+        </div>
+        <div class="relative flex items-baseline">
+          <span class="text-6xl font-bold mr-2">$</span>
+          <input
+            type="text"
+            value="12.50"
+            class="w-full text-7xl font-bold bg-transparent border-none p-0 focus:ring-0 focus:outline-none placeholder-gray-200"
+            autofocus
+          />
+        </div>
+        <div class="h-px bg-black w-full mt-4 mb-8"></div>
+
+        <div class="mb-2">
+          <span
+            class="font-mono text-xs text-gray-400 uppercase tracking-widest"
+            >Category</span
+          >
+        </div>
+        <div class="flex flex-wrap gap-2 mb-8">
+          <button
+            class="border border-black px-4 py-2 font-mono text-sm hover:bg-black hover:text-white transition-colors bg-black text-white"
+          >
+            Food
+          </button>
+          <button
+            class="border border-black px-4 py-2 font-mono text-sm hover:bg-black hover:text-white transition-colors"
+          >
+            Transport
+          </button>
+          <button
+            class="border border-black px-4 py-2 font-mono text-sm hover:bg-black hover:text-white transition-colors"
+          >
+            Shop
+          </button>
+          <button
+            class="border border-black px-4 py-2 font-mono text-sm hover:bg-black hover:text-white transition-colors"
+          >
+            Bills
+          </button>
+          <button
+            class="border border-black px-4 py-2 font-mono text-sm hover:bg-black hover:text-white transition-colors"
+          >
+            Ent.
+          </button>
+          <button
+            class="border border-black px-4 py-2 font-mono text-sm text-gray-400 border-gray-300 hover:border-black hover:text-black transition-colors"
+          >
+            +
+          </button>
+        </div>
+
+        <div class="mb-2">
+          <span
+            class="font-mono text-xs text-gray-400 uppercase tracking-widest"
+            >Note</span
+          >
+        </div>
+        <input
+          type="text"
+          placeholder="What's this for?"
+          class="w-full border-b border-gray-200 font-mono text-lg py-2 focus:outline-none focus:border-black transition-colors bg-transparent mb-8"
+        />
+      </div>
+
+      <div class="p-4 border-t border-black bg-gray-50 safe-pb">
+        <button
+          class="w-full bg-black text-white h-14 font-mono text-sm uppercase tracking-widest hover:bg-gray-800 active:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>Add Transaction</span>
+          <span>&rarr;</span>
+        </button>
+      </div>
+
+      <div
+        class="absolute top-0 left-0 w-full h-1 bg-black animate-[loading_2s_ease-in-out_infinite] hidden"
+      ></div>
+    </div>
+  </body>
+</html>

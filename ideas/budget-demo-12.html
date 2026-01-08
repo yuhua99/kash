@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budget Demo 12 - Split Timeline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #ffffff;
+        color: #000000;
+      }
+      .font-mono {
+        font-family: "Courier New", Courier, monospace;
+      }
+    </style>
+  </head>
+  <body class="h-screen flex flex-col lg:flex-row overflow-hidden">
+    <!-- Left Panel: Navigation & Timeline -->
+    <div
+      class="lg:w-1/3 w-full h-full border-r border-black flex flex-col bg-white z-10"
+    >
+      <header class="p-6 border-b border-black">
+        <h1 class="text-lg font-bold tracking-tight mb-4">TRANSACTIONS</h1>
+        <div class="flex justify-between items-center font-mono text-xs">
+          <span>JAN 2026</span>
+          <span class="border border-black px-2 py-1">$4,250.00</span>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto">
+        <!-- Item 1 (Active) -->
+        <div
+          class="group border-b border-black cursor-pointer bg-black text-white relative"
+        >
+          <div class="p-6 flex gap-4">
+            <div class="flex flex-col items-center pt-1 min-w-[3rem]">
+              <span class="text-xs font-mono opacity-60">JAN</span>
+              <span class="text-lg font-bold">07</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="font-bold text-sm">Whole Foods Market</h3>
+                <span class="font-mono text-sm">-$124.50</span>
+              </div>
+              <div class="text-xs font-mono opacity-60 uppercase">
+                Groceries • 10:42 AM
+              </div>
+            </div>
+          </div>
+          <!-- Arrow Indicator (Only on Active) -->
+          <div
+            class="absolute right-[-1px] top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rotate-45 border-l border-b border-black lg:block hidden"
+          ></div>
+        </div>
+
+        <!-- Item 2 -->
+        <div
+          class="group border-b border-black cursor-pointer hover:bg-gray-50 transition-colors"
+        >
+          <div class="p-6 flex gap-4">
+            <div class="flex flex-col items-center pt-1 min-w-[3rem]">
+              <span class="text-xs font-mono text-gray-400">JAN</span>
+              <span class="text-lg font-bold">06</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="font-bold text-sm">Freelance Payment</h3>
+                <span class="font-mono text-sm">+$1,500.00</span>
+              </div>
+              <div class="text-xs font-mono text-gray-500 uppercase">
+                Income • 09:15 AM
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div
+          class="group border-b border-black cursor-pointer hover:bg-gray-50 transition-colors"
+        >
+          <div class="p-6 flex gap-4">
+            <div class="flex flex-col items-center pt-1 min-w-[3rem]">
+              <span class="text-xs font-mono text-gray-400">JAN</span>
+              <span class="text-lg font-bold">06</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="font-bold text-sm">Netflix Subscription</h3>
+                <span class="font-mono text-sm">-$15.99</span>
+              </div>
+              <div class="text-xs font-mono text-gray-500 uppercase">
+                Entertainment • 18:30 PM
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div
+          class="group border-b border-black cursor-pointer hover:bg-gray-50 transition-colors"
+        >
+          <div class="p-6 flex gap-4">
+            <div class="flex flex-col items-center pt-1 min-w-[3rem]">
+              <span class="text-xs font-mono text-gray-400">JAN</span>
+              <span class="text-lg font-bold">05</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="font-bold text-sm">Uber Ride</h3>
+                <span class="font-mono text-sm">-$24.50</span>
+              </div>
+              <div class="text-xs font-mono text-gray-500 uppercase">
+                Transport • 08:15 AM
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Item 5 -->
+        <div
+          class="group border-b border-black cursor-pointer hover:bg-gray-50 transition-colors"
+        >
+          <div class="p-6 flex gap-4">
+            <div class="flex flex-col items-center pt-1 min-w-[3rem]">
+              <span class="text-xs font-mono text-gray-400">JAN</span>
+              <span class="text-lg font-bold">04</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="font-bold text-sm">Local Coffee Shop</h3>
+                <span class="font-mono text-sm">-$5.40</span>
+              </div>
+              <div class="text-xs font-mono text-gray-500 uppercase">
+                Food • 14:20 PM
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-black lg:hidden block">
+        <p class="text-xs text-center font-mono">
+          Select an item to view details
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Panel: Detail View (Fixed) -->
+    <div class="flex-1 bg-gray-50 lg:block hidden relative overflow-y-auto">
+      <!-- Background Pattern -->
+      <div
+        class="absolute inset-0 opacity-5 pointer-events-none"
+        style="
+          background-image:
+            linear-gradient(#000 1px, transparent 1px),
+            linear-gradient(90deg, #000 1px, transparent 1px);
+          background-size: 40px 40px;
+        "
+      ></div>
+
+      <div
+        class="max-w-xl mx-auto mt-20 p-12 bg-white border border-black shadow-none relative"
+      >
+        <div
+          class="absolute -top-3 -left-3 w-6 h-6 border-l border-t border-black"
+        ></div>
+        <div
+          class="absolute -top-3 -right-3 w-6 h-6 border-r border-t border-black"
+        ></div>
+        <div
+          class="absolute -bottom-3 -left-3 w-6 h-6 border-l border-b border-black"
+        ></div>
+        <div
+          class="absolute -bottom-3 -right-3 w-6 h-6 border-r border-b border-black"
+        ></div>
+
+        <div class="flex justify-between items-start mb-12">
+          <div class="text-4xl font-mono text-gray-200">#00142</div>
+          <div
+            class="border border-black px-3 py-1 text-xs font-mono uppercase tracking-widest"
+          >
+            Receipt
+          </div>
+        </div>
+
+        <div class="text-center mb-12">
+          <div
+            class="w-16 h-16 bg-black text-white mx-auto flex items-center justify-center text-2xl font-bold mb-4"
+          >
+            WF
+          </div>
+          <h2 class="text-2xl font-bold mb-2">Whole Foods Market</h2>
+          <div class="font-mono text-sm text-gray-500">
+            123 Market St, San Francisco, CA
+          </div>
+        </div>
+
+        <div class="border-y border-black py-8 my-8">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-mono text-sm">TOTAL AMOUNT</span>
+            <span class="text-2xl font-bold">-$124.50</span>
+          </div>
+          <div class="flex justify-between items-center text-xs text-gray-500">
+            <span>Status: Completed</span>
+            <span>Card: •••• 4242</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8 mb-8">
+          <div>
+            <div class="text-xs font-mono text-gray-500 mb-1">DATE</div>
+            <div class="font-bold">Jan 07, 2026</div>
+          </div>
+          <div>
+            <div class="text-xs font-mono text-gray-500 mb-1">TIME</div>
+            <div class="font-bold">10:42 AM</div>
+          </div>
+          <div>
+            <div class="text-xs font-mono text-gray-500 mb-1">CATEGORY</div>
+            <div class="font-bold">Groceries</div>
+          </div>
+          <div>
+            <div class="text-xs font-mono text-gray-500 mb-1">NOTES</div>
+            <div class="font-bold border-b border-gray-200 pb-1">
+              Add note...
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <button
+            class="flex-1 bg-black text-white py-3 text-sm font-bold border border-black hover:bg-white hover:text-black transition-colors"
+          >
+            EDIT
+          </button>
+          <button
+            class="flex-1 bg-white text-black py-3 text-sm font-bold border border-black hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+          >
+            DELETE
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

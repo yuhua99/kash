@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Demo 8: Minimalist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+        .font-mono {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        /* Hide scrollbar for ultra clean look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-6">
+
+    <main class="w-full max-w-md">
+        
+        <header class="text-center mb-16">
+            <div class="font-mono text-xs uppercase tracking-widest mb-2 text-gray-400">January 2026</div>
+            <h1 class="text-4xl font-semibold tracking-tight mb-2">$3,420.50</h1>
+            <p class="text-sm text-gray-500">Available Balance</p>
+        </header>
+
+        <section class="mb-12">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-mono text-xs uppercase tracking-widest">Recent Activity</h2>
+                <button class="w-6 h-6 flex items-center justify-center border border-transparent hover:border-black font-mono text-lg leading-none">+</button>
+            </div>
+
+            <ul class="space-y-0">
+                <li class="flex justify-between items-baseline py-4 border-b border-black group cursor-pointer hover:bg-gray-50 transition-colors px-2 -mx-2">
+                    <div class="flex-1">
+                        <span class="block font-medium">Grocery Run</span>
+                    </div>
+                    <span class="font-mono text-sm ml-4">-$124.50</span>
+                </li>
+                <li class="flex justify-between items-baseline py-4 border-b border-black group cursor-pointer hover:bg-gray-50 transition-colors px-2 -mx-2">
+                    <div class="flex-1">
+                        <span class="block font-medium">Monthly Rent</span>
+                    </div>
+                    <span class="font-mono text-sm ml-4">-$1,200.00</span>
+                </li>
+                <li class="flex justify-between items-baseline py-4 border-b border-black group cursor-pointer hover:bg-gray-50 transition-colors px-2 -mx-2">
+                    <div class="flex-1">
+                        <span class="block font-medium">Freelance Deposit</span>
+                    </div>
+                    <span class="font-mono text-sm ml-4 text-green-700">+$850.00</span>
+                </li>
+                <li class="flex justify-between items-baseline py-4 border-b border-black group cursor-pointer hover:bg-gray-50 transition-colors px-2 -mx-2">
+                    <div class="flex-1">
+                        <span class="block font-medium">Coffee</span>
+                    </div>
+                    <span class="font-mono text-sm ml-4">-$4.50</span>
+                </li>
+                <li class="flex justify-between items-baseline py-4 border-b border-black group cursor-pointer hover:bg-gray-50 transition-colors px-2 -mx-2">
+                    <div class="flex-1">
+                        <span class="block font-medium text-gray-400">Pending Authorization</span>
+                    </div>
+                    <span class="font-mono text-sm ml-4 text-gray-400">-$20.00</span>
+                </li>
+            </ul>
+            
+            <button class="mt-8 w-full text-center font-mono text-xs uppercase tracking-widest text-gray-400 hover:text-black transition-colors">Show All Transactions</button>
+        </section>
+
+        <footer class="grid grid-cols-2 gap-8 border-t border-black pt-8">
+            <div>
+                <span class="block font-mono text-xs uppercase tracking-widest text-gray-400 mb-1">Income</span>
+                <span class="block font-semibold">$5,200</span>
+            </div>
+            <div class="text-right">
+                <span class="block font-mono text-xs uppercase tracking-widest text-gray-400 mb-1">Spent</span>
+                <span class="block font-semibold">$1,779</span>
+            </div>
+        </footer>
+
+    </main>
+
+</body>
+</html>

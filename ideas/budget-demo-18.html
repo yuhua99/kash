@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budget Demo 18 - Bottom Aligned</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #ffffff;
+        color: #000000;
+      }
+      .font-mono {
+        font-family: "Courier New", Courier, monospace;
+      }
+    </style>
+  </head>
+  <body class="h-screen flex flex-col justify-end p-8 md:p-12 relative">
+    <div
+      class="absolute top-0 left-0 w-full p-8 md:p-12 flex justify-between items-start pointer-events-none"
+    >
+      <div class="font-mono text-sm">
+        <div>USER: YH</div>
+        <div>LOC: SFO</div>
+      </div>
+      <div class="font-mono text-sm text-right">
+        <div>JAN 08</div>
+        <div>2026</div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl w-full mx-auto">
+      <div
+        class="flex flex-col md:flex-row items-end justify-between gap-12 border-b border-black pb-8 mb-8"
+      >
+        <div class="w-full md:w-auto">
+          <div
+            class="font-mono text-xs text-gray-400 mb-2 uppercase tracking-widest"
+          >
+            Total Assets
+          </div>
+          <h1 class="text-6xl md:text-8xl font-bold tracking-tight">
+            $4,250<span class="text-4xl text-gray-300 font-normal">.00</span>
+          </h1>
+        </div>
+
+        <div class="flex gap-4 mb-2">
+          <button
+            class="w-12 h-12 border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors text-xl font-light rounded-full"
+            style="border-radius: 50% !important"
+          >
+            ↓
+          </button>
+          <button
+            class="w-12 h-12 border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors text-xl font-light rounded-full"
+            style="border-radius: 50% !important"
+          >
+            ↑
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 font-mono text-sm">
+        <div>
+          <h3 class="font-bold border-b border-black pb-2 mb-4 uppercase">
+            Latest
+          </h3>
+          <ul class="space-y-3">
+            <li
+              class="flex justify-between hover:bg-gray-100 p-1 cursor-pointer transition-colors"
+            >
+              <span>Whole Foods</span>
+              <span>-124.50</span>
+            </li>
+            <li
+              class="flex justify-between hover:bg-gray-100 p-1 cursor-pointer transition-colors"
+            >
+              <span>Freelance</span>
+              <span>+1,500.00</span>
+            </li>
+            <li
+              class="flex justify-between hover:bg-gray-100 p-1 cursor-pointer transition-colors"
+            >
+              <span>Netflix</span>
+              <span>-15.99</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-bold border-b border-black pb-2 mb-4 uppercase">
+            Categories
+          </h3>
+          <ul class="space-y-3">
+            <li class="flex justify-between items-center group cursor-pointer">
+              <span>Food & Drink</span>
+              <div
+                class="w-24 h-1 bg-gray-200 group-hover:bg-black transition-colors"
+              >
+                <div class="h-full bg-black w-[45%]"></div>
+              </div>
+            </li>
+            <li class="flex justify-between items-center group cursor-pointer">
+              <span>Transport</span>
+              <div
+                class="w-24 h-1 bg-gray-200 group-hover:bg-black transition-colors"
+              >
+                <div class="h-full bg-black w-[20%]"></div>
+              </div>
+            </li>
+            <li class="flex justify-between items-center group cursor-pointer">
+              <span>Utilities</span>
+              <div
+                class="w-24 h-1 bg-gray-200 group-hover:bg-black transition-colors"
+              >
+                <div class="h-full bg-black w-[35%]"></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold border-b border-black pb-2 mb-4 uppercase">
+              Status
+            </h3>
+            <p class="text-gray-500">
+              Budget on track. Savings goal 85% complete for this month.
+            </p>
+          </div>
+          <button
+            class="mt-8 border border-black py-3 px-6 uppercase tracking-widest hover:bg-black hover:text-white transition-colors text-xs font-bold text-center"
+          >
+            Full Report →
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budget Demo 10 - Horizontal Timeline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #ffffff;
+        color: #000000;
+      }
+      .font-mono {
+        font-family: "Courier New", Courier, monospace;
+      }
+      /* Hide scrollbar for clean look but allow scroll */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="h-screen flex flex-col overflow-hidden">
+    <!-- Header -->
+    <header class="border-b border-black p-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold tracking-tighter">TIMELINE.H</h1>
+      <div class="font-mono text-sm border border-black px-2 py-1">
+        BAL: $4,250.00
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col justify-center relative bg-gray-50/50">
+      <!-- Center Line -->
+      <div
+        class="absolute top-1/2 left-0 w-full h-px bg-black transform -translate-y-1/2 z-0"
+      ></div>
+
+      <!-- Horizontal Scroll Container -->
+      <div
+        class="overflow-x-auto whitespace-nowrap px-8 w-full h-full flex items-center no-scrollbar z-10"
+      >
+        <!-- Date Marker -->
+        <div class="inline-block relative mr-16 align-middle">
+          <div
+            class="w-3 h-3 bg-black absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          ></div>
+          <div
+            class="absolute top-8 left-1/2 transform -translate-x-1/2 font-mono text-xs"
+          >
+            TODAY
+          </div>
+        </div>
+
+        <!-- Item 1 (Top) -->
+        <div class="inline-block w-64 mr-8 align-middle relative group">
+          <div
+            class="w-3 h-3 border border-black bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 group-hover:bg-black transition-colors"
+          ></div>
+          <div
+            class="absolute bottom-10 left-0 w-full border border-black bg-white p-4 hover:bg-black hover:text-white transition-colors cursor-pointer group-hover:-translate-y-2 transition-transform duration-300"
+          >
+            <div
+              class="font-mono text-xs border-b border-black group-hover:border-white pb-1 mb-2 flex justify-between"
+            >
+              <span>10:42 AM</span>
+              <span>EXPENSE</span>
+            </div>
+            <h3 class="text-lg font-bold leading-none mb-1">
+              Whole Foods Market
+            </h3>
+            <p class="font-mono text-sm">-$124.50</p>
+            <div class="mt-2 text-xs opacity-60">Groceries</div>
+
+            <!-- Connector Line -->
+            <div
+              class="absolute -bottom-10 left-1/2 w-px h-10 bg-black group-hover:bg-black"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Item 2 (Bottom) -->
+        <div class="inline-block w-64 mr-8 align-middle relative group">
+          <div
+            class="w-3 h-3 border border-black bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 group-hover:bg-black transition-colors"
+          ></div>
+          <div
+            class="absolute top-10 left-0 w-full border border-black bg-white p-4 hover:bg-black hover:text-white transition-colors cursor-pointer group-hover:translate-y-2 transition-transform duration-300"
+          >
+            <!-- Connector Line -->
+            <div class="absolute -top-10 left-1/2 w-px h-10 bg-black"></div>
+
+            <div
+              class="font-mono text-xs border-b border-black group-hover:border-white pb-1 mb-2 flex justify-between"
+            >
+              <span>09:15 AM</span>
+              <span>INCOME</span>
+            </div>
+            <h3 class="text-lg font-bold leading-none mb-1">
+              Freelance Payment
+            </h3>
+            <p class="font-mono text-sm">+$1,500.00</p>
+            <div class="mt-2 text-xs opacity-60">Design Work</div>
+          </div>
+        </div>
+
+        <!-- Date Marker -->
+        <div class="inline-block relative mr-16 align-middle">
+          <div
+            class="w-3 h-3 border border-black bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          ></div>
+          <div
+            class="absolute top-8 left-1/2 transform -translate-x-1/2 font-mono text-xs text-gray-400"
+          >
+            YESTERDAY
+          </div>
+        </div>
+
+        <!-- Item 3 (Top) -->
+        <div class="inline-block w-64 mr-8 align-middle relative group">
+          <div
+            class="w-3 h-3 border border-black bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 group-hover:bg-black transition-colors"
+          ></div>
+          <div
+            class="absolute bottom-10 left-0 w-full border border-black bg-white p-4 hover:bg-black hover:text-white transition-colors cursor-pointer group-hover:-translate-y-2 transition-transform duration-300"
+          >
+            <div
+              class="font-mono text-xs border-b border-black group-hover:border-white pb-1 mb-2 flex justify-between"
+            >
+              <span>18:30 PM</span>
+              <span>SUBSCRIPTION</span>
+            </div>
+            <h3 class="text-lg font-bold leading-none mb-1">Netflix</h3>
+            <p class="font-mono text-sm">-$15.99</p>
+            <div class="mt-2 text-xs opacity-60">Entertainment</div>
+            <div class="absolute -bottom-10 left-1/2 w-px h-10 bg-black"></div>
+          </div>
+        </div>
+
+        <!-- Item 4 (Bottom) -->
+        <div class="inline-block w-64 mr-8 align-middle relative group">
+          <div
+            class="w-3 h-3 border border-black bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 group-hover:bg-black transition-colors"
+          ></div>
+          <div
+            class="absolute top-10 left-0 w-full border border-black bg-white p-4 hover:bg-black hover:text-white transition-colors cursor-pointer group-hover:translate-y-2 transition-transform duration-300"
+          >
+            <div class="absolute -top-10 left-1/2 w-px h-10 bg-black"></div>
+            <div
+              class="font-mono text-xs border-b border-black group-hover:border-white pb-1 mb-2 flex justify-between"
+            >
+              <span>12:00 PM</span>
+              <span>EXPENSE</span>
+            </div>
+            <h3 class="text-lg font-bold leading-none mb-1">Uber Ride</h3>
+            <p class="font-mono text-sm">-$24.50</p>
+            <div class="mt-2 text-xs opacity-60">Transport</div>
+          </div>
+        </div>
+
+        <!-- Item 5 (Top) -->
+        <div class="inline-block w-64 mr-16 align-middle relative group">
+          <div
+            class="w-3 h-3 border border-black bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 group-hover:bg-black transition-colors"
+          ></div>
+          <div
+            class="absolute bottom-10 left-0 w-full border border-black bg-white p-4 hover:bg-black hover:text-white transition-colors cursor-pointer group-hover:-translate-y-2 transition-transform duration-300"
+          >
+            <div
+              class="font-mono text-xs border-b border-black group-hover:border-white pb-1 mb-2 flex justify-between"
+            >
+              <span>08:15 AM</span>
+              <span>EXPENSE</span>
+            </div>
+            <h3 class="text-lg font-bold leading-none mb-1">Coffee Shop</h3>
+            <p class="font-mono text-sm">-$5.40</p>
+            <div class="mt-2 text-xs opacity-60">Food & Drink</div>
+            <div class="absolute -bottom-10 left-1/2 w-px h-10 bg-black"></div>
+          </div>
+        </div>
+
+        <!-- End Marker -->
+        <div class="inline-block relative mr-8 align-middle">
+          <div
+            class="w-3 h-3 bg-black absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          ></div>
+          <div
+            class="absolute top-8 left-1/2 transform -translate-x-1/2 font-mono text-xs w-32 text-center"
+          >
+            JAN 01, 2026
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Controls -->
+    <footer
+      class="border-t border-black p-4 flex justify-between items-center bg-white z-20"
+    >
+      <div class="flex gap-4 font-mono text-sm">
+        <button class="hover:underline flex items-center gap-2">
+          <span>←</span> SCROLL
+        </button>
+      </div>
+      <button
+        class="border border-black px-6 py-2 font-mono text-sm hover:bg-black hover:text-white transition-colors uppercase"
+      >
+        + Add Transaction
+      </button>
+    </footer>
+  </body>
+</html>

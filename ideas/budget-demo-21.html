@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budget Demo 21 - Minimal Cards (Amount Presets)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #e5e5e5;
+        color: #000000;
+      }
+      .font-mono {
+        font-family: "Courier New", Courier, monospace;
+      }
+      .card-hover:hover {
+        background-color: #000000;
+        color: #ffffff;
+      }
+      .card-hover:hover .text-gray-400,
+      .card-hover:hover .text-gray-500 {
+        color: #999999;
+      }
+      .card-hover:hover .border-black {
+        border-color: #ffffff;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen p-8 flex items-center justify-center">
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl w-full"
+    >
+      <div
+        class="bg-white p-8 border border-black h-64 flex flex-col justify-between card-hover transition-colors duration-300"
+      >
+        <div class="flex justify-between items-start">
+          <span
+            class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1"
+            >Balance</span
+          >
+          <span class="font-mono text-xs">USD</span>
+        </div>
+        <div>
+          <h2 class="text-5xl font-bold tracking-tighter mb-2">$4,250</h2>
+          <p class="font-mono text-xs text-gray-500">Last updated: Just now</p>
+        </div>
+      </div>
+
+      <div
+        class="bg-white p-8 border border-black h-64 flex flex-col justify-between card-hover transition-colors duration-300"
+      >
+        <div class="flex justify-between items-start mb-2">
+          <span
+            class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1"
+            >Quick Add</span
+          >
+        </div>
+        <div class="flex flex-col gap-2 h-full justify-end mt-2">
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              class="border border-black py-2 font-mono text-xs hover:bg-white hover:text-black transition-colors"
+            >
+              $5
+            </button>
+            <button
+              class="border border-black py-2 font-mono text-xs hover:bg-white hover:text-black transition-colors"
+            >
+              $10
+            </button>
+            <button
+              class="border border-black py-2 font-mono text-xs hover:bg-white hover:text-black transition-colors"
+            >
+              $25
+            </button>
+            <button
+              class="border border-black py-2 font-mono text-xs hover:bg-white hover:text-black transition-colors"
+            >
+              $50
+            </button>
+            <button
+              class="border border-black py-2 font-mono text-xs hover:bg-white hover:text-black transition-colors"
+            >
+              $100
+            </button>
+            <button
+              class="border border-black py-2 font-mono text-xs hover:bg-white hover:text-black transition-colors"
+            >
+              Custom
+            </button>
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="flex-1 border border-black py-1 font-mono text-[10px] hover:bg-white hover:text-black transition-colors"
+            >
+              EXPENSE
+            </button>
+            <button
+              class="flex-1 border border-black py-1 font-mono text-[10px] hover:bg-white hover:text-black transition-colors"
+            >
+              INCOME
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bg-white p-8 border border-black h-64 flex flex-col justify-between card-hover transition-colors duration-300"
+      >
+        <div class="flex justify-between items-start">
+          <span
+            class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1"
+            >Savings</span
+          >
+          <span class="font-mono text-xs">64%</span>
+        </div>
+        <div class="w-full bg-gray-200 h-2 mt-auto">
+          <div class="bg-current h-full w-[64%]"></div>
+        </div>
+        <p class="font-mono text-xs mt-4 text-gray-500">
+          Target: $5,000 by Feb 01
+        </p>
+      </div>
+
+      <div
+        class="bg-white p-8 border border-black h-64 flex flex-col justify-between md:col-span-2 card-hover transition-colors duration-300"
+      >
+        <div class="flex justify-between items-start mb-4">
+          <span
+            class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1"
+            >Latest Activity</span
+          >
+          <button class="font-mono text-xs underline">VIEW ALL</button>
+        </div>
+        <div class="space-y-4">
+          <div
+            class="flex justify-between items-end border-b border-gray-200 pb-2"
+          >
+            <div>
+              <div class="font-bold text-sm">Whole Foods Market</div>
+              <div class="font-mono text-xs text-gray-500">Groceries</div>
+            </div>
+            <div class="font-mono text-sm">-$124.50</div>
+          </div>
+          <div
+            class="flex justify-between items-end border-b border-gray-200 pb-2"
+          >
+            <div>
+              <div class="font-bold text-sm">Freelance Payment</div>
+              <div class="font-mono text-xs text-gray-500">Income</div>
+            </div>
+            <div class="font-mono text-sm">+$1,500.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bg-white p-8 border border-black h-64 flex flex-col justify-between card-hover transition-colors duration-300"
+      >
+        <div class="flex justify-between items-start">
+          <span
+            class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1"
+            >Analytics</span
+          >
+        </div>
+        <div class="flex items-end gap-2 h-24">
+          <div class="flex-1 bg-current h-[40%] opacity-20"></div>
+          <div class="flex-1 bg-current h-[60%] opacity-40"></div>
+          <div class="flex-1 bg-current h-[30%] opacity-30"></div>
+          <div class="flex-1 bg-current h-[80%]"></div>
+          <div class="flex-1 bg-current h-[50%] opacity-50"></div>
+        </div>
+        <p
+          class="font-mono text-xs text-center border-t border-black pt-2 mt-2"
+        >
+          Spending Trend
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
