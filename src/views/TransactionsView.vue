@@ -8,7 +8,8 @@ import { formatSignedCurrency } from "@/lib/formatters";
 import { getRangeForPeriod } from "@/lib/timeRange";
 import type { Transaction } from "@/types";
 import { PeriodUnit, TransactionType } from "@/types";
-import { Button } from "@/components/ui";
+import { Button, DropdownMenu } from "@/components/ui";
+import type { DropdownMenuItem } from "@/components/ui/DropdownMenu.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -24,7 +25,6 @@ const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH);
 const currentPage = ref(1);
 
 const showForm = ref(false);
-const showOverflowMenu = ref(false);
 const formMode = ref<"add" | "edit">("add");
 const editingId = ref<string | null>(null);
 
@@ -89,6 +89,16 @@ const saveButtonText = computed(() =>
 const categoryButtonText = computed(() =>
   editingCategoryId.value ? "Update category" : "Add category",
 );
+
+const overflowMenuItems: DropdownMenuItem[] = [
+  { id: "manage-categories", label: "Manage categories", value: "manage-categories" },
+];
+
+const handleOverflowMenuSelect = (item: DropdownMenuItem) => {
+  if (item.value === "manage-categories") {
+    openCategoryDrawer();
+  }
+};
 
 const fetchTransactionsForRange = async () => {
   const { start, end } = selectedRange.value;
@@ -180,7 +190,6 @@ const deleteTransaction = async (id: string) => {
 
 const openCategoryDrawer = () => {
   categoryDrawerOpen.value = true;
-  showOverflowMenu.value = false;
 };
 
 const closeCategoryDrawer = () => {
@@ -260,25 +269,11 @@ onMounted(() => {
           </p>
         </div>
 
-        <div class="relative">
-          <Button
-            type="button"
-            text="More"
-            :aria-expanded="showOverflowMenu"
-            @click="showOverflowMenu = !showOverflowMenu"
-          />
-          <div
-            v-if="showOverflowMenu"
-            class="absolute right-0 top-full z-10 mt-2 w-48 border border-black bg-white p-3 text-xs uppercase tracking-widest"
-          >
-            <Button
-              type="button"
-              text="Manage categories"
-              @click="openCategoryDrawer"
-              class="text-left"
-            />
-          </div>
-        </div>
+        <DropdownMenu :items="overflowMenuItems" align="right" @select="handleOverflowMenuSelect">
+          <template #trigger>
+            <Button type="button" text="More" />
+          </template>
+        </DropdownMenu>
       </div>
 
       <div class="flex flex-wrap items-end gap-4">
