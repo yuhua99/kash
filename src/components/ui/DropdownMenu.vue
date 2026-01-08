@@ -217,7 +217,7 @@ defineExpose({
         v-if="isOpen"
         ref="menuRef"
         @mouseleave="handleMenuMouseLeave"
-        class="absolute z-50 mt-2 min-w-[12rem] bg-white border border-black shadow-lg"
+        class="absolute z-50 mt-2 min-w-[12rem] bg-[var(--bg-base)] border border-[var(--text-base)] shadow-lg"
         :class="alignmentClass"
         role="menu"
         :aria-orientation="'vertical'"
@@ -238,10 +238,10 @@ defineExpose({
               :class="[
                 'w-full text-left px-4 py-2 text-xs uppercase tracking-widest transition-colors',
                 item.disabled
-                  ? 'text-gray-400 cursor-not-allowed bg-gray-50'
+                  ? 'text-[var(--text-muted)] cursor-not-allowed bg-[var(--bg-contrast)]'
                   : focusedIndex === enabledItems.findIndex((i) => i.id === item.id)
-                    ? 'bg-black text-white'
-                    : 'text-black hover:bg-black hover:text-white',
+                    ? 'bg-[var(--bg-interactive)] text-[var(--text-hover)]'
+                    : 'text-[var(--text-base)] hover:bg-[var(--bg-interactive)] hover:text-[var(--text-hover)]',
               ]"
               role="menuitem"
               :tabindex="item.disabled ? -1 : 0"

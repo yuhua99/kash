@@ -28,7 +28,7 @@ The Button component includes default styling that should not be overridden by c
 - **Hover state**: Black background, white text (inverted)
 - **Disabled state**: Light gray background (`bg-gray-200`), black text, no hover effect
 - **Typography**: `text-xs uppercase tracking-widest` (monospace via `.ui-base`)
-- **Dimensions**: Fixed height `h-10`, horizontal padding `px-4`
+- **Dimensions**: vertical padding `py-2`, horizontal padding `px-4`
 
 ### CSS Classes Applied
 

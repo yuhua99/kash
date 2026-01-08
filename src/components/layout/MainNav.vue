@@ -29,7 +29,9 @@ const isActive = (href: string) => {
       :key="item.name"
       :to="item.href"
       class="border-b-2 border-transparent pb-1 uppercase tracking-widest"
-      :class="isActive(item.href) ? 'border-black font-semibold' : 'text-black/70'"
+      :class="
+        isActive(item.href) ? 'border-[var(--text-base)] font-semibold' : 'text-[var(--text-muted)]'
+      "
     >
       {{ item.name }}
     </RouterLink>

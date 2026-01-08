@@ -34,7 +34,10 @@ const handleSelect = async (item: DropdownMenuItem) => {
       <div v-if="item.id === 'categories'" class="w-full">
         {{ item.label }}
       </div>
-      <div v-else-if="item.id === 'logout'" class="w-full border-t border-black pt-2 mt-2">
+      <div
+        v-else-if="item.id === 'logout'"
+        class="w-full border-t border-[var(--text-base)] pt-2 mt-2"
+      >
         <div class="text-[10px] uppercase tracking-widest mb-1">Signed in as</div>
         <div class="font-semibold mb-2">{{ username }}</div>
         {{ item.label }}

@@ -27,12 +27,14 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white text-black">
+  <div class="min-h-screen bg-[var(--bg-base)] text-[var(--text-base)]">
     <div class="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center px-6">
-      <div class="border border-black p-8">
+      <div class="border border-[var(--text-base)] p-8">
         <div class="text-xs uppercase tracking-widest">Access</div>
         <h1 class="mt-2 text-2xl font-semibold uppercase tracking-widest">Login</h1>
-        <p class="mt-2 text-sm text-black/70">Use your account credentials to access the ledger.</p>
+        <p class="mt-2 text-sm text-[var(--text-muted)]">
+          Use your account credentials to access the ledger.
+        </p>
 
         <form class="mt-6 space-y-4" @submit.prevent="handleSubmit">
           <div class="space-y-2">
@@ -42,7 +44,7 @@ const handleSubmit = async () => {
               v-model="username"
               type="text"
               required
-              class="w-full border border-black px-3 py-2"
+              class="w-full border border-[var(--text-base)] px-3 py-2"
               placeholder="Enter username"
             />
           </div>
@@ -53,12 +55,15 @@ const handleSubmit = async () => {
               v-model="password"
               type="password"
               required
-              class="w-full border border-black px-3 py-2"
+              class="w-full border border-[var(--text-base)] px-3 py-2"
               placeholder="Enter password"
             />
           </div>
 
-          <div v-if="authStore.error" class="border border-black bg-white px-3 py-2 text-xs">
+          <div
+            v-if="authStore.error"
+            class="border border-[var(--text-base)] bg-[var(--bg-base)] px-3 py-2 text-xs"
+          >
             {{ authStore.error }}
           </div>
 

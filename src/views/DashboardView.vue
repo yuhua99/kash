@@ -89,16 +89,21 @@ onMounted(() => {
 
 <template>
   <section class="space-y-8">
-    <header class="space-y-4 border-b border-black pb-6">
+    <header class="space-y-4 border-b border-[var(--text-base)] pb-6">
       <div class="flex items-start justify-between gap-6">
         <div>
           <div class="text-xs uppercase tracking-widest">Analytics</div>
           <h1 class="mt-2 text-2xl font-semibold uppercase tracking-widest">Dashboard</h1>
-          <p class="mt-2 text-sm text-black/70">Period focus, visual summaries, zero CRUD.</p>
+          <p class="mt-2 text-sm text-[var(--text-muted)]">
+            Period focus, visual summaries, zero CRUD.
+          </p>
         </div>
         <div class="min-w-[180px]">
           <label class="text-xs uppercase tracking-widest">Period</label>
-          <select v-model="selectedPeriod" class="mt-2 w-full border border-black px-3 py-2">
+          <select
+            v-model="selectedPeriod"
+            class="mt-2 w-full border border-[var(--text-base)] px-3 py-2"
+          >
             <option v-for="period in periodOptions" :key="period.value" :value="period.value">
               {{ period.label }}
             </option>
@@ -108,7 +113,7 @@ onMounted(() => {
     </header>
 
     <div v-if="authStore.error || recordsStore.error || categoriesStore.error" class="space-y-2">
-      <div class="border border-black px-4 py-3 text-xs">
+      <div class="border border-[var(--text-base)] px-4 py-3 text-xs">
         <div v-if="authStore.error">Auth: {{ authStore.error }}</div>
         <div v-if="recordsStore.error">Records: {{ recordsStore.error }}</div>
         <div v-if="categoriesStore.error">Categories: {{ categoriesStore.error }}</div>
@@ -116,7 +121,7 @@ onMounted(() => {
     </div>
 
     <div class="grid gap-6 md:grid-cols-2">
-      <div class="border border-black p-4">
+      <div class="border border-[var(--text-base)] p-4">
         <div class="text-xs uppercase tracking-widest">Net flow trend</div>
         <div class="mt-4 space-y-2">
           <div
@@ -124,12 +129,14 @@ onMounted(() => {
             :key="point.label"
             class="flex items-center gap-3 text-xs"
           >
-            <div class="w-16 shrink-0 text-[10px] uppercase tracking-widest text-black/70">
+            <div
+              class="w-16 shrink-0 text-[10px] uppercase tracking-widest text-[var(--text-muted)]"
+            >
               {{ point.label }}
             </div>
-            <div class="h-2 flex-1 border border-black">
+            <div class="h-2 flex-1 border border-[var(--text-base)]">
               <div
-                class="h-full bg-black"
+                class="h-full bg-[var(--bg-interactive)]"
                 :style="{ width: `${point.width}%` }"
                 :class="point.positive ? '' : 'opacity-50'"
               ></div>
@@ -140,17 +147,17 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="border border-black p-4">
+      <div class="border border-[var(--text-base)] p-4">
         <div class="text-xs uppercase tracking-widest">Income vs Expense</div>
         <div class="mt-4 space-y-4 text-xs">
-          <div class="h-4 w-full border border-black">
+          <div class="h-4 w-full border border-[var(--text-base)]">
             <div class="flex h-full">
               <div
-                class="h-full border-r border-black"
+                class="h-full border-r border-[var(--text-base)]"
                 :style="{ width: `${incomeExpenseBar.incomeWidth}%` }"
               ></div>
               <div
-                class="h-full bg-black"
+                class="h-full bg-[var(--bg-interactive)]"
                 :style="{ width: `${incomeExpenseBar.expenseWidth}%` }"
               ></div>
             </div>
@@ -166,7 +173,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="border border-black p-4">
+      <div class="border border-[var(--text-base)] p-4">
         <div class="text-xs uppercase tracking-widest">Category spend</div>
         <div class="mt-4 space-y-3 text-xs">
           <div v-for="item in topCategories" :key="item.category" class="space-y-1">
@@ -174,8 +181,11 @@ onMounted(() => {
               <span>{{ item.category }}</span>
               <span>{{ formatSignedCurrency(-item.amount) }}</span>
             </div>
-            <div class="h-2 border border-black">
-              <div class="h-full bg-black" :style="{ width: `${item.width}%` }"></div>
+            <div class="h-2 border border-[var(--text-base)]">
+              <div
+                class="h-full bg-[var(--bg-interactive)]"
+                :style="{ width: `${item.width}%` }"
+              ></div>
             </div>
           </div>
           <div v-if="!topCategories.length" class="text-xs uppercase tracking-widest">
@@ -184,12 +194,12 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="border border-black p-4">
+      <div class="border border-[var(--text-base)] p-4">
         <div class="text-xs uppercase tracking-widest">Savings rate</div>
         <div class="mt-4 space-y-4 text-xs">
-          <div class="h-4 border border-black">
+          <div class="h-4 border border-[var(--text-base)]">
             <div
-              class="h-full bg-black"
+              class="h-full bg-[var(--bg-interactive)]"
               :style="{
                 width: `${Math.max(0, Math.min(100, Math.round(financialSummary.savingsRate)))}%`,
               }"
@@ -203,35 +213,35 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="border border-black p-4">
+    <div class="border border-[var(--text-base)] p-4">
       <div class="text-xs uppercase tracking-widest">Quick facts</div>
       <div class="mt-4 grid gap-4 md:grid-cols-4 text-xs">
-        <div class="border border-black p-3">
-          <div class="text-[10px] uppercase tracking-widest text-black/70">Net</div>
+        <div class="border border-[var(--text-base)] p-3">
+          <div class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Net</div>
           <div class="mt-2 text-sm font-semibold">
             {{ formatSignedCurrency(financialSummary.netIncome) }}
           </div>
         </div>
-        <div class="border border-black p-3">
-          <div class="text-[10px] uppercase tracking-widest text-black/70">Income</div>
+        <div class="border border-[var(--text-base)] p-3">
+          <div class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Income</div>
           <div class="mt-2 text-sm font-semibold">
             {{ formatSignedCurrency(financialSummary.totalIncome) }}
           </div>
         </div>
-        <div class="border border-black p-3">
-          <div class="text-[10px] uppercase tracking-widest text-black/70">Expenses</div>
+        <div class="border border-[var(--text-base)] p-3">
+          <div class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Expenses</div>
           <div class="mt-2 text-sm font-semibold">
             {{ formatSignedCurrency(-financialSummary.totalExpenses) }}
           </div>
         </div>
-        <div class="border border-black p-3">
-          <div class="text-[10px] uppercase tracking-widest text-black/70">Largest</div>
+        <div class="border border-[var(--text-base)] p-3">
+          <div class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Largest</div>
           <div v-if="largestTransaction" class="mt-2 text-sm font-semibold">
             {{ largestTransaction.name }}
           </div>
           <div
             v-if="largestTransaction"
-            class="text-[10px] uppercase tracking-widest text-black/70"
+            class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]"
           >
             {{ formatSignedCurrency(largestTransaction.amount) }}
           </div>

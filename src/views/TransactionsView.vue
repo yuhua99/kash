@@ -259,12 +259,12 @@ onMounted(() => {
 
 <template>
   <section class="space-y-8">
-    <header class="space-y-4 border-b border-black pb-6">
+    <header class="space-y-4 border-b border-[var(--text-base)] pb-6">
       <div class="flex items-start justify-between gap-6">
         <div>
           <div class="text-xs uppercase tracking-widest">Transactions</div>
           <h1 class="mt-2 text-2xl font-semibold uppercase tracking-widest">Ledger</h1>
-          <p class="mt-2 text-sm text-black/70">
+          <p class="mt-2 text-sm text-[var(--text-muted)]">
             {{ transactionsSubtitle }}
           </p>
         </div>
@@ -283,13 +283,16 @@ onMounted(() => {
             v-model="searchQuery"
             type="text"
             placeholder="Search by name"
-            class="mt-2 w-full border border-black px-3 py-2"
+            class="mt-2 w-full border border-[var(--text-base)] px-3 py-2"
           />
         </div>
 
         <div class="min-w-[180px]">
           <label class="text-xs uppercase tracking-widest">Category</label>
-          <select v-model="selectedCategoryId" class="mt-2 w-full border border-black px-3 py-2">
+          <select
+            v-model="selectedCategoryId"
+            class="mt-2 w-full border border-[var(--text-base)] px-3 py-2"
+          >
             <option value="all">All</option>
             <option v-for="cat in availableCategories" :key="cat.id" :value="cat.id">
               {{ cat.name }}
@@ -299,7 +302,10 @@ onMounted(() => {
 
         <div class="min-w-[180px]">
           <label class="text-xs uppercase tracking-widest">Period</label>
-          <select v-model="selectedPeriod" class="mt-2 w-full border border-black px-3 py-2">
+          <select
+            v-model="selectedPeriod"
+            class="mt-2 w-full border border-[var(--text-base)] px-3 py-2"
+          >
             <option v-for="period in periodOptions" :key="period.value" :value="period.value">
               {{ period.label }}
             </option>
@@ -313,7 +319,7 @@ onMounted(() => {
     </header>
 
     <div v-if="authStore.error || recordsStore.error || categoriesStore.error" class="space-y-2">
-      <div class="border border-black px-4 py-3 text-xs">
+      <div class="border border-[var(--text-base)] px-4 py-3 text-xs">
         <div v-if="authStore.error || recordsStore.error || categoriesStore.error">
           Auth: {{ authStore.error }}
         </div>
@@ -328,13 +334,15 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="border border-black">
-      <div class="border-b border-black px-4 py-3 text-xs uppercase tracking-widest">
+    <div class="border border-[var(--text-base)]">
+      <div class="border-b border-[var(--text-base)] px-4 py-3 text-xs uppercase tracking-widest">
         Transactions
       </div>
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
-          <thead class="border-b border-black text-xs uppercase tracking-widest text-left">
+          <thead
+            class="border-b border-[var(--text-base)] text-xs uppercase tracking-widest text-left"
+          >
             <tr>
               <th class="px-4 py-3">Date</th>
               <th class="px-4 py-3">Name</th>
@@ -347,7 +355,7 @@ onMounted(() => {
             <tr
               v-for="transaction in filteredTransactions"
               :key="transaction.id"
-              class="border-b border-black last:border-b-0"
+              class="border-b border-[var(--text-base)] last:border-b-0"
             >
               <td class="px-4 py-3">{{ transaction.timeStr }}</td>
               <td class="px-4 py-3">{{ transaction.name }}</td>
@@ -403,9 +411,11 @@ onMounted(() => {
   </section>
 
   <div v-if="showForm" class="fixed inset-0 z-30">
-    <div class="absolute inset-0 bg-black/10" @click="showForm = false"></div>
-    <div class="absolute right-0 top-0 h-full w-full max-w-md border-l border-black bg-white p-6">
-      <div class="flex items-start justify-between border-b border-black pb-4">
+    <div class="absolute inset-0 bg-[var(--bg-interactive)]/10" @click="showForm = false"></div>
+    <div
+      class="absolute right-0 top-0 h-full w-full max-w-md border-l border-[var(--text-base)] bg-[var(--bg-base)] p-6"
+    >
+      <div class="flex items-start justify-between border-b border-[var(--text-base)] pb-4">
         <div>
           <div class="text-xs uppercase tracking-widest">
             {{ formMode === "add" ? "Add" : "Edit" }} transaction
@@ -418,7 +428,11 @@ onMounted(() => {
       <form class="mt-6 space-y-4" @submit.prevent="saveTransaction">
         <div class="space-y-2">
           <label class="text-xs uppercase tracking-widest">Name</label>
-          <input v-model="formName" type="text" class="w-full border border-black px-3 py-2" />
+          <input
+            v-model="formName"
+            type="text"
+            class="w-full border border-[var(--text-base)] px-3 py-2"
+          />
         </div>
         <div class="space-y-2">
           <label class="text-xs uppercase tracking-widest">Amount</label>
@@ -426,19 +440,22 @@ onMounted(() => {
             v-model="formAmount"
             type="number"
             step="0.01"
-            class="w-full border border-black px-3 py-2"
+            class="w-full border border-[var(--text-base)] px-3 py-2"
           />
         </div>
         <div class="space-y-2">
           <label class="text-xs uppercase tracking-widest">Type</label>
-          <select v-model="formType" class="w-full border border-black px-3 py-2">
+          <select v-model="formType" class="w-full border border-[var(--text-base)] px-3 py-2">
             <option :value="TransactionType.INCOME">Income</option>
             <option :value="TransactionType.EXPENSE">Expense</option>
           </select>
         </div>
         <div class="space-y-2">
           <label class="text-xs uppercase tracking-widest">Category</label>
-          <select v-model="formCategoryId" class="w-full border border-black px-3 py-2">
+          <select
+            v-model="formCategoryId"
+            class="w-full border border-[var(--text-base)] px-3 py-2"
+          >
             <option value="" disabled>Select category</option>
             <option v-for="cat in availableCategories" :key="cat.id" :value="cat.id">
               {{ cat.name }}
@@ -453,7 +470,11 @@ onMounted(() => {
         </div>
         <div class="space-y-2">
           <label class="text-xs uppercase tracking-widest">Date</label>
-          <input v-model="formDate" type="date" class="w-full border border-black px-3 py-2" />
+          <input
+            v-model="formDate"
+            type="date"
+            class="w-full border border-[var(--text-base)] px-3 py-2"
+          />
         </div>
 
         <Button type="submit" :text="saveButtonText" class="w-full" />
@@ -462,9 +483,11 @@ onMounted(() => {
   </div>
 
   <div v-if="categoryDrawerOpen" class="fixed inset-0 z-30">
-    <div class="absolute inset-0 bg-black/10" @click="closeCategoryDrawer"></div>
-    <div class="absolute right-0 top-0 h-full w-full max-w-md border-l border-black bg-white p-6">
-      <div class="flex items-start justify-between border-b border-black pb-4">
+    <div class="absolute inset-0 bg-[var(--bg-interactive)]/10" @click="closeCategoryDrawer"></div>
+    <div
+      class="absolute right-0 top-0 h-full w-full max-w-md border-l border-[var(--text-base)] bg-[var(--bg-base)] p-6"
+    >
+      <div class="flex items-start justify-between border-b border-[var(--text-base)] pb-4">
         <div>
           <div class="text-xs uppercase tracking-widest">Categories</div>
           <div class="mt-2 text-lg font-semibold uppercase tracking-widest">Management</div>
@@ -475,14 +498,18 @@ onMounted(() => {
       <form class="mt-6 space-y-4" @submit.prevent="saveCategory">
         <div class="space-y-2">
           <label class="text-xs uppercase tracking-widest">Name</label>
-          <input v-model="categoryName" type="text" class="w-full border border-black px-3 py-2" />
+          <input
+            v-model="categoryName"
+            type="text"
+            class="w-full border border-[var(--text-base)] px-3 py-2"
+          />
         </div>
         <div class="flex items-center gap-2">
           <input
             id="isIncome"
             v-model="categoryIsIncome"
             type="checkbox"
-            class="h-4 w-4 border border-black"
+            class="h-4 w-4 border border-[var(--text-base)]"
           />
           <label for="isIncome" class="text-xs uppercase tracking-widest">Income category</label>
         </div>
@@ -495,17 +522,17 @@ onMounted(() => {
         />
       </form>
 
-      <div class="mt-8 border-t border-black pt-4">
+      <div class="mt-8 border-t border-[var(--text-base)] pt-4">
         <div class="text-xs uppercase tracking-widest">Existing</div>
         <div class="mt-4 space-y-3">
           <div
             v-for="category in availableCategories"
             :key="category.id"
-            class="flex items-center justify-between border border-black px-3 py-2 text-xs"
+            class="flex items-center justify-between border border-[var(--text-base)] px-3 py-2 text-xs"
           >
             <div>
               <div class="uppercase tracking-widest">{{ category.name }}</div>
-              <div class="text-[10px] uppercase tracking-widest text-black/70">
+              <div class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                 {{ category.is_income ? "Income" : "Expense" }}
               </div>
             </div>
