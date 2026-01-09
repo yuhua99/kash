@@ -250,9 +250,9 @@ const filteredAnalytics = computed(() => {
       <div
         class="bg-white border border-black flex flex-col p-8 transition-all duration-500 ease-in-out"
         :class="{
-          'md:col-span-2 lg:col-span-2 lg:col-start-1 lg:row-start-2 h-64':
+          'md:col-span-2 lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:row-end-3 h-64':
             activeView === 'overview',
-          'md:col-span-2 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:row-span-2 h-[33rem]':
+          'md:col-span-2 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:row-end-3 h-[33rem]':
             activeView === 'transactions',
         }"
       >
