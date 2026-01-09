@@ -180,7 +180,7 @@ const filteredAnalytics = computed(() => {
     <TransitionGroup
       name="block"
       tag="div"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2 gap-4 max-w-6xl w-full transition-all duration-500"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-[16rem] gap-4 max-w-6xl w-full"
     >
       <!-- OVERVIEW MODE BLOCKS -->
       <!-- Balance Block (only in overview) -->
@@ -188,6 +188,141 @@ const filteredAnalytics = computed(() => {
         <template #headerRight>
           <span class="font-mono text-xs">USD</span>
         </template>
+        <div class="flex-1 flex flex-col justify-end overflow-hidden">
+          <h2 class="text-5xl font-bold tracking-tighter mb-2">
+            {{ formatCurrency(currentMonthSummary.netIncome) }}
+          </h2>
+          <p class="font-mono text-xs text-[var(--text-muted)]">Current Month</p>
+        </div>
+      </Block>
+
+      <!-- Quick Add Block (only in overview) -->
+      <Block v-if="activeView === 'overview'" key="quick-add" label="Quick Add">
+        <div class="flex-1 flex flex-col justify-center relative overflow-hidden">
+          <input
+            type="text"
+            placeholder="124.50 groceries"
+            class="w-full bg-transparent border-b border-black font-mono text-xl py-2 focus:outline-none placeholder-gray-400 transition-colors"
+          />
+          <button class="absolute right-0 bottom-2 text-2xl hover:text-gray-500 transition-colors">
+            →
+          </button>
+        </div>
+        <p class="font-mono text-xs text-[var(--text-muted)] shrink-0">Format: amount category</p>
+      </Block>
+
+      <!-- Savings Block (only in overview) -->
+      <Block v-if="activeView === 'overview'" key="savings" label="Savings">
+        <template #headerRight>
+          <span class="font-mono text-xs">{{ Math.round(financialSummary.savingsRate) }}%</span>
+        </template>
+        <div class="flex-1 flex flex-col justify-end overflow-hidden">
+          <div class="w-full bg-gray-200 h-2">
+            <div
+              class="bg-current h-full transition-all duration-300"
+              :style="{
+                width: `${Math.max(0, Math.min(100, Math.round(financialSummary.savingsRate)))}%`,
+              }"
+            ></div>
+          </div>
+        </div>
+      </Block>
+
+      <!-- TRANSACTIONS BLOCK (always present, expands in transaction view) -->
+      <div
+        key="transactions"
+        class="bg-white border border-black flex flex-col p-8"
+        :class="{
+          'md:col-span-2 h-64': activeView === 'overview',
+          'lg:col-span-2 lg:row-span-2 h-[33rem]': activeView === 'transactions',
+        }"
+      >
+        <div class="flex justify-between items-start mb-4 shrink-0">
+          <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
+            Latest Activity
+          </span>
+          <button
+            v-if="activeView === 'overview'"
+            class="font-mono text-xs underline hover:text-gray-600 transition-colors"
+            @click="expandTransactions"
+          >
+            VIEW ALL
+          </button>
+          <button
+            v-else
+            class="font-mono text-xs underline hover:text-gray-600 transition-colors"
+            @click="backToOverview"
+          >
+            BACK
+          </button>
+        </div>
+
+        <div
+          v-if="latestTransactions.length > 0"
+          class="flex-1 overflow-y-auto space-y-3 min-h-0"
+        >
+          <div
+            v-for="transaction in displayedTransactions"
+            :key="transaction.id"
+            class="flex justify-between items-end border-b border-gray-200 pb-2"
+          >
+            <div>
+              <div class="font-bold text-sm">{{ transaction.name }}</div>
+              <div class="font-mono text-xs text-[var(--text-muted)]">
+                {{ transaction.category }}
+              </div>
+            </div>
+            <div class="font-mono text-sm">{{ formatSignedCurrency(transaction.amount) }}</div>
+          </div>
+        </div>
+        <div v-else class="flex-1 flex items-center justify-center min-h-0">
+          <p class="font-mono text-xs uppercase tracking-widest text-[var(--text-muted)]">
+            No recent transactions
+          </p>
+        </div>
+      </div>
+
+      <!-- PERIOD FILTER BLOCK (only in transaction view, upper right) -->
+      <Block v-if="activeView === 'transactions'" key="period-filter" label="Time Period">
+        <div class="flex-1 flex flex-col justify-center overflow-hidden">
+          <Select v-model="selectedPeriod" :options="periodOptions" class="w-full mb-4" />
+          <div class="space-y-2">
+            <div class="flex justify-between font-mono text-xs">
+              <span>Income:</span>
+              <span class="text-green-600">{{ formatCurrency(financialSummary.totalIncome) }}</span>
+            </div>
+            <div class="flex justify-between font-mono text-xs">
+              <span>Expenses:</span>
+              <span class="text-red-600">{{ formatCurrency(financialSummary.totalExpenses) }}</span>
+            </div>
+            <div class="flex justify-between font-mono text-sm font-bold border-t border-black pt-2">
+              <span>Net:</span>
+              <span>{{ formatCurrency(financialSummary.netIncome) }}</span>
+            </div>
+          </div>
+        </div>
+      </Block>
+
+      <!-- ANALYTICS BLOCK (always present, content changes based on view) -->
+      <Block key="analytics" label="Analytics">
+        <div class="flex-1 flex flex-col justify-end overflow-hidden">
+          <div class="flex items-end gap-2 h-32">
+            <div
+              v-for="(month, index) in filteredAnalytics"
+              :key="month.month"
+              class="flex-1 bg-current transition-all duration-300"
+              :style="{ height: `${month.heightPercent || 10}%` }"
+              :class="index < filteredAnalytics.length - 1 ? 'opacity-50' : ''"
+            ></div>
+          </div>
+          <p class="font-mono text-xs text-center border-t border-black pt-2 mt-3 shrink-0">
+            {{ activeView === "transactions" ? "Filtered Spending" : "Spending Trend" }}
+          </p>
+        </div>
+      </Block>
+    </TransitionGroup>
+  </div>
+</template>
         <div class="flex-1 flex flex-col justify-end">
           <h2 class="text-5xl font-bold tracking-tighter mb-2">
             {{ formatCurrency(currentMonthSummary.netIncome) }}
