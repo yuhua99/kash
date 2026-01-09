@@ -9,7 +9,7 @@ import { useFinancialCalculations } from "@/composables/useFinancialCalculations
 import { formatCurrency, formatSignedCurrency } from "@/lib/formatters"
 import { PeriodUnit } from "@/types"
 import { Select } from "@/components/ui"
-import DashboardCard from "@/components/DashboardCard.vue"
+import Block from "@/components/Block.vue"
 
 const authStore = useAuthStore()
 const recordsStore = useRecordsStore()
@@ -142,28 +142,20 @@ const last5MonthsExpenses = computed(() => {
   <div class="min-h-screen p-8 flex items-center justify-center">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl w-full">
       <!-- CARD 1: Balance -->
-      <DashboardCard>
-        <div class="flex justify-between items-start">
-          <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
-            Balance
-          </span>
+      <Block label="Balance">
+        <template #headerRight>
           <span class="font-mono text-xs">USD</span>
-        </div>
+        </template>
         <div>
           <h2 class="text-5xl font-bold tracking-tighter mb-2">
             {{ formatCurrency(currentMonthSummary.netIncome) }}
           </h2>
           <p class="font-mono text-xs text-[var(--text-muted)]">Current Month</p>
         </div>
-      </DashboardCard>
+      </Block>
 
       <!-- CARD 2: Quick Add -->
-      <DashboardCard>
-        <div class="flex justify-between items-start">
-          <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
-            Quick Add
-          </span>
-        </div>
+      <Block label="Quick Add">
         <div class="flex-1 flex flex-col justify-center relative mt-2">
           <input
             type="text"
@@ -175,16 +167,13 @@ const last5MonthsExpenses = computed(() => {
           </button>
         </div>
         <p class="font-mono text-xs text-[var(--text-muted)] mt-2">Format: amount category</p>
-      </DashboardCard>
+      </Block>
 
       <!-- CARD 3: Savings -->
-      <DashboardCard>
-        <div class="flex justify-between items-start">
-          <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
-            Savings
-          </span>
+      <Block label="Savings">
+        <template #headerRight>
           <span class="font-mono text-xs">{{ Math.round(financialSummary.savingsRate) }}%</span>
-        </div>
+        </template>
         <div class="w-full bg-gray-200 h-2 mt-auto">
           <div
             class="bg-current h-full"
@@ -193,18 +182,15 @@ const last5MonthsExpenses = computed(() => {
             }"
           ></div>
         </div>
-      </DashboardCard>
+      </Block>
 
       <!-- CARD 4: Latest Activity (spans 2 columns on md+) -->
-      <DashboardCard class="md:col-span-2">
-        <div class="flex justify-between items-start mb-4">
-          <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
-            Latest Activity
-          </span>
+      <Block label="Latest Activity" class="md:col-span-2">
+        <template #headerRight>
           <button class="font-mono text-xs underline" @click="$router.push('/transactions')">
             VIEW ALL
           </button>
-        </div>
+        </template>
         <div v-if="latestTransactions.length > 0" class="space-y-4">
           <div
             v-for="transaction in latestTransactions.slice(0, 2)"
@@ -225,15 +211,10 @@ const last5MonthsExpenses = computed(() => {
             No recent transactions
           </p>
         </div>
-      </DashboardCard>
+      </Block>
 
       <!-- CARD 5: Analytics -->
-      <DashboardCard>
-        <div class="flex justify-between items-start">
-          <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
-            Analytics
-          </span>
-        </div>
+      <Block label="Analytics">
         <div class="flex items-end gap-2 h-24">
           <div
             v-for="(month, index) in last5MonthsExpenses"
@@ -244,7 +225,7 @@ const last5MonthsExpenses = computed(() => {
           ></div>
         </div>
         <p class="font-mono text-xs text-center border-t border-black pt-2 mt-2">Spending Trend</p>
-      </DashboardCard>
+      </Block>
     </div>
   </div>
 </template>
