@@ -90,6 +90,7 @@ onMounted(() => {
   loadData()
 })
 
+// 1. Filter transactions for current month only
 const currentMonthTransactions = computed(() => {
   const now = new Date()
   const year = now.getFullYear()
@@ -102,8 +103,10 @@ const currentMonthTransactions = computed(() => {
   )
 })
 
+// 2. Calculate financial summary for current month
 const { financialSummary: currentMonthSummary } = useFinancialCalculations(currentMonthTransactions)
 
+// 3. Get last 5 months of expense data
 const last5MonthsExpenses = computed(() => {
   const { monthlyAnalysis } = useFinancialCalculations(latestTransactions)
   const analysis = monthlyAnalysis.value
@@ -111,33 +114,34 @@ const last5MonthsExpenses = computed(() => {
   // Get last 5 months
   const last5 = analysis.slice(-5)
 
-  // Calculate max expense for scaling
-  const maxExpense = Math.max(...last5.map((m) => m.expenses), 1)
+  const now = new Date()
+  const monthKeys = Array.from({ length: 5 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (4 - index), 1)
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`
+  })
 
-  const scaled = last5.map((m) => ({
+  const expensesByMonth = new Map(last5.map((item) => [item.month, item.expenses]))
+  const normalized = monthKeys.map((month) => ({
+    month,
+    expenses: expensesByMonth.get(month) ?? 0,
+  }))
+
+  // Calculate max expense for scaling
+  const maxExpense = Math.max(...normalized.map((m) => m.expenses), 1)
+
+  // Return with height percentages
+  return normalized.map((m) => ({
     month: m.month,
     expenses: m.expenses,
     heightPercent: Math.round((m.expenses / maxExpense) * 100),
   }))
-
-  // Always render 5 bars (use 10% placeholders)
-  if (scaled.length >= 5) {
-    return scaled
-  }
-
-  const placeholders = Array.from({ length: 5 - scaled.length }, (_, index) => ({
-    month: `placeholder-${index}`,
-    expenses: 0,
-    heightPercent: 10,
-  }))
-
-  return [...placeholders, ...scaled]
 })
 </script>
 
 <template>
   <div class="min-h-screen p-8 flex items-center justify-center">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl w-full">
+      <!-- CARD 1: Balance -->
       <DashboardCard>
         <div class="flex justify-between items-start">
           <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
@@ -153,6 +157,7 @@ const last5MonthsExpenses = computed(() => {
         </div>
       </DashboardCard>
 
+      <!-- CARD 2: Quick Add -->
       <DashboardCard>
         <div class="flex justify-between items-start">
           <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
@@ -172,6 +177,7 @@ const last5MonthsExpenses = computed(() => {
         <p class="font-mono text-xs text-[var(--text-muted)] mt-2">Format: amount category</p>
       </DashboardCard>
 
+      <!-- CARD 3: Savings -->
       <DashboardCard>
         <div class="flex justify-between items-start">
           <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
@@ -189,6 +195,7 @@ const last5MonthsExpenses = computed(() => {
         </div>
       </DashboardCard>
 
+      <!-- CARD 4: Latest Activity (spans 2 columns on md+) -->
       <DashboardCard class="md:col-span-2">
         <div class="flex justify-between items-start mb-4">
           <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
@@ -198,7 +205,6 @@ const last5MonthsExpenses = computed(() => {
             VIEW ALL
           </button>
         </div>
-
         <div v-if="latestTransactions.length > 0" class="space-y-4">
           <div
             v-for="transaction in latestTransactions.slice(0, 2)"
@@ -214,7 +220,6 @@ const last5MonthsExpenses = computed(() => {
             <div class="font-mono text-sm">{{ formatSignedCurrency(transaction.amount) }}</div>
           </div>
         </div>
-
         <div v-else class="flex items-center justify-center h-full">
           <p class="font-mono text-xs uppercase tracking-widest text-[var(--text-muted)]">
             No recent transactions
@@ -222,13 +227,13 @@ const last5MonthsExpenses = computed(() => {
         </div>
       </DashboardCard>
 
+      <!-- CARD 5: Analytics -->
       <DashboardCard>
         <div class="flex justify-between items-start">
           <span class="font-mono text-xs uppercase tracking-widest border border-black px-2 py-1">
             Analytics
           </span>
         </div>
-
         <div class="flex items-end gap-2 h-24">
           <div
             v-for="(month, index) in last5MonthsExpenses"
@@ -237,17 +242,7 @@ const last5MonthsExpenses = computed(() => {
             :style="{ height: `${month.heightPercent || 10}%` }"
             :class="index < 4 ? 'opacity-50' : ''"
           ></div>
-
-          <div v-if="last5MonthsExpenses.length === 0" class="flex w-full gap-2">
-            <div
-              v-for="index in 5"
-              :key="index"
-              class="flex-1 bg-current opacity-50"
-              :style="{ height: '10%' }"
-            ></div>
-          </div>
         </div>
-
         <p class="font-mono text-xs text-center border-t border-black pt-2 mt-2">Spending Trend</p>
       </DashboardCard>
     </div>
