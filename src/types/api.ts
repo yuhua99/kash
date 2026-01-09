@@ -3,12 +3,12 @@
  */
 
 export interface ApiResponse<T = unknown> {
-  data?: T;
-  error?: string;
-  success: boolean;
+  data?: T
+  error?: string
+  success: boolean
 }
 
 export interface RequestOptions {
-  headers?: Record<string, string>;
-  body?: unknown;
+  headers?: Record<string, string>
+  body?: unknown
 }

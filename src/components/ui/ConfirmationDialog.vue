@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import Dialog from "./Dialog.vue";
-import Button from "./Button.vue";
+import Dialog from "./Dialog.vue"
+import Button from "./Button.vue"
 
 interface Props {
-  open: boolean;
-  title: string;
-  description?: string;
-  confirmText?: string;
-  cancelText?: string;
-  variant?: "default" | "destructive";
-  loading?: boolean;
+  open: boolean
+  title: string
+  description?: string
+  confirmText?: string
+  cancelText?: string
+  variant?: "default" | "destructive"
+  loading?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
@@ -17,22 +17,22 @@ withDefaults(defineProps<Props>(), {
   cancelText: "Cancel",
   variant: "default",
   loading: false,
-});
+})
 
 const emit = defineEmits<{
-  "update:open": [value: boolean];
-  confirm: [];
-  cancel: [];
-}>();
+  "update:open": [value: boolean]
+  confirm: []
+  cancel: []
+}>()
 
 const handleConfirm = () => {
-  emit("confirm");
-};
+  emit("confirm")
+}
 
 const handleCancel = () => {
-  emit("update:open", false);
-  emit("cancel");
-};
+  emit("update:open", false)
+  emit("cancel")
+}
 </script>
 
 <template>

@@ -1,24 +1,24 @@
 <script setup lang="ts" generic="T extends string | number">
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
-import { cn } from "@/lib/utils";
-import { ChevronDown, Check, Search, X } from "lucide-vue-next";
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue"
+import { cn } from "@/lib/utils"
+import { ChevronDown, Check, Search, X } from "lucide-vue-next"
 
 export interface SelectOption<T> {
-  label: string;
-  value: T;
-  disabled?: boolean;
+  label: string
+  value: T
+  disabled?: boolean
 }
 
 interface Props<T> {
-  modelValue: T | null;
-  options: SelectOption<T>[];
-  label?: string;
-  placeholder?: string;
-  searchable?: boolean;
-  disabled?: boolean;
-  error?: string;
-  required?: boolean;
-  id?: string;
+  modelValue: T | null
+  options: SelectOption<T>[]
+  label?: string
+  placeholder?: string
+  searchable?: boolean
+  disabled?: boolean
+  error?: string
+  required?: boolean
+  id?: string
 }
 
 const props = withDefaults(defineProps<Props<T>>(), {
@@ -29,134 +29,134 @@ const props = withDefaults(defineProps<Props<T>>(), {
   required: false,
   placeholder: "Select option",
   id: () => `select-${Math.random().toString(36).substring(2, 9)}`,
-});
+})
 
 const emit = defineEmits<{
-  "update:modelValue": [value: T];
-  change: [value: T];
-}>();
+  "update:modelValue": [value: T]
+  change: [value: T]
+}>()
 
-const isOpen = ref(false);
-const searchQuery = ref("");
-const focusedIndex = ref(-1);
-const triggerRef = ref<HTMLElement | null>(null);
-const listRef = ref<HTMLElement | null>(null);
-const searchInputRef = ref<HTMLInputElement | null>(null);
+const isOpen = ref(false)
+const searchQuery = ref("")
+const focusedIndex = ref(-1)
+const triggerRef = ref<HTMLElement | null>(null)
+const listRef = ref<HTMLElement | null>(null)
+const searchInputRef = ref<HTMLInputElement | null>(null)
 
-const selectedOption = computed(() => props.options.find((opt) => opt.value === props.modelValue));
+const selectedOption = computed(() => props.options.find((opt) => opt.value === props.modelValue))
 
 const filteredOptions = computed(() => {
   if (!props.searchable || !searchQuery.value) {
-    return props.options;
+    return props.options
   }
-  const query = searchQuery.value.toLowerCase();
-  return props.options.filter((opt) => opt.label.toLowerCase().includes(query));
-});
+  const query = searchQuery.value.toLowerCase()
+  return props.options.filter((opt) => opt.label.toLowerCase().includes(query))
+})
 
 const toggle = () => {
-  if (props.disabled) return;
+  if (props.disabled) return
   if (isOpen.value) {
-    close();
+    close()
   } else {
-    open();
+    open()
   }
-};
+}
 
 const open = async () => {
-  isOpen.value = true;
-  focusedIndex.value = -1;
+  isOpen.value = true
+  focusedIndex.value = -1
   // If searchable, focus input
   if (props.searchable) {
-    await nextTick();
-    searchInputRef.value?.focus();
+    await nextTick()
+    searchInputRef.value?.focus()
   } else {
     // If not searchable, focus list for keyboard nav
-    await nextTick();
-    listRef.value?.focus();
+    await nextTick()
+    listRef.value?.focus()
   }
-};
+}
 
 const close = () => {
-  isOpen.value = false;
-  searchQuery.value = "";
-  focusedIndex.value = -1;
+  isOpen.value = false
+  searchQuery.value = ""
+  focusedIndex.value = -1
   // Return focus to trigger
-  triggerRef.value?.focus();
-};
+  triggerRef.value?.focus()
+}
 
 const selectOption = (option: SelectOption<T>) => {
-  if (option.disabled) return;
-  emit("update:modelValue", option.value);
-  emit("change", option.value);
-  close();
-};
+  if (option.disabled) return
+  emit("update:modelValue", option.value)
+  emit("change", option.value)
+  close()
+}
 
 const handleKeyDown = (event: KeyboardEvent) => {
   if (!isOpen.value) {
     if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
-      event.preventDefault();
-      open();
+      event.preventDefault()
+      open()
     }
-    return;
+    return
   }
 
-  const options = filteredOptions.value;
+  const options = filteredOptions.value
 
   switch (event.key) {
     case "ArrowDown":
-      event.preventDefault();
-      focusedIndex.value = (focusedIndex.value + 1) % options.length;
-      scrollToFocused();
-      break;
+      event.preventDefault()
+      focusedIndex.value = (focusedIndex.value + 1) % options.length
+      scrollToFocused()
+      break
     case "ArrowUp":
-      event.preventDefault();
-      focusedIndex.value = focusedIndex.value <= 0 ? options.length - 1 : focusedIndex.value - 1;
-      scrollToFocused();
-      break;
+      event.preventDefault()
+      focusedIndex.value = focusedIndex.value <= 0 ? options.length - 1 : focusedIndex.value - 1
+      scrollToFocused()
+      break
     case "Enter":
-      event.preventDefault();
+      event.preventDefault()
       if (focusedIndex.value >= 0 && focusedIndex.value < options.length) {
-        selectOption(options[focusedIndex.value]);
+        selectOption(options[focusedIndex.value])
       }
-      break;
+      break
     case "Escape":
-      event.preventDefault();
-      close();
-      break;
+      event.preventDefault()
+      close()
+      break
     case "Tab":
-      close();
-      break;
+      close()
+      break
   }
-};
+}
 
 const scrollToFocused = () => {
-  if (!listRef.value) return;
-  const items = listRef.value.querySelectorAll("[role='option']");
-  const item = items[focusedIndex.value] as HTMLElement;
+  if (!listRef.value) return
+  const items = listRef.value.querySelectorAll("[role='option']")
+  const item = items[focusedIndex.value] as HTMLElement
   if (item) {
-    item.scrollIntoView({ block: "nearest" });
+    item.scrollIntoView({ block: "nearest" })
   }
-};
+}
 
 const handleClickOutside = (event: MouseEvent) => {
-  if (!isOpen.value) return;
-  const target = event.target as Node;
-  if (triggerRef.value?.contains(target)) return;
-  if (listRef.value?.contains(target)) return;
+  if (!isOpen.value) return
+  const target = event.target as Node
+  if (triggerRef.value?.contains(target)) return
+  if (listRef.value?.contains(target)) return
   // Also check if click is inside search container
-  const searchContainer = document.getElementById(`${props.id}-search`);
-  if (searchContainer?.contains(target)) return;
+  const searchContainer = document.getElementById(`${props.id}-search`)
+  if (searchContainer?.contains(target)) return
 
-  close();
-};
+  close()
+}
 
 onMounted(() => {
-  document.addEventListener("mousedown", handleClickOutside);
-});
+  document.addEventListener("mousedown", handleClickOutside)
+})
 
 onUnmounted(() => {
-  document.removeEventListener("mousedown", handleClickOutside);
-});
+  document.removeEventListener("mousedown", handleClickOutside)
+})
 
 // Watch for external model changes to update UI if needed (rare for select)
 watch(
@@ -164,7 +164,7 @@ watch(
   (newVal) => {
     // logic if needed
   },
-);
+)
 </script>
 
 <template>

@@ -36,5 +36,5 @@ bun run build
 
 ```sh
 bun run lint
-bun run format
+bun run fmt
 ```

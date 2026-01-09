@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import { Button, Input, Form } from "@/components/ui";
+import { ref, computed } from "vue"
+import { useRouter } from "vue-router"
+import { useAuthStore } from "@/stores/auth"
+import { Button, Input, Form } from "@/components/ui"
 
-const router = useRouter();
-const authStore = useAuthStore();
+const router = useRouter()
+const authStore = useAuthStore()
 
-const username = ref("");
-const password = ref("");
+const username = ref("")
+const password = ref("")
 
-const submitButtonText = computed(() => (authStore.isLoading ? "Signing in..." : "Enter"));
+const submitButtonText = computed(() => (authStore.isLoading ? "Signing in..." : "Enter"))
 
 const handleSubmit = async () => {
-  if (!username.value || !password.value) return;
+  if (!username.value || !password.value) return
 
   const success = await authStore.login({
     username: username.value,
     password: password.value,
-  });
+  })
 
   if (success) {
-    router.push("/transactions");
+    router.push("/transactions")
   }
-};
+}
 </script>
 
 <template>

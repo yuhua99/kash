@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue"
 
 export interface DropdownMenuItem {
-  id: string;
-  label: string;
-  value?: any;
-  disabled?: boolean;
+  id: string
+  label: string
+  value?: any
+  disabled?: boolean
 }
 
 interface Props {
-  items: DropdownMenuItem[];
-  align?: "left" | "center" | "right";
-  openOn?: "click" | "hover";
-  closeOnSelect?: boolean;
-  closeOnOutsideClick?: boolean;
-  disabled?: boolean;
+  items: DropdownMenuItem[]
+  align?: "left" | "center" | "right"
+  openOn?: "click" | "hover"
+  closeOnSelect?: boolean
+  closeOnOutsideClick?: boolean
+  disabled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -23,76 +23,76 @@ const props = withDefaults(defineProps<Props>(), {
   closeOnSelect: true,
   closeOnOutsideClick: true,
   disabled: false,
-});
+})
 
 const emit = defineEmits<{
-  select: [item: DropdownMenuItem];
-  open: [];
-  close: [];
-}>();
+  select: [item: DropdownMenuItem]
+  open: []
+  close: []
+}>()
 
-const isOpen = ref(false);
-const focusedIndex = ref(-1);
-const triggerRef = ref<HTMLElement | null>(null);
-const menuRef = ref<HTMLElement | null>(null);
+const isOpen = ref(false)
+const focusedIndex = ref(-1)
+const triggerRef = ref<HTMLElement | null>(null)
+const menuRef = ref<HTMLElement | null>(null)
 
 const alignmentClass = computed(() => {
   switch (props.align) {
     case "right":
-      return "right-0";
+      return "right-0"
     case "center":
-      return "left-1/2 -translate-x-1/2";
+      return "left-1/2 -translate-x-1/2"
     case "left":
     default:
-      return "left-0";
+      return "left-0"
   }
-});
+})
 
-const enabledItems = computed(() => props.items.filter((item) => !item.disabled));
+const enabledItems = computed(() => props.items.filter((item) => !item.disabled))
 
 function toggle() {
-  if (props.disabled) return;
+  if (props.disabled) return
 
   if (isOpen.value) {
-    close();
+    close()
   } else {
-    open();
+    open()
   }
 }
 
 function open() {
-  if (props.disabled) return;
-  isOpen.value = true;
-  focusedIndex.value = -1;
-  emit("open");
+  if (props.disabled) return
+  isOpen.value = true
+  focusedIndex.value = -1
+  emit("open")
 }
 
 function close() {
-  isOpen.value = false;
-  focusedIndex.value = -1;
-  emit("close");
-  triggerRef.value?.focus();
+  isOpen.value = false
+  focusedIndex.value = -1
+  emit("close")
+  triggerRef.value?.focus()
 }
 
 function selectItem(item: DropdownMenuItem) {
-  if (item.disabled) return;
+  if (item.disabled) return
 
-  emit("select", item);
+  emit("select", item)
 
   if (props.closeOnSelect) {
-    close();
+    close()
   }
 }
 
 function handleTriggerClick() {
   if (props.openOn === "click") {
-    toggle();
+    toggle()
   }
 }
 
 function handleTriggerMouseEnter() {
   if (props.openOn === "hover") {
-    open();
+    open()
   }
 }
 
@@ -101,93 +101,93 @@ function handleTriggerMouseLeave() {
     // Delay close to allow moving to menu
     setTimeout(() => {
       if (!menuRef.value?.matches(":hover")) {
-        close();
+        close()
       }
-    }, 100);
+    }, 100)
   }
 }
 
 function handleMenuMouseLeave() {
   if (props.openOn === "hover") {
-    close();
+    close()
   }
 }
 
 function handleKeyDown(event: KeyboardEvent) {
-  if (!isOpen.value) return;
+  if (!isOpen.value) return
 
   switch (event.key) {
     case "ArrowDown":
-      event.preventDefault();
-      focusNext();
-      break;
+      event.preventDefault()
+      focusNext()
+      break
     case "ArrowUp":
-      event.preventDefault();
-      focusPrevious();
-      break;
+      event.preventDefault()
+      focusPrevious()
+      break
     case "Enter":
     case " ":
-      event.preventDefault();
+      event.preventDefault()
       if (focusedIndex.value >= 0 && focusedIndex.value < enabledItems.value.length) {
-        selectItem(enabledItems.value[focusedIndex.value]);
+        selectItem(enabledItems.value[focusedIndex.value])
       }
-      break;
+      break
     case "Escape":
-      event.preventDefault();
-      close();
-      break;
+      event.preventDefault()
+      close()
+      break
     case "Tab":
-      close();
-      break;
+      close()
+      break
     case "Home":
-      event.preventDefault();
-      focusedIndex.value = 0;
-      break;
+      event.preventDefault()
+      focusedIndex.value = 0
+      break
     case "End":
-      event.preventDefault();
-      focusedIndex.value = enabledItems.value.length - 1;
-      break;
+      event.preventDefault()
+      focusedIndex.value = enabledItems.value.length - 1
+      break
   }
 }
 
 function focusNext() {
-  if (enabledItems.value.length === 0) return;
-  focusedIndex.value = (focusedIndex.value + 1) % enabledItems.value.length;
+  if (enabledItems.value.length === 0) return
+  focusedIndex.value = (focusedIndex.value + 1) % enabledItems.value.length
 }
 
 function focusPrevious() {
-  if (enabledItems.value.length === 0) return;
+  if (enabledItems.value.length === 0) return
   focusedIndex.value =
-    focusedIndex.value <= 0 ? enabledItems.value.length - 1 : focusedIndex.value - 1;
+    focusedIndex.value <= 0 ? enabledItems.value.length - 1 : focusedIndex.value - 1
 }
 
 function handleClickOutside(event: MouseEvent) {
-  if (!props.closeOnOutsideClick || !isOpen.value) return;
+  if (!props.closeOnOutsideClick || !isOpen.value) return
 
-  const target = event.target as Node;
+  const target = event.target as Node
   if (triggerRef.value?.contains(target) || menuRef.value?.contains(target)) {
-    return;
+    return
   }
 
-  close();
+  close()
 }
 
 onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
-  document.addEventListener("keydown", handleKeyDown);
-});
+  document.addEventListener("click", handleClickOutside)
+  document.addEventListener("keydown", handleKeyDown)
+})
 
 onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
-  document.removeEventListener("keydown", handleKeyDown);
-});
+  document.removeEventListener("click", handleClickOutside)
+  document.removeEventListener("keydown", handleKeyDown)
+})
 
 defineExpose({
   open,
   close,
   toggle,
   isOpen,
-});
+})
 </script>
 
 <template>

@@ -1,179 +1,178 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useAuthStore } from "@/stores/auth";
-import { useRecordsStore } from "@/stores/records";
-import { useCategoriesStore } from "@/stores/categories";
-import { useChartData } from "@/composables/useChartData";
-import { useFinancialCalculations } from "@/composables/useFinancialCalculations";
-import { formatCurrency, formatSignedCurrency } from "@/lib/formatters";
-import { PeriodUnit } from "@/types";
-import { Select } from "@/components/ui";
-import Block from "@/components/Block.vue";
+import { computed, onMounted, ref } from "vue"
+import { storeToRefs } from "pinia"
+import { useAuthStore } from "@/stores/auth"
+import { useRecordsStore } from "@/stores/records"
+import { useCategoriesStore } from "@/stores/categories"
+import { useChartData } from "@/composables/useChartData"
+import { useFinancialCalculations } from "@/composables/useFinancialCalculations"
+import { formatCurrency, formatSignedCurrency } from "@/lib/formatters"
+import { PeriodUnit } from "@/types"
+import { Select } from "@/components/ui"
+import Block from "@/components/Block.vue"
 
 // ==================== VIEW STATE MANAGEMENT ====================
-type ViewMode = "overview" | "transactions";
-const activeView = ref<ViewMode>("overview");
+type ViewMode = "overview" | "transactions"
+const activeView = ref<ViewMode>("overview")
 
 function expandTransactions() {
-  activeView.value = "transactions";
+  activeView.value = "transactions"
 }
 
 function backToOverview() {
-  activeView.value = "overview";
+  activeView.value = "overview"
 }
 
 // ==================== STORES & DATA LOADING ====================
-const authStore = useAuthStore();
-const recordsStore = useRecordsStore();
-const categoriesStore = useCategoriesStore();
-const { latestTransactions } = storeToRefs(recordsStore);
+const authStore = useAuthStore()
+const recordsStore = useRecordsStore()
+const categoriesStore = useCategoriesStore()
+const { latestTransactions } = storeToRefs(recordsStore)
 
-const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH);
+const selectedPeriod = ref<PeriodUnit>(PeriodUnit.MONTH)
 const periodOptions = [
   { label: "Month", value: PeriodUnit.MONTH },
   { label: "Half year", value: PeriodUnit.HALF_YEAR },
   { label: "Year", value: PeriodUnit.YEAR },
-];
+]
 
 const isLoading = computed(
   () => authStore.isLoading || recordsStore.isLoading || categoriesStore.isLoading,
-);
+)
 
-const { filterTransactionsByPeriod, getTrendData } = useChartData(latestTransactions);
-const periodTransactions = computed(() => filterTransactionsByPeriod(selectedPeriod.value));
-const { categorySpending: periodCategorySpending } = useChartData(periodTransactions);
-const { financialSummary } = useFinancialCalculations(periodTransactions);
+const { filterTransactionsByPeriod, getTrendData } = useChartData(latestTransactions)
+const periodTransactions = computed(() => filterTransactionsByPeriod(selectedPeriod.value))
+const { categorySpending: periodCategorySpending } = useChartData(periodTransactions)
+const { financialSummary } = useFinancialCalculations(periodTransactions)
 
-const trendSeries = computed(() => getTrendData(selectedPeriod.value));
+const trendSeries = computed(() => getTrendData(selectedPeriod.value))
 const netFlowSeries = computed(() => {
-  const values = trendSeries.value.map((item) => item.income - item.expenses);
-  const max = Math.max(0, ...values.map((value) => Math.abs(value)));
+  const values = trendSeries.value.map((item) => item.income - item.expenses)
+  const max = Math.max(0, ...values.map((value) => Math.abs(value)))
 
   return trendSeries.value.map((item, index) => {
-    const value = values[index] ?? 0;
-    const width = max > 0 ? Math.round((Math.abs(value) / max) * 100) : 0;
+    const value = values[index] ?? 0
+    const width = max > 0 ? Math.round((Math.abs(value) / max) * 100) : 0
     return {
       label: item.period,
       value,
       width,
       positive: value >= 0,
-    };
-  });
-});
+    }
+  })
+})
 
 const incomeExpenseBar = computed(() => {
-  const income = financialSummary.value.totalIncome;
-  const expenses = financialSummary.value.totalExpenses;
-  const total = income + expenses;
-  const incomeWidth = total > 0 ? Math.round((income / total) * 100) : 0;
-  const expenseWidth = total > 0 ? Math.round((expenses / total) * 100) : 0;
+  const income = financialSummary.value.totalIncome
+  const expenses = financialSummary.value.totalExpenses
+  const total = income + expenses
+  const incomeWidth = total > 0 ? Math.round((income / total) * 100) : 0
+  const expenseWidth = total > 0 ? Math.round((expenses / total) * 100) : 0
   return {
     income,
     expenses,
     incomeWidth,
     expenseWidth,
-  };
-});
+  }
+})
 
 const topCategories = computed(() => {
-  const max = Math.max(0, ...periodCategorySpending.value.map((item) => item.amount));
+  const max = Math.max(0, ...periodCategorySpending.value.map((item) => item.amount))
   return periodCategorySpending.value.slice(0, 4).map((item) => ({
     ...item,
     width: max > 0 ? Math.round((item.amount / max) * 100) : 0,
-  }));
-});
+  }))
+})
 
 const largestTransaction = computed(() => {
   if (!periodTransactions.value.length) {
-    return null;
+    return null
   }
   const sorted = [...periodTransactions.value].sort(
     (a, b) => Math.abs(b.amount) - Math.abs(a.amount),
-  );
-  return sorted[0];
-});
+  )
+  return sorted[0]
+})
 
 const loadData = async () => {
-  await categoriesStore.fetchCategories();
-  await recordsStore.fetchLatestRecords();
-};
+  await categoriesStore.fetchCategories()
+  await recordsStore.fetchLatestRecords()
+}
 
 onMounted(() => {
-  loadData();
-});
+  loadData()
+})
 
 // ==================== CURRENT MONTH CALCULATIONS ====================
 const currentMonthTransactions = computed(() => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const startOfMonth = Math.floor(new Date(year, month, 1).getTime() / 1000);
-  const endOfMonth = Math.floor(new Date(year, month + 1, 0, 23, 59, 59).getTime() / 1000);
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  const startOfMonth = Math.floor(new Date(year, month, 1).getTime() / 1000)
+  const endOfMonth = Math.floor(new Date(year, month + 1, 0, 23, 59, 59).getTime() / 1000)
 
   return latestTransactions.value.filter(
     (t) => t.timestamp >= startOfMonth && t.timestamp <= endOfMonth,
-  );
-});
+  )
+})
 
-const { financialSummary: currentMonthSummary } =
-  useFinancialCalculations(currentMonthTransactions);
+const { financialSummary: currentMonthSummary } = useFinancialCalculations(currentMonthTransactions)
 
 // ==================== ANALYTICS DATA ====================
 const last5MonthsExpenses = computed(() => {
-  const { monthlyAnalysis } = useFinancialCalculations(latestTransactions);
-  const analysis = monthlyAnalysis.value;
+  const { monthlyAnalysis } = useFinancialCalculations(latestTransactions)
+  const analysis = monthlyAnalysis.value
 
-  const now = new Date();
+  const now = new Date()
   const monthKeys = Array.from({ length: 5 }, (_, index) => {
-    const date = new Date(now.getFullYear(), now.getMonth() - (4 - index), 1);
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
-  });
+    const date = new Date(now.getFullYear(), now.getMonth() - (4 - index), 1)
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`
+  })
 
-  const expensesByMonth = new Map(analysis.map((item) => [item.month, item.expenses]));
+  const expensesByMonth = new Map(analysis.map((item) => [item.month, item.expenses]))
   const normalized = monthKeys.map((month) => ({
     month,
     expenses: expensesByMonth.get(month) ?? 0,
-  }));
+  }))
 
-  const maxExpense = Math.max(...normalized.map((m) => m.expenses), 1);
+  const maxExpense = Math.max(...normalized.map((m) => m.expenses), 1)
 
   return normalized.map((m) => ({
     month: m.month,
     expenses: m.expenses,
     heightPercent: Math.round((m.expenses / maxExpense) * 100),
-  }));
-});
+  }))
+})
 
 // ==================== TRANSACTION VIEW FILTERING ====================
 // When in transaction view, use the selected period filter
 const displayedTransactions = computed(() => {
   if (activeView.value === "transactions") {
-    return periodTransactions.value;
+    return periodTransactions.value
   }
   // In overview, just show latest 2
-  return latestTransactions.value.slice(0, 2);
-});
+  return latestTransactions.value.slice(0, 2)
+})
 
 // Analytics data for transaction view (based on filtered transactions)
 const filteredAnalytics = computed(() => {
   if (activeView.value !== "transactions") {
-    return last5MonthsExpenses.value;
+    return last5MonthsExpenses.value
   }
 
   // Recalculate based on periodTransactions
-  const { monthlyAnalysis } = useFinancialCalculations(periodTransactions);
-  const analysis = monthlyAnalysis.value;
+  const { monthlyAnalysis } = useFinancialCalculations(periodTransactions)
+  const analysis = monthlyAnalysis.value
 
-  const last5 = analysis.slice(-5);
-  const maxExpense = Math.max(...last5.map((m) => m.expenses), 1);
+  const last5 = analysis.slice(-5)
+  const maxExpense = Math.max(...last5.map((m) => m.expenses), 1)
 
   return last5.map((m) => ({
     month: m.month,
     expenses: m.expenses,
     heightPercent: Math.round((m.expenses / maxExpense) * 100),
-  }));
-});
+  }))
+})
 </script>
 
 <template>

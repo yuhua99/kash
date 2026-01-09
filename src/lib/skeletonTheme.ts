@@ -1,13 +1,13 @@
-export type SkeletonVariant = "block" | "text" | "title" | "chip" | "input" | "circle" | "avatar";
+export type SkeletonVariant = "block" | "text" | "title" | "chip" | "input" | "circle" | "avatar"
 
-export type SkeletonSize = "sm" | "md" | "lg" | "xl";
+export type SkeletonSize = "sm" | "md" | "lg" | "xl"
 
 type SkeletonVariantConfig = {
-  base: string;
-  sizes: Partial<Record<SkeletonSize, string>>;
-};
+  base: string
+  sizes: Partial<Record<SkeletonSize, string>>
+}
 
-export const skeletonBaseClass = "bg-primary/10 motion-safe:animate-pulse";
+export const skeletonBaseClass = "bg-primary/10 motion-safe:animate-pulse"
 
 export const skeletonVariantConfig: Record<SkeletonVariant, SkeletonVariantConfig> = {
   block: {
@@ -72,7 +72,7 @@ export const skeletonVariantConfig: Record<SkeletonVariant, SkeletonVariantConfi
       xl: "h-16 w-16",
     },
   },
-};
+}
 
-export const defaultVariant: SkeletonVariant = "block";
-export const defaultSize: SkeletonSize = "md";
+export const defaultVariant: SkeletonVariant = "block"
+export const defaultSize: SkeletonSize = "md"

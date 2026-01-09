@@ -1,160 +1,160 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-vue-next";
-import { onClickOutside } from "@vueuse/core";
+import { computed, ref, watch } from "vue"
+import { cn } from "@/lib/utils"
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-vue-next"
+import { onClickOutside } from "@vueuse/core"
 
 interface Props {
-  modelValue: string;
-  label?: string;
-  min?: string;
-  max?: string;
-  placeholder?: string;
-  error?: string;
-  disabled?: boolean;
-  required?: boolean;
-  id?: string;
+  modelValue: string
+  label?: string
+  min?: string
+  max?: string
+  placeholder?: string
+  error?: string
+  disabled?: boolean
+  required?: boolean
+  id?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   required: false,
   id: () => `date-picker-${Math.random().toString(36).substring(2, 9)}`,
-});
+})
 
 const emit = defineEmits<{
-  "update:modelValue": [value: string];
-  blur: [event: FocusEvent];
-  focus: [event: FocusEvent];
-}>();
+  "update:modelValue": [value: string]
+  blur: [event: FocusEvent]
+  focus: [event: FocusEvent]
+}>()
 
-const isOpen = ref(false);
-const target = ref(null);
+const isOpen = ref(false)
+const target = ref(null)
 
 // Parse modelValue to Date object, or default to today
 const parseDate = (dateStr: string): Date => {
-  if (!dateStr) return new Date();
-  const [year, month, day] = dateStr.split("-").map(Number);
+  if (!dateStr) return new Date()
+  const [year, month, day] = dateStr.split("-").map(Number)
   // Date constructor uses 0-indexed months
-  return new Date(year, month - 1, day);
-};
+  return new Date(year, month - 1, day)
+}
 
 // Format Date object to YYYY-MM-DD string
 const formatDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
 
 // Format Date for display (e.g., "Jan 01, 2024")
 const formatDisplayDate = (dateStr: string): string => {
-  if (!dateStr) return "";
-  const date = parseDate(dateStr);
+  if (!dateStr) return ""
+  const date = parseDate(dateStr)
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "2-digit",
     year: "numeric",
-  }).format(date);
-};
+  }).format(date)
+}
 
 // Navigation state (current view)
-const currentMonth = ref(new Date().getMonth());
-const currentYear = ref(new Date().getFullYear());
+const currentMonth = ref(new Date().getMonth())
+const currentYear = ref(new Date().getFullYear())
 
 // Sync navigation with modelValue when it changes
 watch(
   () => props.modelValue,
   (newVal) => {
     if (newVal) {
-      const date = parseDate(newVal);
-      currentMonth.value = date.getMonth();
-      currentYear.value = date.getFullYear();
+      const date = parseDate(newVal)
+      currentMonth.value = date.getMonth()
+      currentYear.value = date.getFullYear()
     }
   },
   { immediate: true },
-);
+)
 
 const currentMonthName = computed(() => {
   return new Intl.DateTimeFormat("en-US", { month: "long" }).format(
     new Date(currentYear.value, currentMonth.value),
-  );
-});
+  )
+})
 
 const daysInMonth = computed(() => {
-  return new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-});
+  return new Date(currentYear.value, currentMonth.value + 1, 0).getDate()
+})
 
 const startDayOfMonth = computed(() => {
-  return new Date(currentYear.value, currentMonth.value, 1).getDay();
-});
+  return new Date(currentYear.value, currentMonth.value, 1).getDay()
+})
 
 // Generate calendar grid
 const calendarDays = computed(() => {
-  const days = [];
+  const days = []
 
   // Previous month padding
   for (let i = 0; i < startDayOfMonth.value; i++) {
-    days.push({ day: null, date: null });
+    days.push({ day: null, date: null })
   }
 
   // Current month days
   for (let i = 1; i <= daysInMonth.value; i++) {
-    const date = new Date(currentYear.value, currentMonth.value, i);
-    const dateStr = formatDate(date);
+    const date = new Date(currentYear.value, currentMonth.value, i)
+    const dateStr = formatDate(date)
     days.push({
       day: i,
       date: dateStr,
       isSelected: dateStr === props.modelValue,
       isToday: dateStr === formatDate(new Date()),
-    });
+    })
   }
 
-  return days;
-});
+  return days
+})
 
-const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
 const nextMonth = () => {
   if (currentMonth.value === 11) {
-    currentMonth.value = 0;
-    currentYear.value++;
+    currentMonth.value = 0
+    currentYear.value++
   } else {
-    currentMonth.value++;
+    currentMonth.value++
   }
-};
+}
 
 const prevMonth = () => {
   if (currentMonth.value === 0) {
-    currentMonth.value = 11;
-    currentYear.value--;
+    currentMonth.value = 11
+    currentYear.value--
   } else {
-    currentMonth.value--;
+    currentMonth.value--
   }
-};
+}
 
 const selectDate = (dateStr: string) => {
-  emit("update:modelValue", dateStr);
-  isOpen.value = false;
-};
+  emit("update:modelValue", dateStr)
+  isOpen.value = false
+}
 
 const toggleCalendar = () => {
   if (!props.disabled) {
-    isOpen.value = !isOpen.value;
+    isOpen.value = !isOpen.value
   }
-};
+}
 
 onClickOutside(target, () => {
-  isOpen.value = false;
-});
+  isOpen.value = false
+})
 
 // Handle min/max constraints
 const isDateDisabled = (dateStr: string | null): boolean => {
-  if (!dateStr) return true;
-  if (props.min && dateStr < props.min) return true;
-  if (props.max && dateStr > props.max) return true;
-  return false;
-};
+  if (!dateStr) return true
+  if (props.min && dateStr < props.min) return true
+  if (props.max && dateStr > props.max) return true
+  return false
+}
 </script>
 
 <template>

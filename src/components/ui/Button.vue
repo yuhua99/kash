@@ -1,12 +1,12 @@
 <script setup lang="ts">
 interface Props {
-  text: string;
-  disabled?: boolean;
+  text: string
+  disabled?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
   disabled: false,
-});
+})
 </script>
 
 <template>

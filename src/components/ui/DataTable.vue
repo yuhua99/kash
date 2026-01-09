@@ -1,38 +1,38 @@
 <script setup lang="ts" generic="T extends any">
-import { cn } from "@/lib/utils";
-import { ArrowUp, ArrowDown } from "lucide-vue-next";
+import { cn } from "@/lib/utils"
+import { ArrowUp, ArrowDown } from "lucide-vue-next"
 
 export interface Column {
-  key: string;
-  label: string;
-  align?: "left" | "center" | "right";
-  sortable?: boolean;
+  key: string
+  label: string
+  align?: "left" | "center" | "right"
+  sortable?: boolean
 }
 
 interface Props<T> {
-  columns: Column[];
-  data: T[];
-  loading?: boolean;
-  emptyMessage?: string;
-  sortColumn?: string;
-  sortDirection?: "asc" | "desc" | null;
+  columns: Column[]
+  data: T[]
+  loading?: boolean
+  emptyMessage?: string
+  sortColumn?: string
+  sortDirection?: "asc" | "desc" | null
 }
 
 const props = withDefaults(defineProps<Props<T>>(), {
   loading: false,
   emptyMessage: "No data available.",
   sortDirection: null,
-});
+})
 
 const emit = defineEmits<{
-  sort: [column: string];
-}>();
+  sort: [column: string]
+}>()
 
 const handleSort = (column: Column) => {
   if (column.sortable) {
-    emit("sort", column.key);
+    emit("sort", column.key)
   }
-};
+}
 </script>
 
 <template>

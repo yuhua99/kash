@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch, ref } from "vue";
-import { X } from "lucide-vue-next";
-import { cn } from "@/lib/utils";
+import { onMounted, onUnmounted, watch, ref } from "vue"
+import { X } from "lucide-vue-next"
+import { cn } from "@/lib/utils"
 
 interface Props {
-  open: boolean;
-  title?: string;
-  description?: string;
-  maxWidth?: string; // e.g. 'max-w-md', 'max-w-lg', 'max-w-xl'
+  open: boolean
+  title?: string
+  description?: string
+  maxWidth?: string // e.g. 'max-w-md', 'max-w-lg', 'max-w-xl'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   open: false,
   maxWidth: "max-w-lg",
-});
+})
 
 const emit = defineEmits<{
-  "update:open": [value: boolean];
-  close: [];
-}>();
+  "update:open": [value: boolean]
+  close: []
+}>()
 
 const close = () => {
-  emit("update:open", false);
-  emit("close");
-};
+  emit("update:open", false)
+  emit("close")
+}
 
 const handleKeyDown = (e: KeyboardEvent) => {
   if (props.open && e.key === "Escape") {
-    close();
+    close()
   }
-};
+}
 
 // Lock body scroll when open
 watch(
@@ -37,24 +37,24 @@ watch(
   (isOpen) => {
     if (typeof document !== "undefined") {
       if (isOpen) {
-        document.body.style.overflow = "hidden";
+        document.body.style.overflow = "hidden"
       } else {
-        document.body.style.overflow = "";
+        document.body.style.overflow = ""
       }
     }
   },
-);
+)
 
 onMounted(() => {
-  document.addEventListener("keydown", handleKeyDown);
-});
+  document.addEventListener("keydown", handleKeyDown)
+})
 
 onUnmounted(() => {
-  document.removeEventListener("keydown", handleKeyDown);
+  document.removeEventListener("keydown", handleKeyDown)
   if (typeof document !== "undefined") {
-    document.body.style.overflow = "";
+    document.body.style.overflow = ""
   }
-});
+})
 </script>
 
 <template>

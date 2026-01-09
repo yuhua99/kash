@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 interface Props {
-  class?: string;
+  class?: string
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  submit: [event: Event];
-}>();
+  submit: [event: Event]
+}>()
 </script>
 
 <template>

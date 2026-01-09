@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { cn } from "@/lib/utils";
-import { Check } from "lucide-vue-next";
+import { computed } from "vue"
+import { cn } from "@/lib/utils"
+import { Check } from "lucide-vue-next"
 
 interface Props {
-  modelValue: boolean;
-  label?: string;
-  disabled?: boolean;
-  error?: string;
-  id?: string;
+  modelValue: boolean
+  label?: string
+  disabled?: boolean
+  error?: string
+  id?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   id: () => `checkbox-${Math.random().toString(36).substring(2, 9)}`,
-});
+})
 
 const emit = defineEmits<{
-  "update:modelValue": [value: boolean];
-}>();
+  "update:modelValue": [value: boolean]
+}>()
 
 const checked = computed({
   get: () => props.modelValue,
   set: (val) => emit("update:modelValue", val),
-});
+})
 </script>
 
 <template>

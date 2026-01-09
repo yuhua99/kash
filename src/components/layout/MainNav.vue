@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from "vue-router";
+import { RouterLink, useRoute } from "vue-router"
 
-const route = useRoute();
+const route = useRoute()
 
 const navigation = [
   {
@@ -12,14 +12,14 @@ const navigation = [
     name: "Analytics",
     href: "/analytics",
   },
-];
+]
 
 const isActive = (href: string) => {
   if (href === "/transactions") {
-    return route.path === "/" || route.path.startsWith("/transactions");
+    return route.path === "/" || route.path.startsWith("/transactions")
   }
-  return route.path.startsWith(href);
-};
+  return route.path.startsWith(href)
+}
 </script>
 
 <template>

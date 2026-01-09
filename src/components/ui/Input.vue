@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { cn } from "@/lib/utils";
+import { computed } from "vue"
+import { cn } from "@/lib/utils"
 
 interface Props {
-  modelValue: string | number;
-  label?: string;
-  type?: "text" | "number" | "password" | "email" | "tel" | "search";
-  placeholder?: string;
-  error?: string;
-  helpText?: string;
-  disabled?: boolean;
-  required?: boolean;
-  id?: string;
+  modelValue: string | number
+  label?: string
+  type?: "text" | "number" | "password" | "email" | "tel" | "search"
+  placeholder?: string
+  error?: string
+  helpText?: string
+  disabled?: boolean
+  required?: boolean
+  id?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -19,18 +19,18 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   required: false,
   id: () => `input-${Math.random().toString(36).substring(2, 9)}`,
-});
+})
 
 const emit = defineEmits<{
-  "update:modelValue": [value: string | number];
-  blur: [event: FocusEvent];
-  focus: [event: FocusEvent];
-}>();
+  "update:modelValue": [value: string | number]
+  blur: [event: FocusEvent]
+  focus: [event: FocusEvent]
+}>()
 
 const value = computed({
   get: () => props.modelValue,
   set: (val) => emit("update:modelValue", val),
-});
+})
 </script>
 
 <template>

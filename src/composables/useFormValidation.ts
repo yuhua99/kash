@@ -1,14 +1,14 @@
-import { computed, type Ref } from "vue";
+import { computed, type Ref } from "vue"
 
 export interface ValidationRule {
-  test: (value: unknown) => boolean;
-  message: string;
+  test: (value: unknown) => boolean
+  message: string
 }
 
 export interface FieldValidation {
-  value: Ref<unknown>;
-  rules?: ValidationRule[];
-  required?: boolean;
+  value: Ref<unknown>
+  rules?: ValidationRule[]
+  required?: boolean
 }
 
 /**
@@ -19,22 +19,22 @@ export function useFormValidation() {
    * Validate a single field based on rules
    */
   const validateField = (validation: FieldValidation): { isValid: boolean; error?: string } => {
-    const { value, rules = [], required = false } = validation;
+    const { value, rules = [], required = false } = validation
 
     // Check required validation
     if (required && (!value.value || (typeof value.value === "string" && !value.value.trim()))) {
-      return { isValid: false, error: "This field is required" };
+      return { isValid: false, error: "This field is required" }
     }
 
     // Check custom rules
     for (const rule of rules) {
       if (!rule.test(value.value)) {
-        return { isValid: false, error: rule.message };
+        return { isValid: false, error: rule.message }
       }
     }
 
-    return { isValid: true };
-  };
+    return { isValid: true }
+  }
 
   /**
    * Validate multiple fields and return overall validity
@@ -42,19 +42,19 @@ export function useFormValidation() {
   const validateForm = (
     validations: FieldValidation[],
   ): { isValid: boolean; errors: Record<string, string> } => {
-    const errors: Record<string, string> = {};
-    let isValid = true;
+    const errors: Record<string, string> = {}
+    let isValid = true
 
     validations.forEach((validation, index) => {
-      const result = validateField(validation);
+      const result = validateField(validation)
       if (!result.isValid) {
-        isValid = false;
-        errors[index.toString()] = result.error || "Invalid field";
+        isValid = false
+        errors[index.toString()] = result.error || "Invalid field"
       }
-    });
+    })
 
-    return { isValid, errors };
-  };
+    return { isValid, errors }
+  }
 
   /**
    * Common validation rules
@@ -89,22 +89,22 @@ export function useFormValidation() {
       test: (value) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
       message,
     }),
-  };
+  }
 
   /**
    * Create a reactive validity checker for a form
    */
   const createFormValidator = (validations: FieldValidation[]) => {
-    return computed(() => validateForm(validations));
-  };
+    return computed(() => validateForm(validations))
+  }
 
   /**
    * Transaction-specific validation helpers
    */
   const transactionValidation = {
     isValidAmount: (amount: string): boolean => {
-      const num = parseFloat(amount);
-      return !isNaN(num) && num > 0;
+      const num = parseFloat(amount)
+      return !isNaN(num) && num > 0
     },
 
     isValidTransactionForm: (form: { name: string; amount: string; category: string }): boolean => {
@@ -112,9 +112,9 @@ export function useFormValidation() {
         form.name?.trim() &&
         form.category?.trim() &&
         transactionValidation.isValidAmount(form.amount)
-      );
+      )
     },
-  };
+  }
 
   return {
     validateField,
@@ -122,5 +122,5 @@ export function useFormValidation() {
     createFormValidator,
     rules,
     transactionValidation,
-  };
+  }
 }
