@@ -182,73 +182,55 @@ const filteredAnalytics = computed(() => {
     >
       <!-- OVERVIEW MODE BLOCKS (Row 1) -->
       <!-- Balance Block (only in overview) -->
-      <Transition name="fade">
-        <Block
-          v-if="activeView === 'overview'"
-          class="lg:col-start-1 lg:row-start-1"
-          label="Balance"
-        >
-          <template #headerRight>
-            <span class="font-mono text-xs">USD</span>
-          </template>
-          <div class="flex-1 flex flex-col justify-end overflow-hidden">
-            <h2 class="text-5xl font-bold tracking-tighter mb-2">
-              {{ formatCurrency(currentMonthSummary.netIncome) }}
-            </h2>
-            <p class="font-mono text-xs text-[var(--text-muted)]">Current Month</p>
-          </div>
-        </Block>
-      </Transition>
+      <Block v-if="activeView === 'overview'" class="lg:col-start-1 lg:row-start-1" label="Balance">
+        <template #headerRight>
+          <span class="font-mono text-xs">USD</span>
+        </template>
+        <div class="flex-1 flex flex-col justify-end overflow-hidden">
+          <h2 class="text-5xl font-bold tracking-tighter mb-2">
+            {{ formatCurrency(currentMonthSummary.netIncome) }}
+          </h2>
+          <p class="font-mono text-xs text-[var(--text-muted)]">Current Month</p>
+        </div>
+      </Block>
 
       <!-- Quick Add Block (only in overview) -->
-      <Transition name="fade">
-        <Block
-          v-if="activeView === 'overview'"
-          class="lg:col-start-2 lg:row-start-1"
-          label="Quick Add"
-        >
-          <div class="flex-1 flex flex-col justify-center relative overflow-hidden">
-            <input
-              type="text"
-              placeholder="124.50 groceries"
-              class="w-full bg-transparent border-b border-black font-mono text-xl py-2 focus:outline-none placeholder-gray-400 transition-colors"
-            />
-            <button
-              class="absolute right-0 bottom-2 text-2xl hover:text-gray-500 transition-colors"
-            >
-              →
-            </button>
-          </div>
-          <p class="font-mono text-xs text-[var(--text-muted)] shrink-0">Format: amount category</p>
-        </Block>
-      </Transition>
+      <Block
+        v-if="activeView === 'overview'"
+        class="lg:col-start-2 lg:row-start-1"
+        label="Quick Add"
+      >
+        <div class="flex-1 flex flex-col justify-center relative overflow-hidden">
+          <input
+            type="text"
+            placeholder="124.50 groceries"
+            class="w-full bg-transparent border-b border-black font-mono text-xl py-2 focus:outline-none placeholder-gray-400"
+          />
+          <button class="absolute right-0 bottom-2 text-2xl hover:text-gray-500">→</button>
+        </div>
+        <p class="font-mono text-xs text-[var(--text-muted)] shrink-0">Format: amount category</p>
+      </Block>
 
       <!-- Savings Block (only in overview) -->
-      <Transition name="fade">
-        <Block
-          v-if="activeView === 'overview'"
-          class="lg:col-start-3 lg:row-start-1"
-          label="Savings"
-        >
-          <template #headerRight>
-            <span class="font-mono text-xs">{{ Math.round(financialSummary.savingsRate) }}%</span>
-          </template>
-          <div class="flex-1 flex flex-col justify-end overflow-hidden">
-            <div class="w-full bg-gray-200 h-2">
-              <div
-                class="bg-current h-full transition-all duration-300"
-                :style="{
-                  width: `${Math.max(0, Math.min(100, Math.round(financialSummary.savingsRate)))}%`,
-                }"
-              ></div>
-            </div>
+      <Block v-if="activeView === 'overview'" class="lg:col-start-3 lg:row-start-1" label="Savings">
+        <template #headerRight>
+          <span class="font-mono text-xs">{{ Math.round(financialSummary.savingsRate) }}%</span>
+        </template>
+        <div class="flex-1 flex flex-col justify-end overflow-hidden">
+          <div class="w-full bg-gray-200 h-2">
+            <div
+              class="bg-current h-full"
+              :style="{
+                width: `${Math.max(0, Math.min(100, Math.round(financialSummary.savingsRate)))}%`,
+              }"
+            ></div>
           </div>
-        </Block>
-      </Transition>
+        </div>
+      </Block>
 
       <!-- TRANSACTIONS BLOCK (Row 2 in overview, grows upward to span Row 1+2 in expanded) -->
       <div
-        class="bg-white border border-black flex flex-col p-8 md:col-span-2 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:row-end-3 transition-all duration-500 ease-in-out"
+        class="bg-white border border-black flex flex-col p-8 md:col-span-2 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:row-end-3"
         :class="{
           'h-64 lg:translate-y-[17rem]': activeView === 'overview',
           'h-[33rem] lg:translate-y-0': activeView === 'transactions',
@@ -260,14 +242,14 @@ const filteredAnalytics = computed(() => {
           </span>
           <button
             v-if="activeView === 'overview'"
-            class="font-mono text-xs underline hover:text-gray-600 transition-colors"
+            class="font-mono text-xs underline hover:text-gray-600"
             @click="expandTransactions"
           >
             VIEW ALL
           </button>
           <button
             v-else
-            class="font-mono text-xs underline hover:text-gray-600 transition-colors"
+            class="font-mono text-xs underline hover:text-gray-600"
             @click="backToOverview"
           >
             BACK
@@ -297,37 +279,31 @@ const filteredAnalytics = computed(() => {
       </div>
 
       <!-- PERIOD FILTER BLOCK (only in transaction view, upper right) -->
-      <Transition name="fade">
-        <Block
-          v-if="activeView === 'transactions'"
-          class="lg:col-start-3 lg:row-start-1"
-          label="Time Period"
-        >
-          <div class="flex-1 flex flex-col justify-center overflow-hidden">
-            <Select v-model="selectedPeriod" :options="periodOptions" class="w-full mb-4" />
-            <div class="space-y-2">
-              <div class="flex justify-between font-mono text-xs">
-                <span>Income:</span>
-                <span class="text-green-600">{{
-                  formatCurrency(financialSummary.totalIncome)
-                }}</span>
-              </div>
-              <div class="flex justify-between font-mono text-xs">
-                <span>Expenses:</span>
-                <span class="text-red-600">{{
-                  formatCurrency(financialSummary.totalExpenses)
-                }}</span>
-              </div>
-              <div
-                class="flex justify-between font-mono text-sm font-bold border-t border-black pt-2"
-              >
-                <span>Net:</span>
-                <span>{{ formatCurrency(financialSummary.netIncome) }}</span>
-              </div>
+      <Block
+        v-if="activeView === 'transactions'"
+        class="lg:col-start-3 lg:row-start-1"
+        label="Time Period"
+      >
+        <div class="flex-1 flex flex-col justify-center overflow-hidden">
+          <Select v-model="selectedPeriod" :options="periodOptions" class="w-full mb-4" />
+          <div class="space-y-2">
+            <div class="flex justify-between font-mono text-xs">
+              <span>Income:</span>
+              <span class="text-green-600">{{ formatCurrency(financialSummary.totalIncome) }}</span>
+            </div>
+            <div class="flex justify-between font-mono text-xs">
+              <span>Expenses:</span>
+              <span class="text-red-600">{{ formatCurrency(financialSummary.totalExpenses) }}</span>
+            </div>
+            <div
+              class="flex justify-between font-mono text-sm font-bold border-t border-black pt-2"
+            >
+              <span>Net:</span>
+              <span>{{ formatCurrency(financialSummary.netIncome) }}</span>
             </div>
           </div>
-        </Block>
-      </Transition>
+        </div>
+      </Block>
 
       <!-- ANALYTICS BLOCK (always present, lower right) -->
       <Block class="lg:col-start-3 lg:row-start-2" label="Analytics">
@@ -336,7 +312,7 @@ const filteredAnalytics = computed(() => {
             <div
               v-for="(month, index) in filteredAnalytics"
               :key="month.month"
-              class="flex-1 bg-current transition-all duration-300"
+              class="flex-1 bg-current"
               :style="{ height: `${month.heightPercent || 10}%` }"
               :class="index < filteredAnalytics.length - 1 ? 'opacity-50' : ''"
             ></div>
@@ -349,16 +325,3 @@ const filteredAnalytics = computed(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Fade transition for appearing/disappearing blocks */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
