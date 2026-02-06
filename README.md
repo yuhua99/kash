@@ -1,42 +1,33 @@
-# sv
+# Kash Budget Frontend
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Run
 
 ```sh
-# create a new project
-npx sv create my-app
+bun install
+bun run dev
 ```
 
-To recreate this project with the same configuration:
+## Environment
 
-```sh
-# recreate this project
-bun x sv create --template minimal --types ts --install bun kash
-```
+- Set `VITE_API_BASE_URL` in `.env`.
+- Default API URL is `http://localhost:3000`.
+- All requests include `credentials: "include"` for cookie-session auth.
 
-## Developing
+## Route map
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- `/login`: login form
+- `/register`: account creation form
+- `/home`: full-screen quick-add record form
+- `/records`: record list, search/filter/sort, create/edit/delete
+- `/categories`: category list and create/edit/delete
+- `/stats`: net and category breakdown by selected time preset
+- `/settings`: session actions (logout)
 
-```sh
-npm run dev
+## Checklist
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- Spec routes and flows implemented
+- Auth gating implemented for protected/public-auth routes
+- API integration aligned with `API.md` endpoints
+- Validation limits and rules matched to `API.md`
+- Loading/empty/inline error states implemented per page
+- Style tokens and constraints from `STYLE.md` applied

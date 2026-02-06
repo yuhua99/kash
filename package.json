@@ -21,6 +21,8 @@
 		"vite": "^7.3.1"
 	},
 	"dependencies": {
-		"bits-ui": "^2.15.5"
+		"@tailwindcss/vite": "^4.1.18",
+		"bits-ui": "^2.15.5",
+		"tailwindcss": "^4.1.18"
 	}
 }
