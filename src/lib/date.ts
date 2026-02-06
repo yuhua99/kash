@@ -1,3 +1,5 @@
+import { parseDate, type DateValue } from '@internationalized/date';
+
 export type PeriodPreset = 'month' | 'year' | 'custom';
 
 type PeriodOptions = {
@@ -30,6 +32,26 @@ function capAtTodayIso(value: string): string {
 
 export function todayIso(): string {
 	return toIsoDateLocal(new Date());
+}
+
+export function isoToDateValue(value: string): DateValue | undefined {
+	if (!value) {
+		return undefined;
+	}
+
+	try {
+		return parseDate(value);
+	} catch {
+		return undefined;
+	}
+}
+
+export function dateValueToIso(value: DateValue | null | undefined): string {
+	if (!value) {
+		return '';
+	}
+
+	return value.toString();
 }
 
 export function periodFromPreset(preset: PeriodPreset, options: PeriodOptions = {}): PeriodRange {

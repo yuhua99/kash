@@ -1,0 +1,212 @@
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { getCategories, getRecords } from '$lib/api';
+	import PeriodControls from '$lib/components/PeriodControls.svelte';
+	import { periodFromPreset, type PeriodPreset } from '$lib/date';
+	import type { Category, RecordItem } from '$lib/types';
+	import { onMount } from 'svelte';
+
+	type ApiError = Error & { status?: number };
+	type BreakdownItem = {
+		categoryId: string;
+		name: string;
+		isIncome: boolean;
+		total: number;
+		absoluteTotal: number;
+		share: number;
+	};
+	type Totals = {
+		netTotal: number;
+		incomeTotal: number;
+		expenseTotal: number;
+	};
+
+	const initialRange = periodFromPreset('month');
+
+	let records: RecordItem[] = [];
+	let categories: Category[] = [];
+	let loading = true;
+	let loadError = '';
+
+	let periodPreset: PeriodPreset = 'month';
+	let startDate = initialRange.start;
+	let endDate = initialRange.end;
+
+	$: totals = calculateTotals(records);
+	$: netTotal = totals.netTotal;
+	$: incomeTotal = totals.incomeTotal;
+	$: expenseTotal = totals.expenseTotal;
+	$: breakdown = buildBreakdown(records, categories);
+
+	function calculateTotals(items: RecordItem[]): Totals {
+		let netTotal = 0;
+		let incomeTotal = 0;
+		let expenseTotal = 0;
+
+		for (const item of items) {
+			netTotal += item.amount;
+
+			if (item.amount > 0) {
+				incomeTotal += item.amount;
+				continue;
+			}
+
+			if (item.amount < 0) {
+				expenseTotal += Math.abs(item.amount);
+			}
+		}
+
+		return {
+			netTotal,
+			incomeTotal,
+			expenseTotal
+		};
+	}
+
+	function buildBreakdown(items: RecordItem[], categoryList: Category[]): BreakdownItem[] {
+		const categoryMap = new Map(categoryList.map((category) => [category.id, category]));
+		const totals = new Map<string, number>();
+
+		for (const item of items) {
+			totals.set(item.category_id, (totals.get(item.category_id) ?? 0) + item.amount);
+		}
+
+		const breakdownItems: BreakdownItem[] = [];
+		for (const [categoryId, total] of totals.entries()) {
+			const category = categoryMap.get(categoryId);
+			breakdownItems.push({
+				categoryId,
+				name: category?.name ?? 'Unknown category',
+				isIncome: category?.is_income ?? total >= 0,
+				total,
+				absoluteTotal: Math.abs(total),
+				share: 0
+			});
+		}
+
+		const grandTotal = breakdownItems.reduce((sum, item) => sum + item.absoluteTotal, 0);
+
+		return breakdownItems
+			.map((item) => ({
+				...item,
+				share: grandTotal === 0 ? 0 : (item.absoluteTotal / grandTotal) * 100
+			}))
+			.sort((left, right) => right.absoluteTotal - left.absoluteTotal);
+	}
+
+	function getErrorMessage(error: unknown, fallbackMessage: string): string {
+		return error instanceof Error ? error.message : fallbackMessage;
+	}
+
+	async function fetchStats(): Promise<void> {
+		loading = true;
+		loadError = '';
+
+		try {
+			const [recordsResponse, categoriesResponse] = await Promise.all([
+				getRecords({
+					start_date: startDate,
+					end_date: endDate,
+					limit: 1000,
+					offset: 0
+				}),
+				getCategories({ limit: 1000, offset: 0 })
+			]);
+
+			records = recordsResponse.records;
+			categories = categoriesResponse.categories;
+		} catch (error) {
+			const apiError = error as ApiError;
+			if (apiError.status === 401) {
+				await goto('/login');
+				return;
+			}
+			loadError = getErrorMessage(error, 'Unable to load stats.');
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function onPeriodChange(
+		event: CustomEvent<{ preset: PeriodPreset; start: string; end: string }>
+	): Promise<void> {
+		periodPreset = event.detail.preset;
+		startDate = event.detail.start;
+		endDate = event.detail.end;
+		await fetchStats();
+	}
+
+	onMount(function initStatsPage(): void {
+		void fetchStats();
+	});
+</script>
+
+<main class="stack" aria-labelledby="stats-title">
+	<section class="page-card">
+		<header class="stack">
+			<p class="meta-text">Stats</p>
+			<h1 id="stats-title">Cash flow for selected period</h1>
+			<p>Net total highlights overall direction. Breakdown shows where money concentrates.</p>
+		</header>
+
+		<PeriodControls
+			bind:preset={periodPreset}
+			bind:start={startDate}
+			bind:end={endDate}
+			disabled={loading}
+			on:change={onPeriodChange}
+		/>
+	</section>
+
+	<section class="page-card" aria-live="polite">
+		{#if loading}
+			<p class="loading-banner">Loading stats...</p>
+		{:else if loadError}
+			<p class="error-banner" role="alert">{loadError}</p>
+		{:else if records.length === 0}
+			<p class="empty-banner">
+				No records exist for this period. Change the date range or add entries from
+				<a class="inline-link" href="/home">Home</a>.
+			</p>
+		{:else}
+			<div class="stack">
+				<p class="meta-text">Net total</p>
+				<p class={netTotal >= 0 ? 'amount-income' : 'amount-expense'}>
+					{netTotal.toFixed(2)}
+				</p>
+
+				<div class="stack">
+					<div class="stat-row">
+						<span>Income</span>
+						<strong class="amount-income">{incomeTotal.toFixed(2)}</strong>
+					</div>
+					<div class="stat-row">
+						<span>Expense</span>
+						<strong class="amount-expense">-{expenseTotal.toFixed(2)}</strong>
+					</div>
+				</div>
+			</div>
+
+			<div class="stack">
+				<h2 class="section-title">Category breakdown</h2>
+				{#each breakdown as item}
+					<article class="record-row">
+						<div class="record-main">
+							<strong>{item.name}</strong>
+							<strong class={item.total >= 0 ? 'amount-income' : 'amount-expense'}>
+								{item.total.toFixed(2)}
+							</strong>
+						</div>
+						<div class="record-sub">
+							<span>{item.share.toFixed(1)}% of activity</span>
+							<span>{item.isIncome ? 'Income' : 'Expense'}</span>
+						</div>
+						<div class="stats-bar" aria-hidden="true">
+							<div class="stats-fill" style={`width: ${Math.max(item.share, 2)}%`}></div>
+						</div>
+					</article>
+				{/each}
+			</div>
+		{/if}
+	</section>
+</main>
