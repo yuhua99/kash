@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { getCategories, getRecords } from '$lib/api';
+	import ListRow from '$lib/components/ListRow.svelte';
 	import PeriodControls from '$lib/components/PeriodControls.svelte';
 	import { periodFromPreset, type PeriodPreset } from '$lib/date';
 	import type { Category, RecordItem } from '$lib/types';
@@ -141,12 +142,10 @@
 	});
 </script>
 
-<main class="stack" aria-labelledby="stats-title">
+<main class="stack">
 	<section class="page-card">
 		<header class="stack">
 			<p class="meta-text">Stats</p>
-			<h1 id="stats-title">Cash flow for selected period</h1>
-			<p>Net total highlights overall direction. Breakdown shows where money concentrates.</p>
 		</header>
 
 		<PeriodControls
@@ -171,7 +170,7 @@
 		{:else}
 			<div class="stack">
 				<p class="meta-text">Net total</p>
-				<p class={netTotal >= 0 ? 'amount-income' : 'amount-expense'}>
+				<p class={`${netTotal >= 0 ? 'amount-income' : 'amount-expense'} amount-hero`}>
 					{netTotal.toFixed(2)}
 				</p>
 
@@ -190,21 +189,21 @@
 			<div class="stack">
 				<h2 class="section-title">Category breakdown</h2>
 				{#each breakdown as item}
-					<article class="record-row">
-						<div class="record-main">
+					<ListRow type={item.total >= 0 ? 'income' : 'expense'}>
+						<svelte:fragment slot="main">
 							<strong>{item.name}</strong>
 							<strong class={item.total >= 0 ? 'amount-income' : 'amount-expense'}>
 								{item.total.toFixed(2)}
 							</strong>
-						</div>
-						<div class="record-sub">
+						</svelte:fragment>
+						<svelte:fragment slot="sub">
 							<span>{item.share.toFixed(1)}% of activity</span>
 							<span>{item.isIncome ? 'Income' : 'Expense'}</span>
-						</div>
+						</svelte:fragment>
 						<div class="stats-bar" aria-hidden="true">
 							<div class="stats-fill" style={`width: ${Math.max(item.share, 2)}%`}></div>
 						</div>
-					</article>
+					</ListRow>
 				{/each}
 			</div>
 		{/if}

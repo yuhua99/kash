@@ -1,29 +1,36 @@
 @import 'tailwindcss';
 
 :root {
-	--bg: #f3f3f4;
-	--bg-elevated: #f9f9fa;
+	--bg: #f5f5f5;
+	--bg-elevated: #ffffff;
 	--panel: #ffffff;
-	--panel-strong: #efeff1;
-	--ink: #121212;
-	--ink-muted: #5f5f63;
-	--border: #d8d8dc;
-	--line-soft: rgb(18 18 18 / 10%);
-	--accent: #242424;
-	--accent-ink: #121212;
-	--income: #1d1d1d;
-	--expense: #4b4b4f;
-	--focus: #171717;
-	--success: #2a2a2a;
-	--warning: #3a3a3a;
-	--danger: #2f2f2f;
+	--panel-strong: #ededed;
+	--ink: #0a0a0a;
+	--ink-muted: #575757;
+	--border: #cfcfcf;
+	--line-soft: rgb(0 0 0 / 12%);
+	--accent: #000000;
+	--accent-ink: #000000;
+	--income: #0a0a0a;
+	--expense: #4a4a4a;
+	--focus: #000000;
+	--success: #0a0a0a;
+	--warning: #1a1a1a;
+	--danger: #000000;
+
+	--font-base: 15px;
+	--font-title: 1.25rem;
+	--font-display: 1.5rem;
+	--font-ui: 0.9rem;
+	--font-display: 'Space Mono', 'Courier New', monospace;
+	--font-body: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, sans-serif;
 
 	--radius-sm: 0;
 	--radius-md: 0;
 	--radius-lg: 0;
 
-	--shadow-sm: 0 1px 2px rgb(0 0 0 / 4%);
-	--shadow-md: 0 8px 24px -16px rgb(0 0 0 / 16%);
+	--shadow-sm: 0 1px 2px rgb(0 0 0 / 6%);
+	--shadow-md: 0 12px 24px -18px rgb(0 0 0 / 24%);
 }
 
 *,
@@ -39,8 +46,8 @@ body {
 	padding: 0;
 	min-height: 100%;
 	color: var(--ink);
-	font-family: 'Helvetica Neue', Helvetica, sans-serif;
-	font-size: 15px;
+	font-family: var(--font-body);
+	font-size: var(--font-base);
 	line-height: 1.48;
 	font-variant-numeric: lining-nums tabular-nums;
 	background:
@@ -58,10 +65,18 @@ h5,
 h6 {
 	margin: 0;
 	line-height: 1.06;
-	font-family: 'Helvetica Neue', Helvetica, sans-serif;
+	font-family: var(--font-display);
 	font-weight: 700;
-	letter-spacing: -0.01em;
+	letter-spacing: -0.02em;
 	text-wrap: balance;
+}
+
+h1 {
+	font-size: var(--font-display);
+}
+
+h2 {
+	font-size: var(--font-title);
 }
 
 p {
@@ -114,9 +129,9 @@ a.button-link {
 
 .page-card {
 	display: grid;
-	gap: 16px;
-	padding: 18px;
-	border: 1px solid var(--border);
+	gap: 18px;
+	padding: 20px;
+	border: 2px solid var(--border);
 	background: var(--panel);
 	box-shadow: var(--shadow-sm);
 	animation: card-enter 260ms ease-out both;
@@ -131,16 +146,16 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .section-title {
-	font-size: 1.14rem;
+	font-size: var(--font-title);
 	font-weight: 700;
-	letter-spacing: -0.005em;
+	letter-spacing: -0.01em;
 }
 
 .meta-text {
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
+	font-size: var(--font-ui);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: none;
 	color: var(--ink-muted);
 }
 
@@ -155,10 +170,10 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .field-label {
-	font-size: 0.76rem;
-	font-weight: 700;
-	letter-spacing: 0.09em;
-	text-transform: uppercase;
+	font-size: var(--font-ui);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: none;
 	color: var(--ink-muted);
 }
 
@@ -167,13 +182,21 @@ main.stack > .page-card:nth-child(3) {
 .text-area {
 	width: 100%;
 	min-height: 44px;
-	padding: 10px 12px;
-	border: 1px solid var(--border);
+	padding: 9px 12px;
+	border: 2px solid var(--border);
 	background: var(--bg-elevated);
 	color: var(--ink);
 	transition:
 		border-color 120ms ease,
 		background-color 120ms ease;
+}
+
+.select-input {
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	text-align: left;
 }
 
 .date-trigger {
@@ -202,7 +225,7 @@ main.stack > .page-card:nth-child(3) {
 
 .select-menu {
 	min-width: max(11rem, var(--bits-select-anchor-width));
-	border: 1px solid var(--border);
+	border: 2px solid var(--accent-ink);
 	background: var(--panel);
 	box-shadow: var(--shadow-md);
 	padding: 4px;
@@ -215,9 +238,9 @@ main.stack > .page-card:nth-child(3) {
 	justify-content: space-between;
 	gap: 10px;
 	padding: 8px 10px;
-	font-size: 0.76rem;
+	font-size: var(--font-ui);
 	font-weight: 600;
-	letter-spacing: 0.03em;
+	letter-spacing: 0.02em;
 	color: var(--ink);
 	user-select: none;
 	cursor: pointer;
@@ -228,15 +251,20 @@ main.stack > .page-card:nth-child(3) {
 	background: var(--panel-strong);
 }
 
+.select-item[data-selected] {
+	background: var(--accent);
+	color: #ffffff;
+}
+
 .select-item[data-disabled] {
 	opacity: 0.55;
 	cursor: not-allowed;
 }
 
 .select-item > span:last-child {
-	font-size: 0.66rem;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
+	font-size: var(--font-ui);
+	text-transform: none;
+	letter-spacing: 0.02em;
 	color: var(--ink-muted);
 }
 
@@ -252,7 +280,7 @@ main.stack > .page-card:nth-child(3) {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	border: 1px solid var(--border);
+	border: 2px solid var(--border);
 	background: var(--bg-elevated);
 	color: var(--ink);
 	cursor: pointer;
@@ -263,8 +291,9 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .checkbox-control[data-state='checked'] {
-	background: color-mix(in srgb, var(--accent), white 90%);
-	border-color: color-mix(in srgb, var(--accent), white 68%);
+	background: var(--accent);
+	border-color: var(--accent-ink);
+	color: #ffffff;
 }
 
 .checkbox-control[data-disabled] {
@@ -273,7 +302,7 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .checkbox-indicator {
-	font-size: 0.75rem;
+	font-size: var(--font-ui);
 	font-weight: 800;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -284,12 +313,114 @@ main.stack > .page-card:nth-child(3) {
 	cursor: pointer;
 }
 
+.tabs {
+	display: block;
+}
+
+.tabs-list {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	border: 2px solid var(--border);
+	background: var(--bg-elevated);
+}
+
+.tabs-trigger {
+	min-height: 44px;
+	padding: 8px 10px;
+	border: 0;
+	border-right: 2px solid var(--border);
+	background: transparent;
+	font-size: var(--font-ui);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--ink-muted);
+	cursor: pointer;
+	transition:
+		background-color 120ms ease,
+		color 120ms ease;
+}
+
+.tabs-trigger:last-child {
+	border-right: 0;
+}
+
+.tabs-trigger[data-state='active'] {
+	background: var(--accent);
+	color: #ffffff;
+}
+
+.tabs-trigger[data-state='inactive']:hover {
+	background: var(--panel-strong);
+	color: var(--ink);
+}
+
+.tabs-trigger[data-disabled] {
+	opacity: 0.58;
+	cursor: not-allowed;
+}
+
+.collapsible {
+	display: grid;
+	gap: 12px;
+}
+
+.collapsible-trigger {
+	width: 100%;
+	min-height: 44px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border: 0;
+	background: transparent;
+	font-size: var(--font-ui);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--ink-muted);
+	cursor: pointer;
+	transition:
+		color 120ms ease;
+}
+
+.collapsible-trigger[data-state='open'] {
+	color: var(--ink);
+}
+
+.collapsible-trigger[data-state='closed']:hover {
+	color: var(--ink);
+}
+
+.collapsible-icon {
+	display: inline-block;
+	width: 9px;
+	height: 9px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: rotate(-135deg);
+	transition: transform 200ms ease;
+}
+
+.collapsible-trigger[data-state='open'] .collapsible-icon {
+	transform: rotate(45deg);
+}
+
+.collapsible-content {
+	padding-top: 12px;
+	border-top: 1px dashed var(--border);
+}
+
 .calendar-popover {
 	z-index: 45;
+	max-width: min(calc(100vw - 32px), 20rem);
+	width: 100%;
 }
 
 .calendar-panel {
-	border: 1px solid var(--border);
+	width: 100%;
+	max-width: 100%;
+	border: 2px solid var(--accent-ink);
 	background: var(--panel);
 	box-shadow: var(--shadow-md);
 	padding: 10px;
@@ -304,7 +435,7 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .calendar-heading {
-	font-size: 0.82rem;
+	font-size: var(--font-ui);
 	font-weight: 700;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -315,9 +446,9 @@ main.stack > .page-card:nth-child(3) {
 	min-width: 38px;
 	min-height: 32px;
 	padding: 0 8px;
-	border: 1px solid var(--border);
-	background: var(--panel-strong);
-	font-size: 0.68rem;
+	border: 2px solid var(--border);
+	background: var(--bg-elevated);
+	font-size: var(--font-ui);
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.07em;
@@ -337,7 +468,7 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .calendar-head-cell {
-	font-size: 0.64rem;
+	font-size: var(--font-ui);
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
@@ -354,7 +485,6 @@ main.stack > .page-card:nth-child(3) {
 	min-height: 34px;
 	border: 1px solid transparent;
 	background: transparent;
-	font-size: 0.78rem;
 	font-weight: 600;
 	cursor: pointer;
 	transition:
@@ -397,6 +527,7 @@ main.stack > .page-card:nth-child(3) {
 	display: flex;
 	gap: 8px;
 	flex-wrap: wrap;
+	align-items: flex-end;
 }
 
 .button {
@@ -405,13 +536,14 @@ main.stack > .page-card:nth-child(3) {
 	justify-content: center;
 	gap: 8px;
 	padding: 10px 16px;
-	border: 1px solid transparent;
+	border: 2px solid transparent;
 	text-decoration: none;
 	cursor: pointer;
-	font-size: 0.8rem;
+	font-size: var(--font-ui);
 	font-weight: 700;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
+	font-family: var(--font-display);
 	transition:
 		background-color 120ms ease,
 		border-color 120ms ease,
@@ -438,7 +570,7 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .button.secondary {
-	background: var(--panel-strong);
+	background: var(--bg-elevated);
 	border-color: var(--border);
 	color: var(--ink);
 }
@@ -449,13 +581,14 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .button.danger {
-	background: var(--danger);
-	border-color: color-mix(in srgb, var(--danger), black 20%);
-	color: #ffffff;
+	background: transparent;
+	border-color: var(--accent-ink);
+	border-style: dashed;
+	color: var(--ink);
 }
 
 .button.danger:hover {
-	background: color-mix(in srgb, var(--danger), black 10%);
+	background: var(--panel-strong);
 }
 
 .button.ghost {
@@ -475,7 +608,6 @@ main.stack > .page-card:nth-child(3) {
 .empty-banner,
 .loading-banner {
 	padding: 11px 12px;
-	font-size: 0.88rem;
 	font-weight: 500;
 	border: 1px solid;
 }
@@ -503,7 +635,6 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .field-error {
-	font-size: 0.82rem;
 	font-weight: 600;
 	color: var(--danger);
 }
@@ -523,12 +654,23 @@ main.stack > .page-card:nth-child(3) {
 	color: var(--income);
 	font-weight: 700;
 	font-variant-numeric: lining-nums tabular-nums;
+	font-family: var(--font-display);
+	letter-spacing: -0.01em;
+	font-size: var(--font-title);
 }
 
 .amount-expense {
 	color: var(--expense);
 	font-weight: 700;
 	font-variant-numeric: lining-nums tabular-nums;
+	font-family: var(--font-display);
+	letter-spacing: -0.01em;
+	font-size: var(--font-title);
+}
+
+.amount-hero {
+	font-size: var(--font-display);
+	line-height: 1;
 }
 
 .record-list,
@@ -537,26 +679,38 @@ main.stack > .page-card:nth-child(3) {
 	gap: 8px;
 }
 
-.record-row,
-.category-row {
+
+.record-row {
 	display: grid;
-	gap: 6px;
-	padding: 8px 10px;
-	border: 1px solid var(--border);
+	gap: 10px;
+	padding: 12px 14px;
+	border: 2px solid var(--border);
+	border-left-width: 4px;
 	background: var(--bg-elevated);
-	transition: border-color 120ms ease;
+	transition:
+		border-color 120ms ease,
+		box-shadow 120ms ease;
 }
 
-.record-row:hover,
-.category-row:hover {
+
+.record-row[data-type='income'] {
+	border-left-color: var(--ink);
+}
+
+.record-row[data-type='expense'] {
+	border-left-color: var(--ink-muted);
+}
+
+.record-row:hover {
 	border-color: color-mix(in srgb, var(--border), var(--ink) 20%);
+	box-shadow: var(--shadow-sm);
 }
 
 .record-main {
 	display: flex;
 	justify-content: space-between;
-	align-items: baseline;
-	gap: 8px;
+	align-items: center;
+	gap: 12px;
 }
 
 .record-main strong:first-child {
@@ -565,10 +719,10 @@ main.stack > .page-card:nth-child(3) {
 
 .record-name {
 	flex: 1;
-	font-size: 0.92rem;
 	font-weight: 600;
-	line-height: 1.25;
+	line-height: 1.3;
 	min-width: 0;
+	font-size: var(--font-base);
 }
 
 .record-end {
@@ -583,24 +737,25 @@ main.stack > .page-card:nth-child(3) {
 	display: flex;
 	justify-content: space-between;
 	gap: 8px;
-	font-size: 0.76rem;
+	font-size: var(--font-ui);
 	font-weight: 500;
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
+	text-transform: none;
+	letter-spacing: 0.02em;
 	color: var(--ink-muted);
 }
 
 .record-actions-trigger {
 	min-width: 44px;
-	min-height: 32px;
-	padding: 0 8px;
-	border: 1px solid var(--border);
-	background: var(--panel);
+	min-height: 36px;
+	padding: 0 10px;
+	border: 2px solid var(--border);
+	background: var(--bg-elevated);
 	color: var(--ink-muted);
-	font-size: 0.68rem;
+	font-size: var(--font-ui);
 	font-weight: 700;
 	text-transform: uppercase;
-	letter-spacing: 0.07em;
+	letter-spacing: 0.1em;
+	font-family: var(--font-display);
 	cursor: pointer;
 	transition:
 		border-color 120ms ease,
@@ -616,7 +771,7 @@ main.stack > .page-card:nth-child(3) {
 
 .record-actions-menu {
 	min-width: 9rem;
-	border: 1px solid var(--border);
+	border: 2px solid var(--accent-ink);
 	background: var(--panel);
 	box-shadow: var(--shadow-md);
 	padding: 4px;
@@ -627,9 +782,9 @@ main.stack > .page-card:nth-child(3) {
 
 .record-actions-item {
 	padding: 8px 10px;
-	font-size: 0.76rem;
+	font-size: var(--font-ui);
 	font-weight: 600;
-	letter-spacing: 0.03em;
+	letter-spacing: 0.02em;
 	color: var(--ink);
 	cursor: pointer;
 	outline: none;
@@ -653,7 +808,8 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .record-actions-item-danger {
-	color: var(--danger);
+	color: var(--ink);
+	font-weight: 700;
 }
 
 .bottom-nav {
@@ -666,7 +822,7 @@ main.stack > .page-card:nth-child(3) {
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 0;
-	border-top: 1px solid var(--border);
+	border-top: 2px solid var(--border);
 	background: rgb(255 255 255 / 92%);
 	backdrop-filter: blur(8px);
 	box-shadow: 0 -8px 30px -24px rgb(17 24 39 / 24%);
@@ -678,12 +834,12 @@ main.stack > .page-card:nth-child(3) {
 	padding: 0 4px 8px;
 	display: inline-flex;
 	align-items: center;
-	font-size: 0.72rem;
+	font-size: var(--font-ui);
 	font-weight: 700;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
+	font-family: var(--font-display);
 	color: var(--ink-muted);
-	border-bottom: 1px solid var(--line-soft);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -699,14 +855,15 @@ main.stack > .page-card:nth-child(3) {
 	background: transparent;
 	cursor: pointer;
 	text-decoration: none;
-	font-size: 0.68rem;
+	font-size: var(--font-ui);
 	font-weight: 700;
 	line-height: 1.18;
 	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	border: 1px solid transparent;
+	letter-spacing: 0.12em;
+	border: 2px solid transparent;
 	border-right-color: var(--line-soft);
 	color: var(--ink-muted);
+	font-family: var(--font-display);
 	transition:
 		background-color 120ms ease,
 		color 120ms ease,
@@ -724,21 +881,27 @@ main.stack > .page-card:nth-child(3) {
 }
 
 .nav-link.active {
-	color: var(--accent-ink);
-	background: color-mix(in srgb, var(--accent), white 90%);
-	border-color: color-mix(in srgb, var(--accent), white 70%);
+	color: var(--ink);
+	background: var(--panel);
+	border-color: var(--accent-ink);
 }
 
 .stats-bar {
-	height: 8px;
-	border: 1px solid var(--border);
+	height: 12px;
+	border: 2px solid var(--border);
 	background: var(--panel-strong);
 	overflow: hidden;
 }
 
 .stats-fill {
 	height: 100%;
-	background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent), black 20%));
+	background: repeating-linear-gradient(
+		90deg,
+		var(--accent) 0,
+		var(--accent) 10px,
+		color-mix(in srgb, var(--accent), white 30%) 10px,
+		color-mix(in srgb, var(--accent), white 30%) 16px
+	);
 	transition: width 220ms ease;
 }
 
@@ -781,7 +944,7 @@ main.stack > .page-card:nth-child(3) {
 		padding: 8px;
 		grid-template-columns: auto repeat(5, max-content);
 		gap: 8px;
-		border: 1px solid var(--border);
+		border: 2px solid var(--border);
 		background: rgb(255 255 255 / 92%);
 	}
 
@@ -789,15 +952,13 @@ main.stack > .page-card:nth-child(3) {
 		grid-column: auto;
 		min-height: 44px;
 		padding: 0 10px;
-		border: 1px solid var(--border);
-		border-bottom: 1px solid var(--border);
 		max-width: 15rem;
 	}
 
 	.nav-link {
 		min-height: 44px;
 		padding-inline: 14px;
-		border: 1px solid transparent;
+		border: 2px solid transparent;
 	}
 
 	.nav-link:last-child {

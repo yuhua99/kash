@@ -46,11 +46,9 @@
 	}
 </script>
 
-<main class="page-card" aria-labelledby="register-title">
+<main class="page-card">
 	<header class="stack">
 		<p class="meta-text">Create account</p>
-		<h1 id="register-title">Start your personal ledger</h1>
-		<p>Set up your account in less than a minute and begin recording your cash flow.</p>
 	</header>
 
 	{#if formError}

@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { DateValue } from '@internationalized/date';
+	import { Button, DatePicker, Select } from 'bits-ui';
 	import {
 		deleteRecord,
 		getCategories,
 		getRecords,
 		updateRecord
 	} from '$lib/api';
-	import { Button, DatePicker, DropdownMenu, Select } from 'bits-ui';
+	import ListRow from '$lib/components/ListRow.svelte';
+	import PeriodControls from '$lib/components/PeriodControls.svelte';
+	import RowActionsMenu from '$lib/components/RowActionsMenu.svelte';
 	import {
 		dateValueToIso,
 		isoToDateValue,
@@ -21,7 +24,6 @@
 		validateRecordName,
 		validateSearchTerm
 	} from '$lib/validation';
-	import PeriodControls from '$lib/components/PeriodControls.svelte';
 	import { onMount } from 'svelte';
 
 	type ApiError = Error & { status?: number };
@@ -77,6 +79,20 @@
 		{ value: 'amount_desc', label: 'Amount (high to low)' },
 		{ value: 'amount_asc', label: 'Amount (low to high)' }
 	];
+
+	function isTypeFilter(value: string): value is TypeFilter {
+		return value === 'all' || value === 'income' || value === 'expense';
+	}
+
+	function isSortMode(value: string): value is SortMode {
+		return (
+			value === 'date_desc' ||
+			value === 'date_asc' ||
+			value === 'category_asc' ||
+			value === 'amount_desc' ||
+			value === 'amount_asc'
+		);
+	}
 
 	$: normalizedSearchTerm = search.trim();
 	$: searchValidationError = validateSearchTerm(normalizedSearchTerm) ?? '';
@@ -138,6 +154,18 @@
 				return leftName.localeCompare(rightName);
 			}
 		}
+	}
+
+	function createEditHandler(record: RecordItem): () => void {
+		return function handleEdit(): void {
+			startEdit(record);
+		};
+	}
+
+	function createDeleteHandler(recordId: string): () => void {
+		return function handleDelete(): void {
+			void removeRecord(recordId);
+		};
 	}
 
 	function clearMutationFeedback(): void {
@@ -231,11 +259,15 @@
 	}
 
 	function onTypeFilterChange(nextType: string): void {
-		typeFilter = nextType as TypeFilter;
+		if (isTypeFilter(nextType)) {
+			typeFilter = nextType;
+		}
 	}
 
 	function onSortModeChange(nextSortMode: string): void {
-		sortMode = nextSortMode as SortMode;
+		if (isSortMode(nextSortMode)) {
+			sortMode = nextSortMode;
+		}
 	}
 
 	function onEditCategoryChange(nextCategoryId: string): void {
@@ -323,11 +355,10 @@
 	});
 </script>
 
-<main class="stack" aria-labelledby="records-title">
+<main class="stack">
 	<section class="page-card">
 		<header class="stack">
 			<p class="meta-text">Records</p>
-			<h1 id="records-title">Search and manage records</h1>
 		</header>
 
 		<PeriodControls
@@ -457,47 +488,25 @@
 		{:else}
 			<div class="record-list">
 				{#each filteredRecords as record}
-					<article class="record-row">
-						<div class="record-main">
-							<strong class="record-name">{record.name}</strong>
-							<div class="record-end">
-								<strong class={record.amount > 0 ? 'amount-income' : 'amount-expense'}>
-									{record.amount.toFixed(2)}
-								</strong>
-								{#if editingId !== record.id}
-									<DropdownMenu.Root>
-										<DropdownMenu.Trigger
-											class="record-actions-trigger"
-											aria-label={`Actions for ${record.name}`}
-										>
-											Actions
-										</DropdownMenu.Trigger>
-										<DropdownMenu.Portal>
-											<DropdownMenu.Content class="record-actions-menu" sideOffset={6} align="end">
-												<DropdownMenu.Item
-													class="record-actions-item"
-													onSelect={() => startEdit(record)}
-												>
-													Edit
-												</DropdownMenu.Item>
-												<DropdownMenu.Separator class="record-actions-separator" />
-												<DropdownMenu.Item
-													class="record-actions-item record-actions-item-danger"
-													onSelect={() => void removeRecord(record.id)}
-													disabled={deletingId === record.id}
-												>
-													{deletingId === record.id ? 'Deleting...' : 'Delete'}
-												</DropdownMenu.Item>
-											</DropdownMenu.Content>
-										</DropdownMenu.Portal>
-									</DropdownMenu.Root>
-								{/if}
-							</div>
+					<ListRow type={record.amount > 0 ? 'income' : 'expense'}>
+						<strong slot="main" class="record-name">{record.name}</strong>
+						<div slot="end">
+							<strong class={record.amount > 0 ? 'amount-income' : 'amount-expense'}>
+								{record.amount.toFixed(2)}
+							</strong>
+							{#if editingId !== record.id}
+						<RowActionsMenu
+							ariaLabel={`Actions for ${record.name}`}
+							onEdit={createEditHandler(record)}
+							onDelete={createDeleteHandler(record.id)}
+							deleting={deletingId === record.id}
+						/>
+							{/if}
 						</div>
-						<div class="record-sub">
+						<svelte:fragment slot="sub">
 							<span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
 							<span>{record.date}</span>
-						</div>
+						</svelte:fragment>
 
 						{#if editingId === record.id}
 							<div class="stack">
@@ -568,7 +577,11 @@
 									<div class="field" style="flex: 1 1 10rem">
 										<label class="field-label" for={`edit-date-${record.id}`}>Date</label>
 										<DatePicker.Root value={editDateValue} onValueChange={onEditDateChange}>
-											<DatePicker.Trigger id={`edit-date-${record.id}`} class="text-input date-trigger">
+											<DatePicker.Trigger
+												id={`edit-date-${record.id}`}
+												class="text-input date-trigger"
+												type="button"
+											>
 												{editDate || 'Pick a date'}
 											</DatePicker.Trigger>
 											<DatePicker.Portal>
@@ -591,28 +604,28 @@
 																			<DatePicker.GridRow>
 																				{#each weekdays as day}
 																					<DatePicker.HeadCell class="calendar-head-cell">{day}</DatePicker.HeadCell>
-																				{/each}
+																			{/each}
 																			</DatePicker.GridRow>
 																		</DatePicker.GridHead>
-																		<DatePicker.GridBody>
-																			{#each month.weeks as weekDates}
-																				<DatePicker.GridRow>
-																					{#each weekDates as calendarDate}
-																						<DatePicker.Cell date={calendarDate} month={month.value}>
+																	<DatePicker.GridBody>
+																		{#each month.weeks as weekDates}
+																			<DatePicker.GridRow>
+																				{#each weekDates as calendarDate}
+																					<DatePicker.Cell date={calendarDate} month={month.value}>
 																							<DatePicker.Day class="calendar-day">{calendarDate.day}</DatePicker.Day>
 																						</DatePicker.Cell>
 																					{/each}
 																				</DatePicker.GridRow>
-																			{/each}
-																		</DatePicker.GridBody>
-																	</DatePicker.Grid>
-																{/each}
-															</div>
-														{/snippet}
-													</DatePicker.Calendar>
-												</DatePicker.Content>
-											</DatePicker.Portal>
-										</DatePicker.Root>
+																		{/each}
+																	</DatePicker.GridBody>
+																</DatePicker.Grid>
+															{/each}
+														</div>
+													{/snippet}
+												</DatePicker.Calendar>
+											</DatePicker.Content>
+										</DatePicker.Portal>
+									</DatePicker.Root>
 										{#if editDateError}
 											<p class="field-error" role="alert">{editDateError}</p>
 										{/if}
@@ -634,7 +647,7 @@
 								</div>
 							</div>
 						{/if}
-					</article>
+					</ListRow>
 				{/each}
 			</div>
 		{/if}

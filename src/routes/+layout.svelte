@@ -19,24 +19,36 @@
 	function isActive(pathname: string, href: string): boolean {
 		return pathname === href || pathname.startsWith(`${href}/`);
 	}
+
+	function createNavClickHandler(href: string): () => void {
+		return function handleNavClick(): void {
+			void goto(href);
+		};
+	}
 </script>
 
 <svelte:head>
 	<title>Kash</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+		rel="stylesheet"
+	/>
 </svelte:head>
 
 <div class={`app-shell ${authRoutes.has($page.url.pathname) ? 'auth-shell' : ''}`}>
 	{#if data.user && !authRoutes.has($page.url.pathname)}
 		<Menubar.Root class="bottom-nav" aria-label="Primary">
-			<div class="nav-user" aria-label="Signed in user">{data.user.username}</div>
+			<div class="nav-user" aria-label="Brand">kash!</div>
 			{#each navItems as item}
 				<Menubar.Menu value={item.href}>
-					<Menubar.Trigger
-						class={`nav-link ${isActive($page.url.pathname, item.href) ? 'active' : ''}`}
-						onclick={() => goto(item.href)}
-					>
-						{item.label}
-					</Menubar.Trigger>
+				<Menubar.Trigger
+					class={`nav-link ${isActive($page.url.pathname, item.href) ? 'active' : ''}`}
+					onclick={createNavClickHandler(item.href)}
+				>
+					{item.label}
+				</Menubar.Trigger>
 				</Menubar.Menu>
 			{/each}
 		</Menubar.Root>

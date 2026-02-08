@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Button, Checkbox } from 'bits-ui';
+	import { Button, Collapsible, Tabs } from 'bits-ui';
 	import { createCategory, deleteCategory, getCategories, updateCategory } from '$lib/api';
+	import ListRow from '$lib/components/ListRow.svelte';
+	import RowActionsMenu from '$lib/components/RowActionsMenu.svelte';
 	import type { Category } from '$lib/types';
 	import { validateCategoryName, validateSearchTerm } from '$lib/validation';
 	import { onMount } from 'svelte';
@@ -17,7 +19,8 @@
 	let search = '';
 
 	let createName = '';
-	let createIsIncome = false;
+	let createOpen = false;
+	let createType: 'expense' | 'income' = 'expense';
 	let createNameError = '';
 	let creating = false;
 
@@ -34,10 +37,32 @@
 	);
 	$: incomeCategories = visibleCategories.filter((category) => category.is_income);
 	$: expenseCategories = visibleCategories.filter((category) => !category.is_income);
-	$: createTypeLabel = createIsIncome ? 'Income category' : 'Expense category';
 
-	function onCreateIncomeChange(checked: boolean): void {
-		createIsIncome = checked;
+	function clearMutationFeedback(): void {
+		mutationError = '';
+		successMessage = '';
+	}
+
+	function getErrorMessage(error: unknown, fallbackMessage: string): string {
+		return error instanceof Error ? error.message : fallbackMessage;
+	}
+
+	function createEditHandler(category: Category): () => void {
+		return function handleEdit(): void {
+			startEdit(category);
+		};
+	}
+
+	function createDeleteHandler(category: Category): () => void {
+		return function handleDelete(): void {
+			void removeCategory(category);
+		};
+	}
+
+	function onCreateTypeChange(nextValue: string): void {
+		if (nextValue === 'income' || nextValue === 'expense') {
+			createType = nextValue;
+		}
 	}
 
 	async function fetchCategories(): Promise<void> {
@@ -53,7 +78,7 @@
 				await goto('/login');
 				return;
 			}
-			loadError = error instanceof Error ? error.message : 'Unable to load categories.';
+			loadError = getErrorMessage(error, 'Unable to load categories.');
 		} finally {
 			loading = false;
 		}
@@ -61,8 +86,7 @@
 
 	async function onCreateSubmit(event: SubmitEvent): Promise<void> {
 		event.preventDefault();
-		mutationError = '';
-		successMessage = '';
+		clearMutationFeedback();
 		createNameError = '';
 
 		const normalizedName = createName.trim();
@@ -74,7 +98,8 @@
 
 		creating = true;
 		try {
-			await createCategory({ name: normalizedName, is_income: createIsIncome });
+			const isIncome = createType === 'income';
+			await createCategory({ name: normalizedName, is_income: isIncome });
 			createName = '';
 			successMessage = 'Category created.';
 			await fetchCategories();
@@ -84,7 +109,7 @@
 				await goto('/login');
 				return;
 			}
-			mutationError = error instanceof Error ? error.message : 'Unable to create category.';
+			mutationError = getErrorMessage(error, 'Unable to create category.');
 		} finally {
 			creating = false;
 		}
@@ -94,8 +119,7 @@
 		editingId = category.id;
 		editName = category.name;
 		editNameError = '';
-		mutationError = '';
-		successMessage = '';
+		clearMutationFeedback();
 	}
 
 	function cancelEdit(): void {
@@ -109,8 +133,7 @@
 			return;
 		}
 
-		mutationError = '';
-		successMessage = '';
+		clearMutationFeedback();
 		editNameError = '';
 
 		const normalizedName = editName.trim();
@@ -132,19 +155,18 @@
 				await goto('/login');
 				return;
 			}
-			mutationError = error instanceof Error ? error.message : 'Unable to update category.';
+			mutationError = getErrorMessage(error, 'Unable to update category.');
 		} finally {
 			savingEdit = false;
 		}
 	}
 
 	async function removeCategory(category: Category): Promise<void> {
-		if (!confirm(`Delete category \"${category.name}\"?`)) {
+		if (!confirm(`Delete category "${category.name}"?`)) {
 			return;
 		}
 
-		mutationError = '';
-		successMessage = '';
+		clearMutationFeedback();
 		deletingId = category.id;
 
 		try {
@@ -157,64 +179,57 @@
 				await goto('/login');
 				return;
 			}
-			mutationError = error instanceof Error ? error.message : 'Unable to delete category.';
+			mutationError = getErrorMessage(error, 'Unable to delete category.');
 		} finally {
 			deletingId = null;
 		}
 	}
 
-	onMount(() => {
+	onMount(function initCategoriesPage(): void {
 		void fetchCategories();
 	});
 </script>
 
-<main class="stack" aria-labelledby="categories-title">
-	<section class="page-card">
-		<header class="stack">
-			<p class="meta-text">Categories</p>
-			<h1 id="categories-title">Manage your income and expense buckets</h1>
-			<p>Create categories fast, then rename or remove as your budget evolves.</p>
-		</header>
+<main class="stack">
+	<Collapsible.Root bind:open={createOpen} class="page-card">
+		<Collapsible.Trigger class="collapsible-trigger">
+			<span>Add category</span>
+			<span class="collapsible-icon" aria-hidden="true"></span>
+		</Collapsible.Trigger>
+		<Collapsible.Content class="collapsible-content">
+			{#if mutationError}
+				<p class="error-banner" role="alert">{mutationError}</p>
+			{/if}
 
-		{#if mutationError}
-			<p class="error-banner" role="alert">{mutationError}</p>
-		{/if}
+			{#if successMessage}
+				<p class="success-banner" role="status">{successMessage}</p>
+			{/if}
 
-		{#if successMessage}
-			<p class="success-banner" role="status">{successMessage}</p>
-		{/if}
-
-		<form class="stack" on:submit={onCreateSubmit} novalidate>
-			<div class="field">
-				<label class="field-label" for="create-category-name">Category name</label>
-				<input id="create-category-name" class="text-input" type="text" bind:value={createName} />
-				{#if createNameError}
-					<p class="field-error" role="alert">{createNameError}</p>
-				{/if}
-			</div>
-
-			<div class="field">
-				<div class="checkbox-row">
-					<Checkbox.Root
-						id="create-category-income"
-						checked={createIsIncome}
-						onCheckedChange={onCreateIncomeChange}
-						class="checkbox-control"
-					>
-						{#snippet children({ checked })}
-							<span class="checkbox-indicator" aria-hidden="true">{checked ? 'X' : ''}</span>
-						{/snippet}
-					</Checkbox.Root>
-					<label class="field-label checkbox-label" for="create-category-income">Income category</label>
+			<form class="stack" on:submit={onCreateSubmit} novalidate>
+				<div class="field">
+					<label class="field-label" for="create-category-name">Category name</label>
+					<input id="create-category-name" class="text-input" type="text" bind:value={createName} />
+					{#if createNameError}
+						<p class="field-error" role="alert">{createNameError}</p>
+					{/if}
 				</div>
-				<p class="meta-text">{createTypeLabel}</p>
-			</div>
 
-			<Button.Root class="button primary" type="submit" disabled={creating}>
-				{creating ? 'Creating...' : 'Create category'}
-			</Button.Root>
-		</form>
-	</section>
+				<div class="field">
+					<p id="create-category-type" class="field-label">Type</p>
+					<Tabs.Root value={createType} onValueChange={onCreateTypeChange} class="tabs">
+						<Tabs.List class="tabs-list" aria-labelledby="create-category-type">
+							<Tabs.Trigger class="tabs-trigger" value="expense">Expense</Tabs.Trigger>
+							<Tabs.Trigger class="tabs-trigger" value="income">Income</Tabs.Trigger>
+						</Tabs.List>
+					</Tabs.Root>
+				</div>
+
+				<Button.Root class="button primary" type="submit" disabled={creating}>
+					{creating ? 'Creating...' : 'Create category'}
+				</Button.Root>
+			</form>
+		</Collapsible.Content>
+	</Collapsible.Root>
 
 	<section class="page-card" aria-live="polite">
 		<div class="field">
@@ -246,8 +261,8 @@
 					{:else}
 						<div class="category-list">
 							{#each incomeCategories as category}
-								<article class="category-row">
-									{#if editingId === category.id}
+								{#if editingId === category.id}
+									<ListRow type="income">
 										<div class="field">
 											<label class="field-label" for={`edit-category-${category.id}`}>Name</label>
 											<input
@@ -273,26 +288,20 @@
 												Cancel
 											</Button.Root>
 										</div>
-									{:else}
-										<div class="record-main">
-											<strong>{category.name}</strong>
-											<span class="meta-text">Income</span>
+									</ListRow>
+								{:else}
+									<ListRow type="income">
+										<strong slot="main" class="record-name">{category.name}</strong>
+										<div slot="end">
+										<RowActionsMenu
+											ariaLabel={`Actions for ${category.name}`}
+											onEdit={createEditHandler(category)}
+											onDelete={createDeleteHandler(category)}
+											deleting={deletingId === category.id}
+										/>
 										</div>
-										<div class="button-row">
-											<Button.Root type="button" class="button secondary" onclick={() => startEdit(category)}>
-												Edit
-											</Button.Root>
-											<Button.Root
-												type="button"
-												class="button danger"
-												onclick={() => removeCategory(category)}
-												disabled={deletingId === category.id}
-											>
-												{deletingId === category.id ? 'Deleting...' : 'Delete'}
-											</Button.Root>
-										</div>
-									{/if}
-								</article>
+									</ListRow>
+								{/if}
 							{/each}
 						</div>
 					{/if}
@@ -305,8 +314,8 @@
 					{:else}
 						<div class="category-list">
 							{#each expenseCategories as category}
-								<article class="category-row">
-									{#if editingId === category.id}
+								{#if editingId === category.id}
+									<ListRow type="expense">
 										<div class="field">
 											<label class="field-label" for={`edit-category-${category.id}`}>Name</label>
 											<input
@@ -332,26 +341,20 @@
 												Cancel
 											</Button.Root>
 										</div>
-									{:else}
-										<div class="record-main">
-											<strong>{category.name}</strong>
-											<span class="meta-text">Expense</span>
+									</ListRow>
+								{:else}
+									<ListRow type="expense">
+										<strong slot="main" class="record-name">{category.name}</strong>
+										<div slot="end">
+										<RowActionsMenu
+											ariaLabel={`Actions for ${category.name}`}
+											onEdit={createEditHandler(category)}
+											onDelete={createDeleteHandler(category)}
+											deleting={deletingId === category.id}
+										/>
 										</div>
-										<div class="button-row">
-											<Button.Root type="button" class="button secondary" onclick={() => startEdit(category)}>
-												Edit
-											</Button.Root>
-											<Button.Root
-												type="button"
-												class="button danger"
-												onclick={() => removeCategory(category)}
-												disabled={deletingId === category.id}
-											>
-												{deletingId === category.id ? 'Deleting...' : 'Delete'}
-											</Button.Root>
-										</div>
-									{/if}
-								</article>
+									</ListRow>
+								{/if}
 							{/each}
 						</div>
 					{/if}

@@ -111,7 +111,11 @@
 				weekdayFormat="short"
 				fixedWeeks={true}
 			>
-				<DateRangePicker.Trigger id="period-custom-range" class="text-input date-trigger">
+				<DateRangePicker.Trigger
+					id="period-custom-range"
+					class="text-input date-trigger"
+					type="button"
+				>
 					{customRangeLabel}
 				</DateRangePicker.Trigger>
 				<DateRangePicker.Content class="calendar-popover" sideOffset={6} align="start">
@@ -143,17 +147,17 @@
 														<DateRangePicker.Cell {date} month={month.value}>
 															<DateRangePicker.Day class="calendar-day range-day">{date.day}</DateRangePicker.Day>
 														</DateRangePicker.Cell>
-													{/each}
-												</DateRangePicker.GridRow>
-											{/each}
-										</DateRangePicker.GridBody>
-									</DateRangePicker.Grid>
-								{/each}
-							</div>
-						{/snippet}
-					</DateRangePicker.Calendar>
-				</DateRangePicker.Content>
-			</DateRangePicker.Root>
+												{/each}
+											</DateRangePicker.GridRow>
+										{/each}
+									</DateRangePicker.GridBody>
+								</DateRangePicker.Grid>
+							{/each}
+						</div>
+					{/snippet}
+				</DateRangePicker.Calendar>
+			</DateRangePicker.Content>
+		</DateRangePicker.Root>
 		</div>
 	{:else}
 		<p class="meta-text">{start} to {end}</p>

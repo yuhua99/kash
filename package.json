@@ -24,6 +24,7 @@
 		"@internationalized/date": "^3.8.2",
 		"@tailwindcss/vite": "^4.1.18",
 		"bits-ui": "^2.15.5",
+		"svelte-language-server": "^0.17.25",
 		"tailwindcss": "^4.1.18"
 	}
 }

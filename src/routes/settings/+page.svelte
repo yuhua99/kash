@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { Button } from 'bits-ui';
 	import { logout } from '$lib/api';
+	import ListRow from '$lib/components/ListRow.svelte';
 
 	export let data: App.PageData;
 
@@ -23,19 +24,17 @@
 	}
 </script>
 
-<main class="page-card" aria-labelledby="settings-title">
+<main class="page-card">
 	<header class="stack">
 		<p class="meta-text">Settings</p>
-		<h1 id="settings-title">Account and session</h1>
-		<p>Keep things simple: review account identity and end your current session securely.</p>
 	</header>
 
-	<div class="record-row">
-		<div class="record-main">
+	<ListRow>
+		<svelte:fragment slot="main">
 			<strong>Username</strong>
 			<span class="meta-text">{data.user?.username ?? 'Unknown'}</span>
-		</div>
-	</div>
+		</svelte:fragment>
+	</ListRow>
 
 	{#if formError}
 		<p class="error-banner" role="alert">{formError}</p>

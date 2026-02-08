@@ -45,11 +45,9 @@
 	}
 </script>
 
-<main class="page-card" aria-labelledby="login-title">
+<main class="page-card">
 	<header class="stack">
 		<p class="meta-text">Welcome back</p>
-		<h1 id="login-title">Sign in to your ledger</h1>
-		<p>Track what came in, what went out, and where your month stands.</p>
 	</header>
 
 	{#if formError}
