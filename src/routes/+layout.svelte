@@ -16,6 +16,9 @@
 
 	const authRoutes = new Set(['/login', '/register']);
 
+	$: pathname = $page.url.pathname;
+	$: isAuthRoute = authRoutes.has(pathname);
+
 	function isActive(pathname: string, href: string): boolean {
 		return pathname === href || pathname.startsWith(`${href}/`);
 	}
@@ -39,20 +42,20 @@
 
 <div
 	class="app"
-	data-shell={authRoutes.has($page.url.pathname) ? 'auth' : 'app'}
-	data-route={$page.url.pathname}
+	data-shell={isAuthRoute ? 'auth' : 'app'}
+	data-route={pathname}
 >
-	{#if data.user && !authRoutes.has($page.url.pathname)}
+	{#if data.user && !isAuthRoute}
 		<Menubar.Root class="menubar" aria-label="Primary">
 			<div class="menubar__brand" aria-label="Brand">kash!</div>
 			{#each navItems as item}
 				<Menubar.Menu value={item.href}>
 					<Menubar.Trigger
-						class={`menubar__trigger ${isActive($page.url.pathname, item.href) ? 'is-active' : ''}`}
+						class={`menubar__trigger ${isActive(pathname, item.href) ? 'is-active' : ''}`}
 						onclick={createNavClickHandler(item.href)}
 					>
-					{item.label}
-				</Menubar.Trigger>
+						{item.label}
+					</Menubar.Trigger>
 				</Menubar.Menu>
 			{/each}
 		</Menubar.Root>

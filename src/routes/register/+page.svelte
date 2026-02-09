@@ -79,7 +79,6 @@
 				name="password"
 				type="password"
 				autocomplete="new-password"
-			
 				bind:value={password}
 				required
 			/>
@@ -88,9 +87,9 @@
 			{/if}
 		</div>
 
-	<Button.Root class="btn btn--primary" type="submit" disabled={pending}>
-		{pending ? 'Creating account...' : 'Create account'}
-	</Button.Root>
+		<Button.Root class="btn btn--primary" type="submit" disabled={pending}>
+			{pending ? 'Creating account...' : 'Create account'}
+		</Button.Root>
 	</form>
 
 	<p>

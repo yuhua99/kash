@@ -192,11 +192,11 @@
 
 <main>
 	<Collapsible.Root bind:open={createOpen}>
-	<Collapsible.Trigger class="collapsible-trigger">
-		<span>Add category</span>
-		<span aria-hidden="true"></span>
-	</Collapsible.Trigger>
-	<Collapsible.Content class="collapsible-content">
+		<Collapsible.Trigger class="collapsible-trigger">
+			<span>Add category</span>
+			<span aria-hidden="true"></span>
+		</Collapsible.Trigger>
+		<Collapsible.Content class="collapsible-content">
 			{#if mutationError}
 				<p role="alert">{mutationError}</p>
 			{/if}
@@ -236,7 +236,6 @@
 			<label for="category-search">Search</label>
 			<input
 				id="category-search"
-			
 				type="search"
 				placeholder="Search category names"
 				bind:value={search}
@@ -267,7 +266,6 @@
 											<label for={`edit-category-${category.id}`}>Name</label>
 											<input
 												id={`edit-category-${category.id}`}
-											
 												type="text"
 												bind:value={editName}
 											/>
@@ -275,30 +273,30 @@
 												<p role="alert">{editNameError}</p>
 											{/if}
 										</div>
-									<div class="button-row">
-										<Button.Root
-											class="btn btn--primary"
-											type="button"
-											onclick={saveEdit}
-											disabled={savingEdit}
-										>
-											{savingEdit ? 'Saving...' : 'Save'}
-										</Button.Root>
-										<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
-											Cancel
-										</Button.Root>
-									</div>
+										<div class="button-row">
+											<Button.Root
+												class="btn btn--primary"
+												type="button"
+												onclick={saveEdit}
+												disabled={savingEdit}
+											>
+												{savingEdit ? 'Saving...' : 'Save'}
+											</Button.Root>
+											<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
+												Cancel
+											</Button.Root>
+										</div>
 									</ListRow>
 								{:else}
 									<ListRow type="income">
 										<span slot="main">{category.name}</span>
 										<div slot="end">
-										<RowActionsMenu
-											ariaLabel={`Actions for ${category.name}`}
-											onEdit={createEditHandler(category)}
-											onDelete={createDeleteHandler(category)}
-											deleting={deletingId === category.id}
-										/>
+											<RowActionsMenu
+												ariaLabel={`Actions for ${category.name}`}
+												onEdit={createEditHandler(category)}
+												onDelete={createDeleteHandler(category)}
+												deleting={deletingId === category.id}
+											/>
 										</div>
 									</ListRow>
 								{/if}
@@ -320,7 +318,6 @@
 											<label for={`edit-category-${category.id}`}>Name</label>
 											<input
 												id={`edit-category-${category.id}`}
-											
 												type="text"
 												bind:value={editName}
 											/>
@@ -328,30 +325,30 @@
 												<p role="alert">{editNameError}</p>
 											{/if}
 										</div>
-									<div class="button-row">
-										<Button.Root
-											class="btn btn--primary"
-											type="button"
-											onclick={saveEdit}
-											disabled={savingEdit}
-										>
-											{savingEdit ? 'Saving...' : 'Save'}
-										</Button.Root>
-										<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
-											Cancel
-										</Button.Root>
-									</div>
+										<div class="button-row">
+											<Button.Root
+												class="btn btn--primary"
+												type="button"
+												onclick={saveEdit}
+												disabled={savingEdit}
+											>
+												{savingEdit ? 'Saving...' : 'Save'}
+											</Button.Root>
+											<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
+												Cancel
+											</Button.Root>
+										</div>
 									</ListRow>
 								{:else}
 									<ListRow type="expense">
 										<span slot="main">{category.name}</span>
 										<div slot="end">
-										<RowActionsMenu
-											ariaLabel={`Actions for ${category.name}`}
-											onEdit={createEditHandler(category)}
-											onDelete={createDeleteHandler(category)}
-											deleting={deletingId === category.id}
-										/>
+											<RowActionsMenu
+												ariaLabel={`Actions for ${category.name}`}
+												onEdit={createEditHandler(category)}
+												onDelete={createDeleteHandler(category)}
+												deleting={deletingId === category.id}
+											/>
 										</div>
 									</ListRow>
 								{/if}

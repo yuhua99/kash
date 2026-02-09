@@ -40,7 +40,7 @@
 		<p role="alert">{formError}</p>
 	{/if}
 
-<Button.Root class="btn btn--destructive" type="button" onclick={onLogout} disabled={pending}>
-	{pending ? 'Signing out...' : 'Log out'}
-</Button.Root>
+	<Button.Root class="btn btn--destructive" type="button" onclick={onLogout} disabled={pending}>
+		{pending ? 'Signing out...' : 'Log out'}
+	</Button.Root>
 </main>

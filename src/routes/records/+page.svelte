@@ -374,7 +374,6 @@
 				<label for="records-search">Search</label>
 				<input
 					id="records-search"
-				
 					type="search"
 					placeholder="Search by record name"
 					bind:value={search}
@@ -495,20 +494,20 @@
 					<ListRow type={record.amount > 0 ? 'income' : 'expense'}>
 						<div slot="main">{record.name}</div>
 						<div slot="end">
-						<div
-							class="amount"
-							class:amount--income={record.amount > 0}
-							class:amount--expense={record.amount < 0}
-						>
-							{record.amount.toFixed(2)}
-						</div>
+							<div
+								class="amount"
+								class:amount--income={record.amount > 0}
+								class:amount--expense={record.amount < 0}
+							>
+								{record.amount.toFixed(2)}
+							</div>
 							{#if editingId !== record.id}
-						<RowActionsMenu
-							ariaLabel={`Actions for ${record.name}`}
-							onEdit={createEditHandler(record)}
-							onDelete={createDeleteHandler(record.id)}
-							deleting={deletingId === record.id}
-						/>
+								<RowActionsMenu
+									ariaLabel={`Actions for ${record.name}`}
+									onEdit={createEditHandler(record)}
+									onDelete={createDeleteHandler(record.id)}
+									deleting={deletingId === record.id}
+								/>
 							{/if}
 						</div>
 						<svelte:fragment slot="sub">
@@ -522,7 +521,6 @@
 									<label for={`edit-name-${record.id}`}>Name</label>
 									<input
 										id={`edit-name-${record.id}`}
-									
 										type="text"
 										bind:value={editName}
 									/>
@@ -536,7 +534,6 @@
 										<label for={`edit-amount-${record.id}`}>Amount</label>
 										<input
 											id={`edit-amount-${record.id}`}
-										
 											type="number"
 											step="0.01"
 											bind:value={editAmountInput}
@@ -548,12 +545,12 @@
 
 									<div>
 										<label for={`edit-category-${record.id}`}>Category</label>
-								<Select.Root type="single" value={editCategoryId} onValueChange={onEditCategoryChange}>
-									<Select.Trigger class="control" id={`edit-category-${record.id}`}>
-										{editCategoryLabel}
-									</Select.Trigger>
-									<Select.Portal>
-										<Select.Content class="popover" sideOffset={6} align="start">
+										<Select.Root type="single" value={editCategoryId} onValueChange={onEditCategoryChange}>
+											<Select.Trigger class="control" id={`edit-category-${record.id}`}>
+												{editCategoryLabel}
+											</Select.Trigger>
+											<Select.Portal>
+												<Select.Content class="popover" sideOffset={6} align="start">
 													<Select.Viewport>
 														<Select.Item value="" label="Choose category">
 															{#snippet children({ selected })}
@@ -584,62 +581,61 @@
 
 									<div>
 										<label for={`edit-date-${record.id}`}>Date</label>
-								<DatePicker.Root value={editDateValue} onValueChange={onEditDateChange}>
-									<DatePicker.Trigger
-										class="control"
-										id={`edit-date-${record.id}`}
-										
-										type="button"
-									>
-										{editDate || 'Pick a date'}
-									</DatePicker.Trigger>
-									<DatePicker.Portal>
-										<DatePicker.Content class="popover" sideOffset={6} align="start">
-											<DatePicker.Calendar class="calendar">
-														{#snippet children({ months, weekdays })}
-															<DatePicker.Header>
-																<DatePicker.PrevButton aria-label="Previous month">
-																	Prev
-																</DatePicker.PrevButton>
-																<DatePicker.Heading />
-																<DatePicker.NextButton aria-label="Next month">
-																	Next
-																</DatePicker.NextButton>
-															</DatePicker.Header>
-															<div>
-																{#each months as month (month.value.toString())}
-																	<DatePicker.Grid>
-																		<DatePicker.GridHead>
-																			<DatePicker.GridRow>
-																				{#each weekdays as day}
-																					<DatePicker.HeadCell>{day}</DatePicker.HeadCell>
+									<DatePicker.Root value={editDateValue} onValueChange={onEditDateChange}>
+										<DatePicker.Trigger
+											class="control"
+											id={`edit-date-${record.id}`}
+											type="button"
+										>
+											{editDate || 'Pick a date'}
+										</DatePicker.Trigger>
+										<DatePicker.Portal>
+											<DatePicker.Content class="popover" sideOffset={6} align="start">
+												<DatePicker.Calendar class="calendar">
+													{#snippet children({ months, weekdays })}
+														<DatePicker.Header>
+															<DatePicker.PrevButton aria-label="Previous month">
+																Prev
+															</DatePicker.PrevButton>
+															<DatePicker.Heading />
+															<DatePicker.NextButton aria-label="Next month">
+																Next
+															</DatePicker.NextButton>
+														</DatePicker.Header>
+														<div>
+															{#each months as month (month.value.toString())}
+																<DatePicker.Grid>
+																	<DatePicker.GridHead>
+																		<DatePicker.GridRow>
+																			{#each weekdays as day}
+																				<DatePicker.HeadCell>{day}</DatePicker.HeadCell>
 																			{/each}
-																			</DatePicker.GridRow>
-																		</DatePicker.GridHead>
-																	<DatePicker.GridBody>
-																		{#each month.weeks as weekDates}
-																			<DatePicker.GridRow>
-																				{#each weekDates as calendarDate}
-																					<DatePicker.Cell date={calendarDate} month={month.value}>
-																							<DatePicker.Day>{calendarDate.day}</DatePicker.Day>
-																						</DatePicker.Cell>
-																					{/each}
-																				</DatePicker.GridRow>
-																		{/each}
-																	</DatePicker.GridBody>
-																</DatePicker.Grid>
-															{/each}
-														</div>
-													{/snippet}
-												</DatePicker.Calendar>
-											</DatePicker.Content>
-										</DatePicker.Portal>
-									</DatePicker.Root>
-										{#if editDateError}
-											<p role="alert">{editDateError}</p>
-										{/if}
-									</div>
+																		</DatePicker.GridRow>
+																	</DatePicker.GridHead>
+																<DatePicker.GridBody>
+																	{#each month.weeks as weekDates}
+																		<DatePicker.GridRow>
+																			{#each weekDates as calendarDate}
+																				<DatePicker.Cell date={calendarDate} month={month.value}>
+																					<DatePicker.Day>{calendarDate.day}</DatePicker.Day>
+																				</DatePicker.Cell>
+																			{/each}
+																		</DatePicker.GridRow>
+																	{/each}
+																</DatePicker.GridBody>
+															</DatePicker.Grid>
+														{/each}
+													</div>
+												{/snippet}
+											</DatePicker.Calendar>
+										</DatePicker.Content>
+									</DatePicker.Portal>
+								</DatePicker.Root>
+								{#if editDateError}
+									<p role="alert">{editDateError}</p>
+								{/if}
 								</div>
+							</div>
 
 							<div class="button-row">
 								<Button.Root
@@ -654,10 +650,10 @@
 									Cancel
 								</Button.Root>
 							</div>
-							</div>
-						{/if}
-					</ListRow>
-				{/each}
+						</div>
+					{/if}
+				</ListRow>
+			{/each}
 			</div>
 		{/if}
 	</section>

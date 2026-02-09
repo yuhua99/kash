@@ -175,14 +175,14 @@
 				</p>
 
 				<div>
-				<div>
-					<span>Income</span>
-					<span class="amount amount--income">{incomeTotal.toFixed(2)}</span>
-				</div>
-				<div>
-					<span>Expense</span>
-					<span class="amount amount--expense">-{expenseTotal.toFixed(2)}</span>
-				</div>
+					<div>
+						<span>Income</span>
+						<span class="amount amount--income">{incomeTotal.toFixed(2)}</span>
+					</div>
+					<div>
+						<span>Expense</span>
+						<span class="amount amount--expense">-{expenseTotal.toFixed(2)}</span>
+					</div>
 				</div>
 			</div>
 
@@ -190,16 +190,16 @@
 				<p>Category breakdown</p>
 				{#each breakdown as item}
 					<ListRow type={item.total >= 0 ? 'income' : 'expense'}>
-					<svelte:fragment slot="main">
-						<span>{item.name}</span>
-						<span
-							class="amount"
-							class:amount--income={item.total >= 0}
-							class:amount--expense={item.total < 0}
-						>
-							{item.total.toFixed(2)}
-						</span>
-					</svelte:fragment>
+						<svelte:fragment slot="main">
+							<span>{item.name}</span>
+							<span
+								class="amount"
+								class:amount--income={item.total >= 0}
+								class:amount--expense={item.total < 0}
+							>
+								{item.total.toFixed(2)}
+							</span>
+						</svelte:fragment>
 						<svelte:fragment slot="sub">
 							<span>{item.share.toFixed(1)}% of activity</span>
 							<span>{item.isIncome ? 'Income' : 'Expense'}</span>

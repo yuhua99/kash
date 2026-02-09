@@ -111,16 +111,15 @@
 				weekdayFormat="short"
 				fixedWeeks={true}
 			>
-			<DateRangePicker.Trigger
-				class="control"
-				id="period-custom-range"
-				
-				type="button"
-			>
-				{customRangeLabel}
-			</DateRangePicker.Trigger>
-			<DateRangePicker.Content class="popover" sideOffset={6} align="start">
-				<DateRangePicker.Calendar class="calendar">
+				<DateRangePicker.Trigger
+					class="control"
+					id="period-custom-range"
+					type="button"
+				>
+					{customRangeLabel}
+				</DateRangePicker.Trigger>
+				<DateRangePicker.Content class="popover" sideOffset={6} align="start">
+					<DateRangePicker.Calendar class="calendar">
 						{#snippet children({ months, weekdays })}
 							<DateRangePicker.Header>
 								<DateRangePicker.PrevButton aria-label="Previous month">
