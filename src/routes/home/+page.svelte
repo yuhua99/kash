@@ -148,36 +148,36 @@
 	});
 </script>
 
-<main class="page-card">
-	<header class="stack">
-		<p class="meta-text">Quick add</p>
+<main>
+	<header>
+		<p>Quick add</p>
 	</header>
 
 	{#if loading}
-		<p class="loading-banner">Loading categories...</p>
+		<p>Loading categories...</p>
 	{:else if loadError}
-		<p class="error-banner" role="alert">{loadError}</p>
+		<p role="alert">{loadError}</p>
 	{:else if categories.length === 0}
-		<p class="empty-banner">
+		<p>
 			You do not have categories yet. Create one in
-			<a href="/categories" class="inline-link">Categories</a>
+			<a href="/categories">Categories</a>
 			first.
 		</p>
 	{:else}
 		{#if successMessage}
-			<p class="success-banner" role="status">{successMessage}</p>
+			<p role="status">{successMessage}</p>
 		{/if}
 
 		{#if formError}
-			<p class="error-banner" role="alert">{formError}</p>
+			<p role="alert">{formError}</p>
 		{/if}
 
-		<form class="stack" on:submit={onSubmit} novalidate>
-			<div class="field">
-				<label class="field-label" for="record-amount">Amount</label>
+		<form on:submit={onSubmit} novalidate>
+			<div>
+				<label for="record-amount">Amount</label>
 				<input
 					id="record-amount"
-					class="text-input"
+				
 					type="number"
 					step="0.01"
 					min="0"
@@ -185,29 +185,29 @@
 					required
 				/>
 				{#if amountError}
-					<p class="field-error" role="alert">{amountError}</p>
+					<p role="alert">{amountError}</p>
 				{/if}
 			</div>
 
-			<div class="field">
-				<p id="record-type" class="field-label">Type</p>
-				<Tabs.Root value={recordType} onValueChange={onRecordTypeChange} class="tabs">
-					<Tabs.List class="tabs-list" aria-labelledby="record-type">
-						<Tabs.Trigger class="tabs-trigger" value="expense">Expense</Tabs.Trigger>
-						<Tabs.Trigger class="tabs-trigger" value="income">Income</Tabs.Trigger>
+			<div>
+				<p id="record-type">Type</p>
+				<Tabs.Root value={recordType} onValueChange={onRecordTypeChange}>
+					<Tabs.List aria-labelledby="record-type">
+						<Tabs.Trigger value="expense">Expense</Tabs.Trigger>
+						<Tabs.Trigger value="income">Income</Tabs.Trigger>
 					</Tabs.List>
 				</Tabs.Root>
 			</div>
 
-			<div class="field">
-				<label class="field-label" for="record-category">Category</label>
+			<div>
+				<label for="record-category">Category</label>
 				<Select.Root type="single" value={categoryId} onValueChange={onCategoryChange}>
-					<Select.Trigger id="record-category" class="select-input">{selectedCategoryLabel}</Select.Trigger>
+					<Select.Trigger id="record-category">{selectedCategoryLabel}</Select.Trigger>
 					<Select.Portal>
-						<Select.Content class="select-menu" sideOffset={6} align="start">
+						<Select.Content sideOffset={6} align="start">
 							<Select.Viewport>
 								{#each filteredCategories as category}
-									<Select.Item class="select-item" value={category.id} label={category.name}>
+									<Select.Item value={category.id} label={category.name}>
 										{#snippet children({ selected })}
 											<span>{category.name}</span>
 										{#if selected}
@@ -221,36 +221,36 @@
 					</Select.Portal>
 				</Select.Root>
 				{#if categoryError}
-					<p class="field-error" role="alert">{categoryError}</p>
+					<p role="alert">{categoryError}</p>
 				{/if}
 			</div>
 
-		<div class="field">
-			<label class="field-label" for="record-date">Date</label>
+		<div>
+			<label for="record-date">Date</label>
 			<DatePicker.Root value={dateValue} onValueChange={onDateChange}>
-				<DatePicker.Trigger id="record-date" class="text-input date-trigger" type="button">
+				<DatePicker.Trigger id="record-date" type="button">
 					{date || 'Pick a date'}
 				</DatePicker.Trigger>
 				<DatePicker.Portal>
-					<DatePicker.Content class="calendar-popover" sideOffset={6} align="start">
-						<DatePicker.Calendar class="calendar-panel">
+					<DatePicker.Content sideOffset={6} align="start">
+						<DatePicker.Calendar>
 							{#snippet children({ months, weekdays })}
-								<DatePicker.Header class="calendar-header">
-									<DatePicker.PrevButton class="calendar-nav-button" aria-label="Previous month">
+								<DatePicker.Header>
+									<DatePicker.PrevButton aria-label="Previous month">
 										Prev
 									</DatePicker.PrevButton>
-									<DatePicker.Heading class="calendar-heading" />
-									<DatePicker.NextButton class="calendar-nav-button" aria-label="Next month">
+									<DatePicker.Heading />
+									<DatePicker.NextButton aria-label="Next month">
 										Next
 									</DatePicker.NextButton>
 								</DatePicker.Header>
-								<div class="calendar-months">
+								<div>
 									{#each months as month (month.value.toString())}
-										<DatePicker.Grid class="calendar-grid">
+										<DatePicker.Grid>
 											<DatePicker.GridHead>
 												<DatePicker.GridRow>
 													{#each weekdays as day}
-														<DatePicker.HeadCell class="calendar-head-cell">{day}</DatePicker.HeadCell>
+														<DatePicker.HeadCell>{day}</DatePicker.HeadCell>
 													{/each}
 												</DatePicker.GridRow>
 											</DatePicker.GridHead>
@@ -259,7 +259,7 @@
 													<DatePicker.GridRow>
 														{#each weekDates as calendarDate}
 															<DatePicker.Cell date={calendarDate} month={month.value}>
-																<DatePicker.Day class="calendar-day">{calendarDate.day}</DatePicker.Day>
+																<DatePicker.Day>{calendarDate.day}</DatePicker.Day>
 															</DatePicker.Cell>
 														{/each}
 													</DatePicker.GridRow>
@@ -274,19 +274,19 @@
 				</DatePicker.Portal>
 			</DatePicker.Root>
 			{#if dateError}
-				<p class="field-error" role="alert">{dateError}</p>
+				<p role="alert">{dateError}</p>
 			{/if}
 		</div>
 
-			<div class="field">
-				<label class="field-label" for="record-name">Record name</label>
-				<input id="record-name" class="text-input" type="text" bind:value={name} required />
+			<div>
+				<label for="record-name">Record name</label>
+				<input id="record-name" type="text" bind:value={name} required />
 				{#if nameError}
-					<p class="field-error" role="alert">{nameError}</p>
+					<p role="alert">{nameError}</p>
 				{/if}
 			</div>
 
-			<Button.Root class="button primary" type="submit" disabled={submitting}>
+			<Button.Root type="submit" disabled={submitting}>
 				{submitting ? 'Saving...' : 'Save record'}
 			</Button.Root>
 		</form>

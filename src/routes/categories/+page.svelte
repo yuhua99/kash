@@ -190,108 +190,108 @@
 	});
 </script>
 
-<main class="stack">
-	<Collapsible.Root bind:open={createOpen} class="page-card">
-		<Collapsible.Trigger class="collapsible-trigger">
+<main>
+	<Collapsible.Root bind:open={createOpen}>
+		<Collapsible.Trigger>
 			<span>Add category</span>
-			<span class="collapsible-icon" aria-hidden="true"></span>
+			<span aria-hidden="true"></span>
 		</Collapsible.Trigger>
-		<Collapsible.Content class="collapsible-content">
+		<Collapsible.Content>
 			{#if mutationError}
-				<p class="error-banner" role="alert">{mutationError}</p>
+				<p role="alert">{mutationError}</p>
 			{/if}
 
 			{#if successMessage}
-				<p class="success-banner" role="status">{successMessage}</p>
+				<p role="status">{successMessage}</p>
 			{/if}
 
-			<form class="stack" on:submit={onCreateSubmit} novalidate>
-				<div class="field">
-					<label class="field-label" for="create-category-name">Category name</label>
-					<input id="create-category-name" class="text-input" type="text" bind:value={createName} />
+			<form on:submit={onCreateSubmit} novalidate>
+				<div>
+					<label for="create-category-name">Category name</label>
+					<input id="create-category-name" type="text" bind:value={createName} />
 					{#if createNameError}
-						<p class="field-error" role="alert">{createNameError}</p>
+						<p role="alert">{createNameError}</p>
 					{/if}
 				</div>
 
-				<div class="field">
-					<p id="create-category-type" class="field-label">Type</p>
-					<Tabs.Root value={createType} onValueChange={onCreateTypeChange} class="tabs">
-						<Tabs.List class="tabs-list" aria-labelledby="create-category-type">
-							<Tabs.Trigger class="tabs-trigger" value="expense">Expense</Tabs.Trigger>
-							<Tabs.Trigger class="tabs-trigger" value="income">Income</Tabs.Trigger>
+				<div>
+					<p id="create-category-type">Type</p>
+					<Tabs.Root value={createType} onValueChange={onCreateTypeChange}>
+						<Tabs.List aria-labelledby="create-category-type">
+							<Tabs.Trigger value="expense">Expense</Tabs.Trigger>
+							<Tabs.Trigger value="income">Income</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs.Root>
 				</div>
 
-				<Button.Root class="button primary" type="submit" disabled={creating}>
+				<Button.Root type="submit" disabled={creating}>
 					{creating ? 'Creating...' : 'Create category'}
 				</Button.Root>
 			</form>
 		</Collapsible.Content>
 	</Collapsible.Root>
 
-	<section class="page-card" aria-live="polite">
-		<div class="field">
-			<label class="field-label" for="category-search">Search</label>
+	<section aria-live="polite">
+		<div>
+			<label for="category-search">Search</label>
 			<input
 				id="category-search"
-				class="text-input"
+			
 				type="search"
 				placeholder="Search category names"
 				bind:value={search}
 			/>
 			{#if searchValidationError}
-				<p class="field-error" role="alert">{searchValidationError}</p>
+				<p role="alert">{searchValidationError}</p>
 			{/if}
 		</div>
 
 		{#if loading}
-			<p class="loading-banner">Loading categories...</p>
+			<p>Loading categories...</p>
 		{:else if loadError}
-			<p class="error-banner" role="alert">{loadError}</p>
+			<p role="alert">{loadError}</p>
 		{:else if visibleCategories.length === 0}
-			<p class="empty-banner">No categories found. Create one to start organizing records.</p>
+			<p>No categories found. Create one to start organizing records.</p>
 		{:else}
-			<div class="stack">
-				<section class="stack" aria-labelledby="income-heading">
-					<h2 class="section-title" id="income-heading">Income</h2>
+			<div>
+				<section aria-labelledby="income-heading">
+					<h2 id="income-heading">Income</h2>
 					{#if incomeCategories.length === 0}
-						<p class="empty-banner">No income categories yet.</p>
+						<p>No income categories yet.</p>
 					{:else}
-						<div class="category-list">
+						<div>
 							{#each incomeCategories as category}
 								{#if editingId === category.id}
 									<ListRow type="income">
-										<div class="field">
-											<label class="field-label" for={`edit-category-${category.id}`}>Name</label>
+										<div>
+											<label for={`edit-category-${category.id}`}>Name</label>
 											<input
 												id={`edit-category-${category.id}`}
-												class="text-input"
+											
 												type="text"
 												bind:value={editName}
 											/>
 											{#if editNameError}
-												<p class="field-error" role="alert">{editNameError}</p>
+												<p role="alert">{editNameError}</p>
 											{/if}
 										</div>
-										<div class="button-row">
+										<div>
 											<Button.Root
 												type="button"
-												class="button primary"
+											
 												onclick={saveEdit}
 												disabled={savingEdit}
 											>
 												{savingEdit ? 'Saving...' : 'Save'}
 											</Button.Root>
-											<Button.Root type="button" class="button secondary" onclick={cancelEdit}>
+											<Button.Root type="button" onclick={cancelEdit}>
 												Cancel
 											</Button.Root>
 										</div>
 									</ListRow>
 								{:else}
 									<ListRow type="income">
-										<strong slot="main" class="record-name">{category.name}</strong>
+										<strong slot="main">{category.name}</strong>
 										<div slot="end">
 										<RowActionsMenu
 											ariaLabel={`Actions for ${category.name}`}
@@ -307,44 +307,44 @@
 					{/if}
 				</section>
 
-				<section class="stack" aria-labelledby="expense-heading">
-					<h2 class="section-title" id="expense-heading">Expense</h2>
+				<section aria-labelledby="expense-heading">
+					<h2 id="expense-heading">Expense</h2>
 					{#if expenseCategories.length === 0}
-						<p class="empty-banner">No expense categories yet.</p>
+						<p>No expense categories yet.</p>
 					{:else}
-						<div class="category-list">
+						<div>
 							{#each expenseCategories as category}
 								{#if editingId === category.id}
 									<ListRow type="expense">
-										<div class="field">
-											<label class="field-label" for={`edit-category-${category.id}`}>Name</label>
+										<div>
+											<label for={`edit-category-${category.id}`}>Name</label>
 											<input
 												id={`edit-category-${category.id}`}
-												class="text-input"
+											
 												type="text"
 												bind:value={editName}
 											/>
 											{#if editNameError}
-												<p class="field-error" role="alert">{editNameError}</p>
+												<p role="alert">{editNameError}</p>
 											{/if}
 										</div>
-										<div class="button-row">
+										<div>
 											<Button.Root
 												type="button"
-												class="button primary"
+											
 												onclick={saveEdit}
 												disabled={savingEdit}
 											>
 												{savingEdit ? 'Saving...' : 'Save'}
 											</Button.Root>
-											<Button.Root type="button" class="button secondary" onclick={cancelEdit}>
+											<Button.Root type="button" onclick={cancelEdit}>
 												Cancel
 											</Button.Root>
 										</div>
 									</ListRow>
 								{:else}
 									<ListRow type="expense">
-										<strong slot="main" class="record-name">{category.name}</strong>
+										<strong slot="main">{category.name}</strong>
 										<div slot="end">
 										<RowActionsMenu
 											ariaLabel={`Actions for ${category.name}`}

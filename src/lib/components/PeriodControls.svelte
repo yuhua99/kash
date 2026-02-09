@@ -71,9 +71,9 @@
 	}
 </script>
 
-<section class="stack" aria-label="Period controls">
-	<div class="field">
-		<label class="field-label" for="period-preset">Period</label>
+<section aria-label="Period controls">
+	<div>
+		<label for="period-preset">Period</label>
 		<Select.Root
 			type="single"
 			value={preset}
@@ -81,12 +81,12 @@
 			onValueChange={onPresetChange}
 			items={presetOptions}
 		>
-			<Select.Trigger id="period-preset" class="select-input">{presetLabel}</Select.Trigger>
+			<Select.Trigger id="period-preset">{presetLabel}</Select.Trigger>
 			<Select.Portal>
-				<Select.Content class="select-menu" sideOffset={6} align="start">
+				<Select.Content sideOffset={6} align="start">
 					<Select.Viewport>
 						{#each presetOptions as option}
-							<Select.Item class="select-item" value={option.value} label={option.label}>
+							<Select.Item value={option.value} label={option.label}>
 								{#snippet children({ selected })}
 									<span>{option.label}</span>
 									{#if selected}
@@ -102,8 +102,8 @@
 	</div>
 
 	{#if preset === 'custom'}
-		<div class="field">
-			<label class="field-label" for="period-custom-range">Custom range</label>
+		<div>
+			<label for="period-custom-range">Custom range</label>
 			<DateRangePicker.Root
 				value={customRangeValue}
 				disabled={disabled}
@@ -113,30 +113,30 @@
 			>
 				<DateRangePicker.Trigger
 					id="period-custom-range"
-					class="text-input date-trigger"
+				
 					type="button"
 				>
 					{customRangeLabel}
 				</DateRangePicker.Trigger>
-				<DateRangePicker.Content class="calendar-popover" sideOffset={6} align="start">
-					<DateRangePicker.Calendar class="calendar-panel">
+				<DateRangePicker.Content sideOffset={6} align="start">
+					<DateRangePicker.Calendar>
 						{#snippet children({ months, weekdays })}
-							<DateRangePicker.Header class="calendar-header">
-								<DateRangePicker.PrevButton class="calendar-nav-button" aria-label="Previous month">
+							<DateRangePicker.Header>
+								<DateRangePicker.PrevButton aria-label="Previous month">
 									Prev
 								</DateRangePicker.PrevButton>
-								<DateRangePicker.Heading class="calendar-heading" />
-								<DateRangePicker.NextButton class="calendar-nav-button" aria-label="Next month">
+								<DateRangePicker.Heading />
+								<DateRangePicker.NextButton aria-label="Next month">
 									Next
 								</DateRangePicker.NextButton>
 							</DateRangePicker.Header>
-							<div class="calendar-months">
+							<div>
 								{#each months as month (month.value.toString())}
-									<DateRangePicker.Grid class="calendar-grid">
+									<DateRangePicker.Grid>
 										<DateRangePicker.GridHead>
 											<DateRangePicker.GridRow>
 												{#each weekdays as day}
-													<DateRangePicker.HeadCell class="calendar-head-cell">{day}</DateRangePicker.HeadCell>
+													<DateRangePicker.HeadCell>{day}</DateRangePicker.HeadCell>
 												{/each}
 											</DateRangePicker.GridRow>
 										</DateRangePicker.GridHead>
@@ -145,7 +145,7 @@
 												<DateRangePicker.GridRow>
 													{#each weekDates as date}
 														<DateRangePicker.Cell {date} month={month.value}>
-															<DateRangePicker.Day class="calendar-day range-day">{date.day}</DateRangePicker.Day>
+															<DateRangePicker.Day>{date.day}</DateRangePicker.Day>
 														</DateRangePicker.Cell>
 												{/each}
 											</DateRangePicker.GridRow>
@@ -160,6 +160,6 @@
 		</DateRangePicker.Root>
 		</div>
 	{:else}
-		<p class="meta-text">{start} to {end}</p>
+		<p>{start} to {end}</p>
 	{/if}
 </section>

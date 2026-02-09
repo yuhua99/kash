@@ -12,17 +12,17 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger class="record-actions-trigger" aria-label={ariaLabel}>
+	<DropdownMenu.Trigger aria-label={ariaLabel}>
 		{triggerLabel}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Portal>
-		<DropdownMenu.Content class="record-actions-menu" sideOffset={6} align="end">
-			<DropdownMenu.Item class="record-actions-item" onSelect={onEdit}>
+		<DropdownMenu.Content sideOffset={6} align="end">
+			<DropdownMenu.Item onSelect={onEdit}>
 				{editLabel}
 			</DropdownMenu.Item>
-			<DropdownMenu.Separator class="record-actions-separator" />
+			<DropdownMenu.Separator />
 			<DropdownMenu.Item
-				class="record-actions-item record-actions-item-danger"
+			
 				onSelect={onDelete}
 				disabled={deleting}
 			>

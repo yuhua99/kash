@@ -24,23 +24,23 @@
 	}
 </script>
 
-<main class="page-card">
-	<header class="stack">
-		<p class="meta-text">Settings</p>
+<main>
+	<header>
+		<p>Settings</p>
 	</header>
 
 	<ListRow>
 		<svelte:fragment slot="main">
 			<strong>Username</strong>
-			<span class="meta-text">{data.user?.username ?? 'Unknown'}</span>
+			<span>{data.user?.username ?? 'Unknown'}</span>
 		</svelte:fragment>
 	</ListRow>
 
 	{#if formError}
-		<p class="error-banner" role="alert">{formError}</p>
+		<p role="alert">{formError}</p>
 	{/if}
 
-	<Button.Root class="button danger" type="button" onclick={onLogout} disabled={pending}>
+	<Button.Root type="button" onclick={onLogout} disabled={pending}>
 		{pending ? 'Signing out...' : 'Log out'}
 	</Button.Root>
 </main>

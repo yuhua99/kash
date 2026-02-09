@@ -355,10 +355,10 @@
 	});
 </script>
 
-<main class="stack">
-	<section class="page-card">
-		<header class="stack">
-			<p class="meta-text">Records</p>
+<main>
+	<section>
+		<header>
+			<p>Records</p>
 		</header>
 
 		<PeriodControls
@@ -369,32 +369,32 @@
 			on:change={onPeriodChange}
 		/>
 
-		<div class="stack">
-			<div class="field">
-				<label class="field-label" for="records-search">Search</label>
+		<div>
+			<div>
+				<label for="records-search">Search</label>
 				<input
 					id="records-search"
-					class="text-input"
+				
 					type="search"
 					placeholder="Search by record name"
 					bind:value={search}
 				/>
 				{#if searchValidationError}
-					<p class="field-error" role="alert">{searchValidationError}</p>
+					<p role="alert">{searchValidationError}</p>
 				{/if}
 			</div>
 
-			<div class="button-row">
-				<div class="field" style="flex: 1 1 12rem">
-					<label class="field-label" for="records-category-filter">Category</label>
+			<div>
+				<div>
+					<label for="records-category-filter">Category</label>
 					<Select.Root type="single" value={categoryFilter} onValueChange={onCategoryFilterChange}>
-						<Select.Trigger id="records-category-filter" class="select-input">
+						<Select.Trigger id="records-category-filter">
 							{categoryFilterLabel}
 						</Select.Trigger>
 						<Select.Portal>
-							<Select.Content class="select-menu" sideOffset={6} align="start">
+							<Select.Content sideOffset={6} align="start">
 								<Select.Viewport>
-									<Select.Item class="select-item" value="all" label="All categories">
+									<Select.Item value="all" label="All categories">
 										{#snippet children({ selected })}
 											<span>All categories</span>
 										{#if selected}
@@ -403,7 +403,7 @@
 										{/snippet}
 									</Select.Item>
 									{#each categories as category}
-										<Select.Item class="select-item" value={category.id} label={category.name}>
+										<Select.Item value={category.id} label={category.name}>
 											{#snippet children({ selected })}
 												<span>{category.name}</span>
 												{#if selected}
@@ -418,15 +418,15 @@
 					</Select.Root>
 				</div>
 
-				<div class="field" style="flex: 1 1 10rem">
-					<label class="field-label" for="records-type-filter">Type</label>
+				<div>
+					<label for="records-type-filter">Type</label>
 					<Select.Root type="single" value={typeFilter} onValueChange={onTypeFilterChange}>
-						<Select.Trigger id="records-type-filter" class="select-input">{typeFilterLabel}</Select.Trigger>
+						<Select.Trigger id="records-type-filter">{typeFilterLabel}</Select.Trigger>
 						<Select.Portal>
-							<Select.Content class="select-menu" sideOffset={6} align="start">
+							<Select.Content sideOffset={6} align="start">
 								<Select.Viewport>
 									{#each typeFilterOptions as option}
-										<Select.Item class="select-item" value={option.value} label={option.label}>
+										<Select.Item value={option.value} label={option.label}>
 											{#snippet children({ selected })}
 												<span>{option.label}</span>
 											{#if selected}
@@ -441,15 +441,15 @@
 					</Select.Root>
 				</div>
 
-				<div class="field" style="flex: 1 1 12rem">
-					<label class="field-label" for="records-sort">Sort</label>
+				<div>
+					<label for="records-sort">Sort</label>
 					<Select.Root type="single" value={sortMode} onValueChange={onSortModeChange}>
-						<Select.Trigger id="records-sort" class="select-input">{sortModeLabel}</Select.Trigger>
+						<Select.Trigger id="records-sort">{sortModeLabel}</Select.Trigger>
 						<Select.Portal>
-							<Select.Content class="select-menu" sideOffset={6} align="start">
+							<Select.Content sideOffset={6} align="start">
 								<Select.Viewport>
 									{#each sortOptions as option}
-										<Select.Item class="select-item" value={option.value} label={option.label}>
+										<Select.Item value={option.value} label={option.label}>
 											{#snippet children({ selected })}
 												<span>{option.label}</span>
 											{#if selected}
@@ -467,31 +467,31 @@
 		</div>
 	</section>
 
-	<section class="page-card" aria-live="polite">
+	<section aria-live="polite">
 		{#if successMessage}
-			<p class="success-banner" role="status">{successMessage}</p>
+			<p role="status">{successMessage}</p>
 		{/if}
 
 		{#if mutationError}
-			<p class="error-banner" role="alert">{mutationError}</p>
+			<p role="alert">{mutationError}</p>
 		{/if}
 
 		{#if loading}
-			<p class="loading-banner">Loading records...</p>
+			<p>Loading records...</p>
 		{:else if loadError}
-			<p class="error-banner" role="alert">{loadError}</p>
+			<p role="alert">{loadError}</p>
 		{:else if filteredRecords.length === 0}
-			<p class="empty-banner">
+			<p>
 				No matches. Add new records from
-				<a class="inline-link" href="/home">Home</a>.
+				<a href="/home">Home</a>.
 			</p>
 		{:else}
-			<div class="record-list">
+			<div>
 				{#each filteredRecords as record}
 					<ListRow type={record.amount > 0 ? 'income' : 'expense'}>
-						<strong slot="main" class="record-name">{record.name}</strong>
+						<strong slot="main">{record.name}</strong>
 						<div slot="end">
-							<strong class={record.amount > 0 ? 'amount-income' : 'amount-expense'}>
+							<strong>
 								{record.amount.toFixed(2)}
 							</strong>
 							{#if editingId !== record.id}
@@ -509,45 +509,45 @@
 						</svelte:fragment>
 
 						{#if editingId === record.id}
-							<div class="stack">
-								<div class="field">
-									<label class="field-label" for={`edit-name-${record.id}`}>Name</label>
+							<div>
+								<div>
+									<label for={`edit-name-${record.id}`}>Name</label>
 									<input
 										id={`edit-name-${record.id}`}
-										class="text-input"
+									
 										type="text"
 										bind:value={editName}
 									/>
 									{#if editNameError}
-										<p class="field-error" role="alert">{editNameError}</p>
+										<p role="alert">{editNameError}</p>
 									{/if}
 								</div>
 
-								<div class="button-row">
-									<div class="field" style="flex: 1 1 10rem">
-										<label class="field-label" for={`edit-amount-${record.id}`}>Amount</label>
+								<div>
+									<div>
+										<label for={`edit-amount-${record.id}`}>Amount</label>
 										<input
 											id={`edit-amount-${record.id}`}
-											class="text-input"
+										
 											type="number"
 											step="0.01"
 											bind:value={editAmountInput}
 										/>
 										{#if editAmountError}
-											<p class="field-error" role="alert">{editAmountError}</p>
+											<p role="alert">{editAmountError}</p>
 										{/if}
 									</div>
 
-									<div class="field" style="flex: 1 1 10rem">
-										<label class="field-label" for={`edit-category-${record.id}`}>Category</label>
+									<div>
+										<label for={`edit-category-${record.id}`}>Category</label>
 										<Select.Root type="single" value={editCategoryId} onValueChange={onEditCategoryChange}>
-											<Select.Trigger id={`edit-category-${record.id}`} class="select-input">
+											<Select.Trigger id={`edit-category-${record.id}`}>
 												{editCategoryLabel}
 											</Select.Trigger>
 											<Select.Portal>
-												<Select.Content class="select-menu" sideOffset={6} align="start">
+												<Select.Content sideOffset={6} align="start">
 													<Select.Viewport>
-														<Select.Item class="select-item" value="" label="Choose category">
+														<Select.Item value="" label="Choose category">
 															{#snippet children({ selected })}
 																<span>Choose category</span>
 																{#if selected}
@@ -556,7 +556,7 @@
 															{/snippet}
 														</Select.Item>
 														{#each categories as category}
-															<Select.Item class="select-item" value={category.id} label={category.name}>
+															<Select.Item value={category.id} label={category.name}>
 																{#snippet children({ selected })}
 																	<span>{category.name}</span>
 																	{#if selected}
@@ -570,40 +570,40 @@
 											</Select.Portal>
 										</Select.Root>
 										{#if editCategoryError}
-											<p class="field-error" role="alert">{editCategoryError}</p>
+											<p role="alert">{editCategoryError}</p>
 										{/if}
 									</div>
 
-									<div class="field" style="flex: 1 1 10rem">
-										<label class="field-label" for={`edit-date-${record.id}`}>Date</label>
+									<div>
+										<label for={`edit-date-${record.id}`}>Date</label>
 										<DatePicker.Root value={editDateValue} onValueChange={onEditDateChange}>
 											<DatePicker.Trigger
 												id={`edit-date-${record.id}`}
-												class="text-input date-trigger"
+											
 												type="button"
 											>
 												{editDate || 'Pick a date'}
 											</DatePicker.Trigger>
 											<DatePicker.Portal>
-												<DatePicker.Content class="calendar-popover" sideOffset={6} align="start">
-													<DatePicker.Calendar class="calendar-panel">
+												<DatePicker.Content sideOffset={6} align="start">
+													<DatePicker.Calendar>
 														{#snippet children({ months, weekdays })}
-															<DatePicker.Header class="calendar-header">
-																<DatePicker.PrevButton class="calendar-nav-button" aria-label="Previous month">
+															<DatePicker.Header>
+																<DatePicker.PrevButton aria-label="Previous month">
 																	Prev
 																</DatePicker.PrevButton>
-																<DatePicker.Heading class="calendar-heading" />
-																<DatePicker.NextButton class="calendar-nav-button" aria-label="Next month">
+																<DatePicker.Heading />
+																<DatePicker.NextButton aria-label="Next month">
 																	Next
 																</DatePicker.NextButton>
 															</DatePicker.Header>
-															<div class="calendar-months">
+															<div>
 																{#each months as month (month.value.toString())}
-																	<DatePicker.Grid class="calendar-grid">
+																	<DatePicker.Grid>
 																		<DatePicker.GridHead>
 																			<DatePicker.GridRow>
 																				{#each weekdays as day}
-																					<DatePicker.HeadCell class="calendar-head-cell">{day}</DatePicker.HeadCell>
+																					<DatePicker.HeadCell>{day}</DatePicker.HeadCell>
 																			{/each}
 																			</DatePicker.GridRow>
 																		</DatePicker.GridHead>
@@ -612,7 +612,7 @@
 																			<DatePicker.GridRow>
 																				{#each weekDates as calendarDate}
 																					<DatePicker.Cell date={calendarDate} month={month.value}>
-																							<DatePicker.Day class="calendar-day">{calendarDate.day}</DatePicker.Day>
+																							<DatePicker.Day>{calendarDate.day}</DatePicker.Day>
 																						</DatePicker.Cell>
 																					{/each}
 																				</DatePicker.GridRow>
@@ -627,21 +627,21 @@
 										</DatePicker.Portal>
 									</DatePicker.Root>
 										{#if editDateError}
-											<p class="field-error" role="alert">{editDateError}</p>
+											<p role="alert">{editDateError}</p>
 										{/if}
 									</div>
 								</div>
 
-								<div class="button-row">
+								<div>
 									<Button.Root
 										type="button"
-										class="button primary"
+									
 										onclick={saveEdit}
 										disabled={savingEdit}
 									>
 										{savingEdit ? 'Saving...' : 'Save changes'}
 									</Button.Root>
-									<Button.Root type="button" class="button secondary" onclick={cancelEdit}>
+									<Button.Root type="button" onclick={cancelEdit}>
 										Cancel
 									</Button.Root>
 								</div>

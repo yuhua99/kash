@@ -45,55 +45,55 @@
 	}
 </script>
 
-<main class="page-card">
-	<header class="stack">
-		<p class="meta-text">Welcome back</p>
+<main>
+	<header>
+		<p>Welcome back</p>
 	</header>
 
 	{#if formError}
-		<p class="error-banner" role="alert">{formError}</p>
+		<p role="alert">{formError}</p>
 	{/if}
 
-	<form class="stack" on:submit={onSubmit} novalidate>
-		<div class="field">
-			<label class="field-label" for="login-username">Username</label>
+	<form on:submit={onSubmit} novalidate>
+		<div>
+			<label for="login-username">Username</label>
 			<input
 				id="login-username"
 				name="username"
 				type="text"
 				autocomplete="username"
-				class="text-input"
+			
 				bind:value={username}
 				required
 			/>
 			{#if usernameError}
-				<p class="field-error" role="alert">{usernameError}</p>
+				<p role="alert">{usernameError}</p>
 			{/if}
 		</div>
 
-		<div class="field">
-			<label class="field-label" for="login-password">Password</label>
+		<div>
+			<label for="login-password">Password</label>
 			<input
 				id="login-password"
 				name="password"
 				type="password"
 				autocomplete="current-password"
-				class="text-input"
+			
 				bind:value={password}
 				required
 			/>
 			{#if passwordError}
-				<p class="field-error" role="alert">{passwordError}</p>
+				<p role="alert">{passwordError}</p>
 			{/if}
 		</div>
 
-		<Button.Root class="button primary" type="submit" disabled={pending}>
+		<Button.Root type="submit" disabled={pending}>
 			{pending ? 'Signing in...' : 'Sign in'}
 		</Button.Root>
 	</form>
 
 	<p>
 		No account yet?
-		<a href="/register" class="inline-link">Create one</a>
+		<a href="/register">Create one</a>
 	</p>
 </main>

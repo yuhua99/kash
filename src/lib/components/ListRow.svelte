@@ -2,19 +2,19 @@
 	export let type: 'income' | 'expense' | undefined = undefined;
 </script>
 
-<article class="record-row" data-type={type}>
+<article data-type={type}>
 	{#if $$slots.main || $$slots.end}
-		<div class="record-main">
+		<div>
 			<slot name="main" />
 			{#if $$slots.end}
-				<div class="record-end">
+				<div>
 					<slot name="end" />
 				</div>
 			{/if}
 		</div>
 	{/if}
 	{#if $$slots.sub}
-		<div class="record-sub">
+		<div>
 			<slot name="sub" />
 		</div>
 	{/if}

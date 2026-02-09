@@ -142,10 +142,10 @@
 	});
 </script>
 
-<main class="stack">
-	<section class="page-card">
-		<header class="stack">
-			<p class="meta-text">Stats</p>
+<main>
+	<section>
+		<header>
+			<p>Stats</p>
 		</header>
 
 		<PeriodControls
@@ -157,42 +157,42 @@
 		/>
 	</section>
 
-	<section class="page-card" aria-live="polite">
+	<section aria-live="polite">
 		{#if loading}
-			<p class="loading-banner">Loading stats...</p>
+			<p>Loading stats...</p>
 		{:else if loadError}
-			<p class="error-banner" role="alert">{loadError}</p>
+			<p role="alert">{loadError}</p>
 		{:else if records.length === 0}
-			<p class="empty-banner">
+			<p>
 				No records exist for this period. Change the date range or add entries from
-				<a class="inline-link" href="/home">Home</a>.
+				<a href="/home">Home</a>.
 			</p>
 		{:else}
-			<div class="stack">
-				<p class="meta-text">Net total</p>
-				<p class={`${netTotal >= 0 ? 'amount-income' : 'amount-expense'} amount-hero`}>
+			<div>
+				<p>Net total</p>
+				<p>
 					{netTotal.toFixed(2)}
 				</p>
 
-				<div class="stack">
-					<div class="stat-row">
+				<div>
+					<div>
 						<span>Income</span>
-						<strong class="amount-income">{incomeTotal.toFixed(2)}</strong>
+						<strong>{incomeTotal.toFixed(2)}</strong>
 					</div>
-					<div class="stat-row">
+					<div>
 						<span>Expense</span>
-						<strong class="amount-expense">-{expenseTotal.toFixed(2)}</strong>
+						<strong>-{expenseTotal.toFixed(2)}</strong>
 					</div>
 				</div>
 			</div>
 
-			<div class="stack">
-				<h2 class="section-title">Category breakdown</h2>
+			<div>
+				<h2>Category breakdown</h2>
 				{#each breakdown as item}
 					<ListRow type={item.total >= 0 ? 'income' : 'expense'}>
 						<svelte:fragment slot="main">
 							<strong>{item.name}</strong>
-							<strong class={item.total >= 0 ? 'amount-income' : 'amount-expense'}>
+							<strong>
 								{item.total.toFixed(2)}
 							</strong>
 						</svelte:fragment>
@@ -200,8 +200,8 @@
 							<span>{item.share.toFixed(1)}% of activity</span>
 							<span>{item.isIncome ? 'Income' : 'Expense'}</span>
 						</svelte:fragment>
-						<div class="stats-bar" aria-hidden="true">
-							<div class="stats-fill" style={`width: ${Math.max(item.share, 2)}%`}></div>
+						<div aria-hidden="true">
+							<div></div>
 						</div>
 					</ListRow>
 				{/each}
