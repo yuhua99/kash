@@ -31,18 +31,26 @@
 	<title>Kash</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link
+		rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+	/>
 </svelte:head>
 
-<div>
+<div
+	class="app"
+	data-shell={authRoutes.has($page.url.pathname) ? 'auth' : 'app'}
+	data-route={$page.url.pathname}
+>
 	{#if data.user && !authRoutes.has($page.url.pathname)}
-		<Menubar.Root aria-label="Primary">
-			<div aria-label="Brand">kash!</div>
+		<Menubar.Root class="menubar" aria-label="Primary">
+			<div class="menubar__brand" aria-label="Brand">kash!</div>
 			{#each navItems as item}
 				<Menubar.Menu value={item.href}>
-				<Menubar.Trigger
-				
-					onclick={createNavClickHandler(item.href)}
-				>
+					<Menubar.Trigger
+						class={`menubar__trigger ${isActive($page.url.pathname, item.href) ? 'is-active' : ''}`}
+						onclick={createNavClickHandler(item.href)}
+					>
 					{item.label}
 				</Menubar.Trigger>
 				</Menubar.Menu>

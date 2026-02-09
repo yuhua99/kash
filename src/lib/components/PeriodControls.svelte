@@ -71,7 +71,7 @@
 	}
 </script>
 
-<section aria-label="Period controls">
+<section class="period-controls" aria-label="Period controls">
 	<div>
 		<label for="period-preset">Period</label>
 		<Select.Root
@@ -81,9 +81,9 @@
 			onValueChange={onPresetChange}
 			items={presetOptions}
 		>
-			<Select.Trigger id="period-preset">{presetLabel}</Select.Trigger>
+			<Select.Trigger class="control" id="period-preset">{presetLabel}</Select.Trigger>
 			<Select.Portal>
-				<Select.Content sideOffset={6} align="start">
+				<Select.Content class="popover" sideOffset={6} align="start">
 					<Select.Viewport>
 						{#each presetOptions as option}
 							<Select.Item value={option.value} label={option.label}>
@@ -111,15 +111,16 @@
 				weekdayFormat="short"
 				fixedWeeks={true}
 			>
-				<DateRangePicker.Trigger
-					id="period-custom-range"
+			<DateRangePicker.Trigger
+				class="control"
+				id="period-custom-range"
 				
-					type="button"
-				>
-					{customRangeLabel}
-				</DateRangePicker.Trigger>
-				<DateRangePicker.Content sideOffset={6} align="start">
-					<DateRangePicker.Calendar>
+				type="button"
+			>
+				{customRangeLabel}
+			</DateRangePicker.Trigger>
+			<DateRangePicker.Content class="popover" sideOffset={6} align="start">
+				<DateRangePicker.Calendar class="calendar">
 						{#snippet children({ months, weekdays })}
 							<DateRangePicker.Header>
 								<DateRangePicker.PrevButton aria-label="Previous month">

@@ -388,11 +388,11 @@
 				<div>
 					<label for="records-category-filter">Category</label>
 					<Select.Root type="single" value={categoryFilter} onValueChange={onCategoryFilterChange}>
-						<Select.Trigger id="records-category-filter">
+						<Select.Trigger class="control" id="records-category-filter">
 							{categoryFilterLabel}
 						</Select.Trigger>
 						<Select.Portal>
-							<Select.Content sideOffset={6} align="start">
+							<Select.Content class="popover" sideOffset={6} align="start">
 								<Select.Viewport>
 									<Select.Item value="all" label="All categories">
 										{#snippet children({ selected })}
@@ -421,9 +421,11 @@
 				<div>
 					<label for="records-type-filter">Type</label>
 					<Select.Root type="single" value={typeFilter} onValueChange={onTypeFilterChange}>
-						<Select.Trigger id="records-type-filter">{typeFilterLabel}</Select.Trigger>
+						<Select.Trigger class="control" id="records-type-filter">
+							{typeFilterLabel}
+						</Select.Trigger>
 						<Select.Portal>
-							<Select.Content sideOffset={6} align="start">
+							<Select.Content class="popover" sideOffset={6} align="start">
 								<Select.Viewport>
 									{#each typeFilterOptions as option}
 										<Select.Item value={option.value} label={option.label}>
@@ -444,9 +446,11 @@
 				<div>
 					<label for="records-sort">Sort</label>
 					<Select.Root type="single" value={sortMode} onValueChange={onSortModeChange}>
-						<Select.Trigger id="records-sort">{sortModeLabel}</Select.Trigger>
+						<Select.Trigger class="control" id="records-sort">
+							{sortModeLabel}
+						</Select.Trigger>
 						<Select.Portal>
-							<Select.Content sideOffset={6} align="start">
+							<Select.Content class="popover" sideOffset={6} align="start">
 								<Select.Viewport>
 									{#each sortOptions as option}
 										<Select.Item value={option.value} label={option.label}>
@@ -491,9 +495,13 @@
 					<ListRow type={record.amount > 0 ? 'income' : 'expense'}>
 						<div slot="main">{record.name}</div>
 						<div slot="end">
-							<div>
-								{record.amount.toFixed(2)}
-							</div>
+						<div
+							class="amount"
+							class:amount--income={record.amount > 0}
+							class:amount--expense={record.amount < 0}
+						>
+							{record.amount.toFixed(2)}
+						</div>
 							{#if editingId !== record.id}
 						<RowActionsMenu
 							ariaLabel={`Actions for ${record.name}`}
@@ -540,12 +548,12 @@
 
 									<div>
 										<label for={`edit-category-${record.id}`}>Category</label>
-										<Select.Root type="single" value={editCategoryId} onValueChange={onEditCategoryChange}>
-											<Select.Trigger id={`edit-category-${record.id}`}>
-												{editCategoryLabel}
-											</Select.Trigger>
-											<Select.Portal>
-												<Select.Content sideOffset={6} align="start">
+								<Select.Root type="single" value={editCategoryId} onValueChange={onEditCategoryChange}>
+									<Select.Trigger class="control" id={`edit-category-${record.id}`}>
+										{editCategoryLabel}
+									</Select.Trigger>
+									<Select.Portal>
+										<Select.Content class="popover" sideOffset={6} align="start">
 													<Select.Viewport>
 														<Select.Item value="" label="Choose category">
 															{#snippet children({ selected })}
@@ -576,17 +584,18 @@
 
 									<div>
 										<label for={`edit-date-${record.id}`}>Date</label>
-										<DatePicker.Root value={editDateValue} onValueChange={onEditDateChange}>
-											<DatePicker.Trigger
-												id={`edit-date-${record.id}`}
-											
-												type="button"
-											>
-												{editDate || 'Pick a date'}
-											</DatePicker.Trigger>
-											<DatePicker.Portal>
-												<DatePicker.Content sideOffset={6} align="start">
-													<DatePicker.Calendar>
+								<DatePicker.Root value={editDateValue} onValueChange={onEditDateChange}>
+									<DatePicker.Trigger
+										class="control"
+										id={`edit-date-${record.id}`}
+										
+										type="button"
+									>
+										{editDate || 'Pick a date'}
+									</DatePicker.Trigger>
+									<DatePicker.Portal>
+										<DatePicker.Content class="popover" sideOffset={6} align="start">
+											<DatePicker.Calendar class="calendar">
 														{#snippet children({ months, weekdays })}
 															<DatePicker.Header>
 																<DatePicker.PrevButton aria-label="Previous month">
@@ -632,19 +641,19 @@
 									</div>
 								</div>
 
-								<div>
-									<Button.Root
-										type="button"
-									
-										onclick={saveEdit}
-										disabled={savingEdit}
-									>
-										{savingEdit ? 'Saving...' : 'Save changes'}
-									</Button.Root>
-									<Button.Root type="button" onclick={cancelEdit}>
-										Cancel
-									</Button.Root>
-								</div>
+							<div class="button-row">
+								<Button.Root
+									class="btn btn--primary"
+									type="button"
+									onclick={saveEdit}
+									disabled={savingEdit}
+								>
+									{savingEdit ? 'Saving...' : 'Save changes'}
+								</Button.Root>
+								<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
+									Cancel
+								</Button.Root>
+							</div>
 							</div>
 						{/if}
 					</ListRow>

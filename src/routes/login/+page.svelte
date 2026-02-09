@@ -87,9 +87,9 @@
 			{/if}
 		</div>
 
-		<Button.Root type="submit" disabled={pending}>
-			{pending ? 'Signing in...' : 'Sign in'}
-		</Button.Root>
+	<Button.Root class="btn btn--primary" type="submit" disabled={pending}>
+		{pending ? 'Signing in...' : 'Sign in'}
+	</Button.Root>
 	</form>
 
 	<p>

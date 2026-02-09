@@ -192,11 +192,11 @@
 
 <main>
 	<Collapsible.Root bind:open={createOpen}>
-		<Collapsible.Trigger>
-			<span>Add category</span>
-			<span aria-hidden="true"></span>
-		</Collapsible.Trigger>
-		<Collapsible.Content>
+	<Collapsible.Trigger class="collapsible-trigger">
+		<span>Add category</span>
+		<span aria-hidden="true"></span>
+	</Collapsible.Trigger>
+	<Collapsible.Content class="collapsible-content">
 			{#if mutationError}
 				<p role="alert">{mutationError}</p>
 			{/if}
@@ -217,14 +217,14 @@
 				<div>
 					<p id="create-category-type">Type</p>
 					<Tabs.Root value={createType} onValueChange={onCreateTypeChange}>
-						<Tabs.List aria-labelledby="create-category-type">
-							<Tabs.Trigger value="expense">Expense</Tabs.Trigger>
-							<Tabs.Trigger value="income">Income</Tabs.Trigger>
+						<Tabs.List class="tabs-list" aria-labelledby="create-category-type">
+							<Tabs.Trigger class="tabs-trigger" value="expense">Expense</Tabs.Trigger>
+							<Tabs.Trigger class="tabs-trigger" value="income">Income</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs.Root>
 				</div>
 
-				<Button.Root type="submit" disabled={creating}>
+				<Button.Root class="btn btn--primary" type="submit" disabled={creating}>
 					{creating ? 'Creating...' : 'Create category'}
 				</Button.Root>
 			</form>
@@ -275,19 +275,19 @@
 												<p role="alert">{editNameError}</p>
 											{/if}
 										</div>
-										<div>
-											<Button.Root
-												type="button"
-											
-												onclick={saveEdit}
-												disabled={savingEdit}
-											>
-												{savingEdit ? 'Saving...' : 'Save'}
-											</Button.Root>
-											<Button.Root type="button" onclick={cancelEdit}>
-												Cancel
-											</Button.Root>
-										</div>
+									<div class="button-row">
+										<Button.Root
+											class="btn btn--primary"
+											type="button"
+											onclick={saveEdit}
+											disabled={savingEdit}
+										>
+											{savingEdit ? 'Saving...' : 'Save'}
+										</Button.Root>
+										<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
+											Cancel
+										</Button.Root>
+									</div>
 									</ListRow>
 								{:else}
 									<ListRow type="income">
@@ -328,19 +328,19 @@
 												<p role="alert">{editNameError}</p>
 											{/if}
 										</div>
-										<div>
-											<Button.Root
-												type="button"
-											
-												onclick={saveEdit}
-												disabled={savingEdit}
-											>
-												{savingEdit ? 'Saving...' : 'Save'}
-											</Button.Root>
-											<Button.Root type="button" onclick={cancelEdit}>
-												Cancel
-											</Button.Root>
-										</div>
+									<div class="button-row">
+										<Button.Root
+											class="btn btn--primary"
+											type="button"
+											onclick={saveEdit}
+											disabled={savingEdit}
+										>
+											{savingEdit ? 'Saving...' : 'Save'}
+										</Button.Root>
+										<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
+											Cancel
+										</Button.Root>
+									</div>
 									</ListRow>
 								{:else}
 									<ListRow type="expense">

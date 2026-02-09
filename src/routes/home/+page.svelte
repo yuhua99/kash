@@ -191,21 +191,23 @@
 
 			<div>
 				<p id="record-type">Type</p>
-				<Tabs.Root value={recordType} onValueChange={onRecordTypeChange}>
-					<Tabs.List aria-labelledby="record-type">
-						<Tabs.Trigger value="expense">Expense</Tabs.Trigger>
-						<Tabs.Trigger value="income">Income</Tabs.Trigger>
-					</Tabs.List>
-				</Tabs.Root>
-			</div>
+			<Tabs.Root value={recordType} onValueChange={onRecordTypeChange}>
+				<Tabs.List class="tabs-list" aria-labelledby="record-type">
+					<Tabs.Trigger class="tabs-trigger" value="expense">Expense</Tabs.Trigger>
+					<Tabs.Trigger class="tabs-trigger" value="income">Income</Tabs.Trigger>
+				</Tabs.List>
+			</Tabs.Root>
+		</div>
 
 			<div>
 				<label for="record-category">Category</label>
-				<Select.Root type="single" value={categoryId} onValueChange={onCategoryChange}>
-					<Select.Trigger id="record-category">{selectedCategoryLabel}</Select.Trigger>
-					<Select.Portal>
-						<Select.Content sideOffset={6} align="start">
-							<Select.Viewport>
+			<Select.Root type="single" value={categoryId} onValueChange={onCategoryChange}>
+				<Select.Trigger class="control" id="record-category">
+					{selectedCategoryLabel}
+				</Select.Trigger>
+				<Select.Portal>
+					<Select.Content class="popover" sideOffset={6} align="start">
+						<Select.Viewport>
 								{#each filteredCategories as category}
 									<Select.Item value={category.id} label={category.name}>
 										{#snippet children({ selected })}
@@ -227,13 +229,13 @@
 
 		<div>
 			<label for="record-date">Date</label>
-			<DatePicker.Root value={dateValue} onValueChange={onDateChange}>
-				<DatePicker.Trigger id="record-date" type="button">
-					{date || 'Pick a date'}
-				</DatePicker.Trigger>
-				<DatePicker.Portal>
-					<DatePicker.Content sideOffset={6} align="start">
-						<DatePicker.Calendar>
+		<DatePicker.Root value={dateValue} onValueChange={onDateChange}>
+			<DatePicker.Trigger class="control" id="record-date" type="button">
+				{date || 'Pick a date'}
+			</DatePicker.Trigger>
+			<DatePicker.Portal>
+				<DatePicker.Content class="popover" sideOffset={6} align="start">
+					<DatePicker.Calendar class="calendar">
 							{#snippet children({ months, weekdays })}
 								<DatePicker.Header>
 									<DatePicker.PrevButton aria-label="Previous month">
@@ -286,9 +288,9 @@
 				{/if}
 			</div>
 
-			<Button.Root type="submit" disabled={submitting}>
-				{submitting ? 'Saving...' : 'Save record'}
-			</Button.Root>
+		<Button.Root class="btn btn--primary" type="submit" disabled={submitting}>
+			{submitting ? 'Saving...' : 'Save record'}
+		</Button.Root>
 		</form>
 	{/if}
 </main>
