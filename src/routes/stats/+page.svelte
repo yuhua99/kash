@@ -177,24 +177,24 @@
 				<div>
 					<div>
 						<span>Income</span>
-						<strong>{incomeTotal.toFixed(2)}</strong>
+						<span>{incomeTotal.toFixed(2)}</span>
 					</div>
 					<div>
 						<span>Expense</span>
-						<strong>-{expenseTotal.toFixed(2)}</strong>
+						<span>-{expenseTotal.toFixed(2)}</span>
 					</div>
 				</div>
 			</div>
 
 			<div>
-				<h2>Category breakdown</h2>
+				<p>Category breakdown</p>
 				{#each breakdown as item}
 					<ListRow type={item.total >= 0 ? 'income' : 'expense'}>
 						<svelte:fragment slot="main">
-							<strong>{item.name}</strong>
-							<strong>
+							<span>{item.name}</span>
+							<span>
 								{item.total.toFixed(2)}
-							</strong>
+							</span>
 						</svelte:fragment>
 						<svelte:fragment slot="sub">
 							<span>{item.share.toFixed(1)}% of activity</span>

@@ -255,7 +255,7 @@
 		{:else}
 			<div>
 				<section aria-labelledby="income-heading">
-					<h2 id="income-heading">Income</h2>
+					<p id="income-heading">Income</p>
 					{#if incomeCategories.length === 0}
 						<p>No income categories yet.</p>
 					{:else}
@@ -291,7 +291,7 @@
 									</ListRow>
 								{:else}
 									<ListRow type="income">
-										<strong slot="main">{category.name}</strong>
+										<span slot="main">{category.name}</span>
 										<div slot="end">
 										<RowActionsMenu
 											ariaLabel={`Actions for ${category.name}`}
@@ -308,7 +308,7 @@
 				</section>
 
 				<section aria-labelledby="expense-heading">
-					<h2 id="expense-heading">Expense</h2>
+					<p id="expense-heading">Expense</p>
 					{#if expenseCategories.length === 0}
 						<p>No expense categories yet.</p>
 					{:else}
@@ -344,7 +344,7 @@
 									</ListRow>
 								{:else}
 									<ListRow type="expense">
-										<strong slot="main">{category.name}</strong>
+										<span slot="main">{category.name}</span>
 										<div slot="end">
 										<RowActionsMenu
 											ariaLabel={`Actions for ${category.name}`}

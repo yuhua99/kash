@@ -31,7 +31,7 @@
 
 	<ListRow>
 		<svelte:fragment slot="main">
-			<strong>Username</strong>
+			<span>Username</span>
 			<span>{data.user?.username ?? 'Unknown'}</span>
 		</svelte:fragment>
 	</ListRow>

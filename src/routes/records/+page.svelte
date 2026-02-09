@@ -489,11 +489,11 @@
 			<div>
 				{#each filteredRecords as record}
 					<ListRow type={record.amount > 0 ? 'income' : 'expense'}>
-						<strong slot="main">{record.name}</strong>
+						<div slot="main">{record.name}</div>
 						<div slot="end">
-							<strong>
+							<div>
 								{record.amount.toFixed(2)}
-							</strong>
+							</div>
 							{#if editingId !== record.id}
 						<RowActionsMenu
 							ariaLabel={`Actions for ${record.name}`}
