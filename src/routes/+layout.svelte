@@ -1,65 +1,61 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import '../app.css';
-	import { page } from '$app/stores';
-	import { Menubar } from 'bits-ui';
+  import { goto } from '$app/navigation'
+  import '../app.css'
+  import { page } from '$app/stores'
+  import { Menubar } from 'bits-ui'
 
-	export let data: App.PageData;
+  export let data: App.PageData
 
-	const navItems = [
-		{ href: '/home', label: 'Home' },
-		{ href: '/records', label: 'Records' },
-		{ href: '/categories', label: 'Categories' },
-		{ href: '/stats', label: 'Stats' },
-		{ href: '/settings', label: 'Settings' }
-	];
+  const navItems = [
+    { href: '/home', label: 'Home' },
+    { href: '/records', label: 'Records' },
+    { href: '/categories', label: 'Categories' },
+    { href: '/stats', label: 'Stats' },
+    { href: '/settings', label: 'Settings' },
+  ]
 
-	const authRoutes = new Set(['/login', '/register']);
+  const authRoutes = new Set(['/login', '/register'])
 
-	$: pathname = $page.url.pathname;
-	$: isAuthRoute = authRoutes.has(pathname);
+  $: pathname = $page.url.pathname
+  $: isAuthRoute = authRoutes.has(pathname)
 
-	function isActive(pathname: string, href: string): boolean {
-		return pathname === href || pathname.startsWith(`${href}/`);
-	}
+  function isActive(pathname: string, href: string): boolean {
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
 
-	function createNavClickHandler(href: string): () => void {
-		return function handleNavClick(): void {
-			void goto(href);
-		};
-	}
+  function createNavClickHandler(href: string): () => void {
+    return function handleNavClick(): void {
+      void goto(href)
+    }
+  }
 </script>
 
 <svelte:head>
-	<title>Kash</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link
-		rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-	/>
+  <title>Kash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+  />
 </svelte:head>
 
-<div
-	class="app"
-	data-shell={isAuthRoute ? 'auth' : 'app'}
-	data-route={pathname}
->
-	{#if data.user && !isAuthRoute}
-		<Menubar.Root class="menubar" aria-label="Primary">
-			<div class="menubar__brand" aria-label="Brand">kash!</div>
-			{#each navItems as item}
-				<Menubar.Menu value={item.href}>
-					<Menubar.Trigger
-						class={`menubar__trigger ${isActive(pathname, item.href) ? 'is-active' : ''}`}
-						onclick={createNavClickHandler(item.href)}
-					>
-						{item.label}
-					</Menubar.Trigger>
-				</Menubar.Menu>
-			{/each}
-		</Menubar.Root>
-	{/if}
+<div class="app" data-shell={isAuthRoute ? 'auth' : 'app'} data-route={pathname}>
+  {#if data.user && !isAuthRoute}
+    <Menubar.Root class="menubar" aria-label="Primary">
+      <div class="menubar__brand" aria-label="Brand">kash!</div>
+      {#each navItems as item}
+        <Menubar.Menu value={item.href}>
+          <Menubar.Trigger
+            class={`menubar__trigger ${isActive(pathname, item.href) ? 'is-active' : ''}`}
+            onclick={createNavClickHandler(item.href)}
+          >
+            {item.label}
+          </Menubar.Trigger>
+        </Menubar.Menu>
+      {/each}
+    </Menubar.Root>
+  {/if}
 
-	<slot />
+  <slot />
 </div>
