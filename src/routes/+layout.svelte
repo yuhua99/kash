@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
   import '../app.css'
+  import './+layout.css'
   import { page } from '$app/stores'
   import { Menubar } from 'bits-ui'
 

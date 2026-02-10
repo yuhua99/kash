@@ -1,0 +1,8 @@
+.section-list {
+  display: grid;
+  gap: 12px;
+}
+
+.section-compact {
+  gap: 8px;
+}

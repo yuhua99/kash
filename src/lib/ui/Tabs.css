@@ -1,0 +1,29 @@
+.tabs-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  border: 1px solid var(--border);
+}
+
+.tabs-trigger {
+  height: 44px;
+  border: 0;
+  border-right: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 150ms linear,
+    color 150ms linear,
+    border-color 150ms linear,
+    outline-color 150ms ease-out;
+}
+
+.tabs-trigger:last-child {
+  border-right: 0;
+}
+
+.tabs-trigger[aria-selected='true'],
+.tabs-trigger[data-state='active'] {
+  color: var(--accent);
+  background: var(--panel-strong);
+}

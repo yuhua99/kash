@@ -1,0 +1,16 @@
+.amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount--income {
+  color: var(--success);
+}
+
+.amount--expense {
+  color: var(--danger);
+}
+
+.amount--accent {
+  color: var(--accent);
+}

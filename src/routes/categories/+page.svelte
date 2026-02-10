@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import { Button, Dialog, Tabs } from 'bits-ui'
   import {
     createCategory,
     deleteCategory,
@@ -12,18 +11,22 @@
     invalidateCategoriesCache,
     setCategoriesCache,
   } from '$lib/features/categories/cache'
-  import ListRow from '$lib/components/ListRow.svelte'
-  import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
-  import Block from '$lib/components/Block.svelte'
+  import ConfirmDialog from '$lib/ui/ConfirmDialog.svelte'
+  import CategoryEditDialog from '$lib/features/categories/components/CategoryEditDialog.svelte'
+  import CategoryForm from '$lib/features/categories/components/CategoryForm.svelte'
+  import CategoryList from '$lib/features/categories/components/CategoryList.svelte'
   import type { Category } from '$lib/core/domain/models'
   import { validateCategoryName } from '$lib/shared/validation'
-  import { onMount } from 'svelte'
+  import type { PageData } from './$types'
 
   type ApiError = Error & { status?: number }
+  type CategoriesPageData = PageData & { categories: Category[]; loadError?: string }
 
-  let categories: Category[] = []
-  let loading = true
-  let loadError = ''
+  export let data: CategoriesPageData
+
+  let categories: Category[] = data.categories
+  let loading = false
+  let loadError = data.loadError ?? ''
   let mutationError = ''
   let successMessage = ''
 
@@ -46,6 +49,12 @@
 
   $: incomeCategories = categories.filter((category) => category.is_income)
   $: expenseCategories = categories.filter((category) => !category.is_income)
+
+  $: if (data) {
+    categories = data.categories
+    loadError = data.loadError ?? ''
+    loading = false
+  }
 
   function clearMutationFeedback(): void {
     mutationError = ''
@@ -272,196 +281,59 @@
       deletingId = null
     }
   }
-
-  onMount(function initCategoriesPage(): void {
-    void fetchCategories()
-  })
 </script>
 
 <svelte:window on:click={onMainClick} />
 
 <main>
-  <Block title="Add category">
-    {#if mutationError}
-      <p role="alert">{mutationError}</p>
-    {/if}
+  <CategoryForm
+    {mutationError}
+    {successMessage}
+    bind:createName
+    {createNameError}
+    {createType}
+    {creating}
+    {onCreateSubmit}
+    {onCreateTypeChange}
+  />
 
-    {#if successMessage}
-      <p role="status">{successMessage}</p>
-    {/if}
+  <CategoryList
+    {loading}
+    {loadError}
+    {categories}
+    {incomeCategories}
+    {expenseCategories}
+    {activeActionRowId}
+    {deletingId}
+    {onRowShellClick}
+    {onRowShellKeydown}
+    {startEdit}
+    {requestDeleteCategory}
+  />
 
-    <form on:submit={onCreateSubmit} novalidate>
-      <div>
-        <label for="create-category-name">Category name</label>
-        <input id="create-category-name" type="text" bind:value={createName} />
-        {#if createNameError}
-          <p role="alert">{createNameError}</p>
-        {/if}
-      </div>
+  {#if !loading && !loadError && categories.length > 0}
+    <CategoryEditDialog
+      {editDialogOpen}
+      {onEditDialogOpenChange}
+      {editingCategoryName}
+      bind:editName
+      {editNameError}
+      {saveEdit}
+      {cancelEdit}
+      {savingEdit}
+    />
 
-      <div>
-        <p id="create-category-type">Type</p>
-        <Tabs.Root value={createType} onValueChange={onCreateTypeChange}>
-          <Tabs.List class="tabs-list" aria-labelledby="create-category-type">
-            <Tabs.Trigger class="tabs-trigger" value="expense">Expense</Tabs.Trigger>
-            <Tabs.Trigger class="tabs-trigger" value="income">Income</Tabs.Trigger>
-          </Tabs.List>
-        </Tabs.Root>
-      </div>
-
-      <Button.Root class="btn btn--primary" type="submit" disabled={creating}>
-        {creating ? 'Creating...' : 'Create category'}
-      </Button.Root>
-    </form>
-  </Block>
-
-  <Block title="Categories">
-    <div aria-live="polite">
-      {#if loading}
-        <p>Loading categories...</p>
-      {:else if loadError}
-        <p role="alert">{loadError}</p>
-      {:else if categories.length === 0}
-        <p>No categories found. Create one to start organizing records.</p>
-      {:else}
-        <div class="section-list">
-          <section class="section-compact" aria-label="Income">
-            {#if incomeCategories.length === 0}
-              <p>No income categories yet.</p>
-            {:else}
-              <div>
-                {#each incomeCategories as category}
-                  <div
-                    data-action-row-shell
-                    class="row-action-shell"
-                    data-type="income"
-                    role="button"
-                    tabindex="0"
-                    on:click={(event) => onRowShellClick(event, category.id)}
-                    on:keydown={(event) => onRowShellKeydown(event, category.id)}
-                  >
-                    <ListRow type="income">
-                      <span slot="main">{category.name}</span>
-                    </ListRow>
-                    {#if activeActionRowId === category.id}
-                      <div class="row-action-panel">
-                        <Button.Root
-                          class="btn btn--compact"
-                          type="button"
-                          onclick={() => startEdit(category)}
-                        >
-                          Edit
-                        </Button.Root>
-                        <Button.Root
-                          class="btn btn--compact"
-                          type="button"
-                          disabled={deletingId === category.id}
-                          onclick={() => requestDeleteCategory(category)}
-                        >
-                          {deletingId === category.id ? 'Deleting...' : 'Delete'}
-                        </Button.Root>
-                      </div>
-                    {/if}
-                  </div>
-                {/each}
-              </div>
-            {/if}
-          </section>
-
-          <section class="section-compact" aria-labelledby="expense-heading">
-            <p id="expense-heading">Expense</p>
-            {#if expenseCategories.length === 0}
-              <p>No expense categories yet.</p>
-            {:else}
-              <div>
-                {#each expenseCategories as category}
-                  <div
-                    data-action-row-shell
-                    class="row-action-shell"
-                    data-type="expense"
-                    role="button"
-                    tabindex="0"
-                    on:click={(event) => onRowShellClick(event, category.id)}
-                    on:keydown={(event) => onRowShellKeydown(event, category.id)}
-                  >
-                    <ListRow type="expense">
-                      <span slot="main">{category.name}</span>
-                    </ListRow>
-                    {#if activeActionRowId === category.id}
-                      <div class="row-action-panel">
-                        <Button.Root
-                          class="btn btn--compact"
-                          type="button"
-                          onclick={() => startEdit(category)}
-                        >
-                          Edit
-                        </Button.Root>
-                        <Button.Root
-                          class="btn btn--compact"
-                          type="button"
-                          disabled={deletingId === category.id}
-                          onclick={() => requestDeleteCategory(category)}
-                        >
-                          {deletingId === category.id ? 'Deleting...' : 'Delete'}
-                        </Button.Root>
-                      </div>
-                    {/if}
-                  </div>
-                {/each}
-              </div>
-            {/if}
-          </section>
-        </div>
-
-        <Dialog.Root open={editDialogOpen} onOpenChange={onEditDialogOpenChange}>
-          <Dialog.Portal>
-            <Dialog.Overlay class="dialog-overlay" />
-            <Dialog.Content class="dialog-content">
-              <Dialog.Title>Edit category</Dialog.Title>
-              <Dialog.Description>
-                {editingCategoryName
-                  ? `Update "${editingCategoryName}".`
-                  : 'Update selected category.'}
-              </Dialog.Description>
-
-              <div>
-                <label for="edit-category-name">Category name</label>
-                <input id="edit-category-name" type="text" bind:value={editName} />
-                {#if editNameError}
-                  <p role="alert">{editNameError}</p>
-                {/if}
-              </div>
-
-              <div class="button-row">
-                <Button.Root
-                  class="btn btn--primary"
-                  type="button"
-                  onclick={saveEdit}
-                  disabled={savingEdit}
-                >
-                  {savingEdit ? 'Saving...' : 'Save changes'}
-                </Button.Root>
-                <Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
-                  Cancel
-                </Button.Root>
-              </div>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
-
-        <ConfirmDialog
-          open={deleteDialogOpen}
-          onOpenChange={onDeleteDialogOpenChange}
-          title="Delete category"
-          description={pendingDeleteCategory
-            ? `Delete category "${pendingDeleteCategory.name}"? This cannot be undone.`
-            : 'Delete selected category? This cannot be undone.'}
-          confirmLabel="Delete"
-          confirmBusyLabel="Deleting..."
-          busy={deletingId === pendingDeleteCategory?.id}
-          onConfirm={confirmDeleteCategory}
-        />
-      {/if}
-    </div>
-  </Block>
+    <ConfirmDialog
+      open={deleteDialogOpen}
+      onOpenChange={onDeleteDialogOpenChange}
+      title="Delete category"
+      description={pendingDeleteCategory
+        ? `Delete category "${pendingDeleteCategory.name}"? This cannot be undone.`
+        : 'Delete selected category? This cannot be undone.'}
+      confirmLabel="Delete"
+      confirmBusyLabel="Deleting..."
+      busy={deletingId === pendingDeleteCategory?.id}
+      onConfirm={confirmDeleteCategory}
+    />
+  {/if}
 </main>

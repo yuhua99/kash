@@ -1,0 +1,27 @@
+.block {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.block__header p {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.block__content {
+  display: grid;
+  gap: 16px;
+}

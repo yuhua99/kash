@@ -1,0 +1,71 @@
+.select-trigger {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 150ms linear,
+    color 150ms linear,
+    border-color 150ms linear,
+    outline-color 150ms ease-out;
+}
+
+.select-trigger[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.select-trigger[data-state='open'] {
+  border-color: var(--accent);
+  background: var(--panel-strong);
+}
+
+.select-content {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 4px 0;
+  border-radius: 0;
+  width: var(--bits-select-anchor-width);
+  min-width: var(--bits-select-anchor-width);
+  max-height: var(--bits-select-content-available-height);
+  overflow: auto;
+}
+
+.select-viewport {
+  display: grid;
+}
+
+.select-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select-item[data-highlighted] {
+  background: var(--selection);
+}
+
+.select-item[data-selected],
+.select-item[aria-selected='true'] {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.select-item[data-disabled],
+.select-item[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

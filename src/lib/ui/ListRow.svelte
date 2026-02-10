@@ -1,4 +1,5 @@
 <script lang="ts">
+  import './ListRow.css'
   export let type: 'income' | 'expense' | undefined = undefined
 </script>
 

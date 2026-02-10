@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { Button, Dialog } from 'bits-ui'
+  import { Dialog } from 'bits-ui'
+  import Button from '$lib/ui/Button.svelte'
+  import ButtonRow from '$lib/ui/ButtonRow.svelte'
+  import './Dialog.css'
 
   export let open = false
   export let title = 'Confirm action'
@@ -23,24 +26,19 @@
         <Dialog.Description>{description}</Dialog.Description>
       {/if}
 
-      <div class="button-row">
-        <Button.Root
-          class="btn btn--secondary"
+      <ButtonRow>
+        <Button
+          variant="secondary"
           type="button"
           onclick={() => onOpenChange(false)}
           disabled={busy}
         >
           {cancelLabel}
-        </Button.Root>
-        <Button.Root
-          class="btn btn--primary"
-          type="button"
-          onclick={() => void onConfirm()}
-          disabled={busy}
-        >
+        </Button>
+        <Button variant="primary" type="button" onclick={() => void onConfirm()} disabled={busy}>
           {resolvedConfirmLabel}
-        </Button.Root>
-      </div>
+        </Button>
+      </ButtonRow>
     </Dialog.Content>
   </Dialog.Portal>
 </Dialog.Root>

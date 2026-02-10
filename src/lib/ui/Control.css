@@ -1,0 +1,26 @@
+.control {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  gap: 8px;
+  transition:
+    background-color 150ms linear,
+    color 150ms linear,
+    border-color 150ms linear,
+    outline-color 150ms ease-out;
+}
+
+.control[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

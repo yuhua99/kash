@@ -2,12 +2,12 @@
   import { goto } from '$app/navigation'
   import { getRecords } from '$lib/features/records/api'
   import { getCategoriesCached } from '$lib/features/categories/cache'
-  import ListRow from '$lib/components/ListRow.svelte'
-  import PeriodControls from '$lib/components/PeriodControls.svelte'
-  import { periodFromPreset, type PeriodPreset } from '$lib/shared/date'
-  import Block from '$lib/components/Block.svelte'
+  import PeriodControls from '$lib/features/periods/components/PeriodControls.svelte'
+  import StatsBreakdown from '$lib/features/stats/components/StatsBreakdown.svelte'
+  import { type PeriodPreset } from '$lib/shared/date'
+  import Block from '$lib/ui/Block.svelte'
   import type { Category, RecordItem } from '$lib/core/domain/models'
-  import { onMount } from 'svelte'
+  import type { PageData } from './$types'
 
   type ApiError = Error & { status?: number }
   type BreakdownItem = {
@@ -24,22 +24,41 @@
     expenseTotal: number
   }
 
-  const initialRange = periodFromPreset('month')
+  type StatsPageData = PageData & {
+    records: RecordItem[]
+    categories: Category[]
+    periodPreset: PeriodPreset
+    startDate: string
+    endDate: string
+    loadError?: string
+  }
 
-  let records: RecordItem[] = []
-  let categories: Category[] = []
-  let loading = true
-  let loadError = ''
+  export let data: StatsPageData
 
-  let periodPreset: PeriodPreset = 'month'
-  let startDate = initialRange.start
-  let endDate = initialRange.end
+  let records: RecordItem[] = data.records
+  let categories: Category[] = data.categories
+  let loading = false
+  let loadError = data.loadError ?? ''
+
+  let periodPreset: PeriodPreset = data.periodPreset
+  let startDate = data.startDate
+  let endDate = data.endDate
 
   $: totals = calculateTotals(records)
   $: netTotal = totals.netTotal
   $: incomeTotal = totals.incomeTotal
   $: expenseTotal = totals.expenseTotal
   $: breakdown = buildBreakdown(records, categories)
+
+  $: if (data) {
+    records = data.records
+    categories = data.categories
+    periodPreset = data.periodPreset
+    startDate = data.startDate
+    endDate = data.endDate
+    loadError = data.loadError ?? ''
+    loading = false
+  }
 
   function calculateTotals(items: RecordItem[]): Totals {
     let netTotal = 0
@@ -138,10 +157,6 @@
     endDate = event.detail.end
     await fetchStats()
   }
-
-  onMount(function initStatsPage(): void {
-    void fetchStats()
-  })
 </script>
 
 <main>
@@ -155,60 +170,13 @@
     />
   </Block>
 
-  <Block title="Category breakdown">
-    <div aria-live="polite">
-      {#if loading}
-        <p>Loading stats...</p>
-      {:else if loadError}
-        <p role="alert">{loadError}</p>
-      {:else if records.length === 0}
-        <p>
-          No records exist for this period. Change the date range or add entries from
-          <a href="/home">Home</a>.
-        </p>
-      {:else}
-        <div>
-          <p>Net total</p>
-          <p class="amount amount--accent">
-            {netTotal.toFixed(2)}
-          </p>
-
-          <div>
-            <div>
-              <span>Income</span>
-              <span class="amount amount--income">{incomeTotal.toFixed(2)}</span>
-            </div>
-            <div>
-              <span>Expense</span>
-              <span class="amount amount--expense">-{expenseTotal.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          {#each breakdown as item}
-            <ListRow type={item.total >= 0 ? 'income' : 'expense'}>
-              <svelte:fragment slot="main">
-                <span>{item.name}</span>
-                <span
-                  class="amount"
-                  class:amount--income={item.total >= 0}
-                  class:amount--expense={item.total < 0}
-                >
-                  {item.total.toFixed(2)}
-                </span>
-              </svelte:fragment>
-              <svelte:fragment slot="sub">
-                <span>{item.share.toFixed(1)}% of activity</span>
-                <span>{item.isIncome ? 'Income' : 'Expense'}</span>
-              </svelte:fragment>
-              <div aria-hidden="true">
-                <div></div>
-              </div>
-            </ListRow>
-          {/each}
-        </div>
-      {/if}
-    </div>
-  </Block>
+  <StatsBreakdown
+    {loading}
+    {loadError}
+    recordCount={records.length}
+    {netTotal}
+    {incomeTotal}
+    {expenseTotal}
+    {breakdown}
+  />
 </main>

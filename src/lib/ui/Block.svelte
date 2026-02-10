@@ -1,4 +1,5 @@
 <script lang="ts">
+  import './Block.css'
   export let title: string
 </script>
 

@@ -3,9 +3,9 @@
 ## Target Architecture
 
 - **core**: environment, HTTP client, domain model types.
-- **features**: `auth`, `categories`, `records` each owns API logic and feature-specific helpers.
-- **shared**: cross-feature date and validation utilities.
-- **routes**: UI and page-level orchestration only.
+- **features**: `auth`, `categories`, `records`, `periods`, `stats` own API logic and feature-specific helpers/components.
+- **ui**: shared UI primitives and styles in `src/lib/ui`.
+- **routes**: UI and page-level orchestration only, with client-side data loading.
 
 ## Applied In This Refactor
 
@@ -13,22 +13,19 @@
    - `src/lib/core/config/env.ts`
    - `src/lib/core/http/api-client.ts`
    - `src/lib/core/domain/models.ts`
-2. Added feature modules:
+2. Added feature modules and APIs:
    - `src/lib/features/auth/{api.ts,form-submit.ts}`
    - `src/lib/features/categories/{api.ts,cache.ts}`
    - `src/lib/features/records/api.ts`
-3. Added shared modules:
-   - `src/lib/shared/date.ts`
-   - `src/lib/shared/validation.ts`
-   - `src/lib/shared/types.ts`
-4. Migrated routes and components to the new modules.
-5. Kept backward-compatible adapter files under `src/lib/*.ts` to avoid breaking external imports while moving forward with the new structure.
-6. Removed dead components:
+3. Added UI primitives and co-located styles under `src/lib/ui/*`.
+4. Migrated routes to client `+page.ts` loaders and split UI into feature components under `src/lib/features/*/components`.
+5. Trimmed `src/app.css` down to tokens, reset, layout, and base form styles.
+6. Removed legacy re-export files under `src/lib/*.ts` and deleted dead components:
    - `src/lib/components/RowActionsMenu.svelte`
    - `src/lib/components/CollapsibleExample.svelte`
 
 ## Remaining Optional Cleanup
 
-- Split large route files (`records`, `categories`) into smaller feature UI components.
-- Move from client `onMount` loading to server-first `+page.server.ts` / actions.
-- Slice `src/app.css` into shared tokens plus per-feature style modules.
+- Decide whether to re-enable SSR and move data loading to `+page.server.ts`.
+- Add additional UI primitives if new patterns repeat (e.g., input/field wrappers).
+- Run `bun run check` to confirm types after refactors.

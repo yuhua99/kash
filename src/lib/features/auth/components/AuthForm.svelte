@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from 'bits-ui'
+  import Button from '$lib/ui/Button.svelte'
 
   export let title: string
   export let formError = ''
@@ -59,9 +59,9 @@
       {/if}
     </div>
 
-    <Button.Root class="btn btn--primary" type="submit" disabled={pending}>
+    <Button variant="primary" type="submit" disabled={pending}>
       {pending ? pendingText : submitText}
-    </Button.Root>
+    </Button>
   </form>
 
   <p>

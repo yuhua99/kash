@@ -1,6 +1,0 @@
-export * from '$lib/features/auth/api'
-export * from '$lib/features/categories/api'
-export * from '$lib/features/records/api'
-export * from '$lib/shared/date'
-export * from '$lib/shared/types'
-export * from '$lib/shared/validation'

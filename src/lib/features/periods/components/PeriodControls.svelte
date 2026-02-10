@@ -1,7 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import { DateRangePicker, type DateRange } from 'bits-ui'
-  import SelectField from '$lib/components/SelectField.svelte'
+  import SelectField from '$lib/ui/SelectField.svelte'
+  import '$lib/ui/Control.css'
+  import '$lib/ui/DatePicker.css'
+  import './PeriodControls.css'
   import {
     dateValueToIso,
     isoToDateValue,
@@ -105,8 +108,8 @@
         <DateRangePicker.Trigger class="control" id="period-custom-range" type="button">
           {customRangeLabel}
         </DateRangePicker.Trigger>
-        <DateRangePicker.Content class="popover" sideOffset={6} align="start">
-          <DateRangePicker.Calendar class="calendar">
+        <DateRangePicker.Content class="date-popover" sideOffset={6} align="start">
+          <DateRangePicker.Calendar class="date-calendar">
             {#snippet children({ months, weekdays })}
               <DateRangePicker.Header>
                 <DateRangePicker.PrevButton aria-label="Previous month">

@@ -15,11 +15,11 @@ bun run check
 
 ## Infra Surface
 
-- API client: `src/lib/api.ts`
-- API types: `src/lib/types.ts`
-- Validation helpers: `src/lib/validation.ts`
-- Date and formatting helpers: `src/lib/date.ts`
-- Barrel exports: `src/lib/index.ts`
+- Core infrastructure: `src/lib/core/config/env.ts`, `src/lib/core/http/api-client.ts`, `src/lib/core/domain/models.ts`
+- Feature APIs and helpers: `src/lib/features/*`
+- Feature UI components: `src/lib/features/*/components`
+- UI primitives and styles: `src/lib/ui/*`
+- Routes: `src/routes` for page orchestration and data loading
 
 ## Notes
 

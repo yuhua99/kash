@@ -1,10 +1,10 @@
 <script lang="ts">
   import { goto, invalidate } from '$app/navigation'
-  import { Button } from 'bits-ui'
+  import Button from '$lib/ui/Button.svelte'
   import { logout } from '$lib/features/auth/api'
   import { invalidateCategoriesCache } from '$lib/features/categories/cache'
-  import ListRow from '$lib/components/ListRow.svelte'
-  import Block from '$lib/components/Block.svelte'
+  import Block from '$lib/ui/Block.svelte'
+  import ListRow from '$lib/ui/ListRow.svelte'
 
   export let data: App.PageData
 
@@ -41,8 +41,8 @@
       <p role="alert">{formError}</p>
     {/if}
 
-    <Button.Root class="btn btn--destructive" type="button" onclick={onLogout} disabled={pending}>
+    <Button variant="destructive" type="button" onclick={onLogout} disabled={pending}>
       {pending ? 'Signing out...' : 'Log out'}
-    </Button.Root>
+    </Button>
   </Block>
 </main>
