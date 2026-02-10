@@ -8,6 +8,7 @@
 		setCategoriesCache
 	} from '$lib/category-cache';
 	import ListRow from '$lib/components/ListRow.svelte';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import type { Category } from '$lib/types';
 	import { validateCategoryName, validateSearchTerm } from '$lib/validation';
 	import { onMount } from 'svelte';
@@ -34,6 +35,8 @@
 	let editDialogOpen = false;
 	let savingEdit = false;
 	let deletingId: string | null = null;
+	let pendingDeleteCategory: Category | null = null;
+	let deleteDialogOpen = false;
 	let activeActionRowId: string | null = null;
 
 	$: editingCategoryName = categories.find((category) => category.id === editingId)?.name ?? '';
@@ -211,11 +214,42 @@
 		}
 	}
 
-	async function removeCategory(category: Category): Promise<void> {
+	function requestDeleteCategory(category: Category): void {
 		activeActionRowId = null;
-		if (!confirm(`Delete category "${category.name}"?`)) {
+		if (deletingId) {
 			return;
 		}
+
+		clearMutationFeedback();
+		pendingDeleteCategory = category;
+		deleteDialogOpen = true;
+	}
+
+	function closeDeleteDialog(): void {
+		deleteDialogOpen = false;
+		pendingDeleteCategory = null;
+	}
+
+	function onDeleteDialogOpenChange(nextOpen: boolean): void {
+		if (nextOpen) {
+			deleteDialogOpen = true;
+			return;
+		}
+
+		if (deletingId) {
+			deleteDialogOpen = true;
+			return;
+		}
+
+		closeDeleteDialog();
+	}
+
+	async function confirmDeleteCategory(): Promise<void> {
+		if (!pendingDeleteCategory) {
+			return;
+		}
+
+		const category = pendingDeleteCategory;
 
 		clearMutationFeedback();
 		deletingId = category.id;
@@ -226,6 +260,7 @@
 			if (editingId === category.id) {
 				cancelEdit();
 			}
+			closeDeleteDialog();
 			successMessage = 'Category deleted.';
 			await fetchCategories(true);
 		} catch (error) {
@@ -338,14 +373,14 @@
 											>
 												Edit
 											</Button.Root>
-											<Button.Root
-												class="btn btn--compact"
-												type="button"
-												disabled={deletingId === category.id}
-												onclick={() => void removeCategory(category)}
-											>
-												{deletingId === category.id ? 'Deleting...' : 'Delete'}
-											</Button.Root>
+										<Button.Root
+											class="btn btn--compact"
+											type="button"
+											disabled={deletingId === category.id}
+											onclick={() => requestDeleteCategory(category)}
+										>
+											{deletingId === category.id ? 'Deleting...' : 'Delete'}
+										</Button.Root>
 										</div>
 									{/if}
 								</div>
@@ -382,14 +417,14 @@
 											>
 												Edit
 											</Button.Root>
-											<Button.Root
-												class="btn btn--compact"
-												type="button"
-												disabled={deletingId === category.id}
-												onclick={() => void removeCategory(category)}
-											>
-												{deletingId === category.id ? 'Deleting...' : 'Delete'}
-											</Button.Root>
+										<Button.Root
+											class="btn btn--compact"
+											type="button"
+											disabled={deletingId === category.id}
+											onclick={() => requestDeleteCategory(category)}
+										>
+											{deletingId === category.id ? 'Deleting...' : 'Delete'}
+										</Button.Root>
 										</div>
 									{/if}
 								</div>
@@ -429,6 +464,19 @@
 					</Dialog.Content>
 				</Dialog.Portal>
 			</Dialog.Root>
+
+			<ConfirmDialog
+				open={deleteDialogOpen}
+				onOpenChange={onDeleteDialogOpenChange}
+				title="Delete category"
+				description={pendingDeleteCategory
+					? `Delete category "${pendingDeleteCategory.name}"? This cannot be undone.`
+					: 'Delete selected category? This cannot be undone.'}
+				confirmLabel="Delete"
+				confirmBusyLabel="Deleting..."
+				busy={deletingId === pendingDeleteCategory?.id}
+				onConfirm={confirmDeleteCategory}
+			/>
 		{/if}
 	</section>
 </main>

@@ -10,6 +10,7 @@
 	import { getCategoriesCached } from '$lib/category-cache';
 	import ListRow from '$lib/components/ListRow.svelte';
 	import PeriodControls from '$lib/components/PeriodControls.svelte';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import {
 		dateValueToIso,
 		isoToDateValue,
@@ -66,6 +67,8 @@
 	let editCategoryError = '';
 	let editDateError = '';
 	let editDialogOpen = false;
+	let deleteDialogOpen = false;
+	let pendingDeleteRecord: RecordItem | null = null;
 
 	let savingEdit = false;
 	let deletingId: string | null = null;
@@ -387,17 +390,49 @@
 		}
 	}
 
-	async function removeRecord(id: string): Promise<void> {
+	function requestDeleteRecord(record: RecordItem): void {
 		activeActionRowId = null;
-		if (!confirm('Delete this record?')) {
+		if (deletingId) {
 			return;
 		}
+
+		clearMutationFeedback();
+		pendingDeleteRecord = record;
+		deleteDialogOpen = true;
+	}
+
+	function closeDeleteDialog(): void {
+		deleteDialogOpen = false;
+		pendingDeleteRecord = null;
+	}
+
+	function onDeleteDialogOpenChange(nextOpen: boolean): void {
+		if (nextOpen) {
+			deleteDialogOpen = true;
+			return;
+		}
+
+		if (deletingId) {
+			deleteDialogOpen = true;
+			return;
+		}
+
+		closeDeleteDialog();
+	}
+
+	async function confirmDeleteRecord(): Promise<void> {
+		if (!pendingDeleteRecord) {
+			return;
+		}
+
+		const id = pendingDeleteRecord.id;
 
 		clearMutationFeedback();
 		deletingId = id;
 
 		try {
 			await deleteRecord(id);
+			closeDeleteDialog();
 			successMessage = 'Record deleted.';
 			if (editingId === id) {
 				cancelEdit();
@@ -607,7 +642,7 @@
 											class="btn btn--compact"
 											type="button"
 											disabled={deletingId === record.id}
-											onclick={() => void removeRecord(record.id)}
+											onclick={() => requestDeleteRecord(record)}
 										>
 											{deletingId === record.id ? 'Deleting...' : 'Delete'}
 										</Button.Root>
@@ -740,6 +775,19 @@
 					</Dialog.Content>
 				</Dialog.Portal>
 			</Dialog.Root>
+
+			<ConfirmDialog
+				open={deleteDialogOpen}
+				onOpenChange={onDeleteDialogOpenChange}
+				title="Delete record"
+				description={pendingDeleteRecord
+					? `Delete record "${pendingDeleteRecord.name}"? This cannot be undone.`
+					: 'Delete selected record? This cannot be undone.'}
+				confirmLabel="Delete"
+				confirmBusyLabel="Deleting..."
+				busy={deletingId === pendingDeleteRecord?.id}
+				onConfirm={confirmDeleteRecord}
+			/>
 		{/if}
 	</section>
 </main>
