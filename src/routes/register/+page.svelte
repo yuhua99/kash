@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import AuthForm from '$lib/components/AuthForm.svelte';
 	import { handleAuthSubmit } from '$lib/auth-form';
 	import { login, register } from '$lib/api';
+	import { invalidateCategoriesCache } from '$lib/category-cache';
 
 	let username = '';
 	let password = '';
@@ -19,6 +20,8 @@
 			onValidSubmit: async (normalizedUsername, validPassword) => {
 				await register(normalizedUsername, validPassword);
 				await login(normalizedUsername, validPassword);
+				invalidateCategoriesCache();
+				await invalidate('app:auth');
 				await goto('/home');
 			},
 			setUsernameError: (message) => {

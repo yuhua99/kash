@@ -91,7 +91,6 @@ main {
 
 [data-shell="auth"] main {
   width: min(100%, 420px);
-  min-height: calc(100vh - 48px);
   background: var(--panel);
   border: 1px solid var(--border);
   padding: 24px;
@@ -305,7 +304,6 @@ form .btn {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   min-height: 44px;
-  margin-inline: -16px;
   background: var(--surface);
 }
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { getCategories, getRecords } from '$lib/api';
+	import { getRecords } from '$lib/api';
+	import { getCategoriesCached } from '$lib/category-cache';
 	import ListRow from '$lib/components/ListRow.svelte';
 	import PeriodControls from '$lib/components/PeriodControls.svelte';
 	import { periodFromPreset, type PeriodPreset } from '$lib/date';
@@ -104,18 +105,18 @@
 		loadError = '';
 
 		try {
-			const [recordsResponse, categoriesResponse] = await Promise.all([
+			const [recordsResponse, cachedCategories] = await Promise.all([
 				getRecords({
 					start_date: startDate,
 					end_date: endDate,
 					limit: 1000,
 					offset: 0
 				}),
-				getCategories({ limit: 1000, offset: 0 })
+				getCategoriesCached()
 			]);
 
 			records = recordsResponse.records;
-			categories = categoriesResponse.categories;
+			categories = cachedCategories;
 		} catch (error) {
 			const apiError = error as ApiError;
 			if (apiError.status === 401) {

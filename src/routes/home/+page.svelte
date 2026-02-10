@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import type { DateValue } from '@internationalized/date';
 	import { Button, DatePicker, Select, Tabs } from 'bits-ui';
-	import { createRecord, getCategories } from '$lib/api';
+	import { createRecord } from '$lib/api';
+	import { getCategoriesCached } from '$lib/category-cache';
 	import { dateValueToIso, isoToDateValue, todayIso } from '$lib/date';
 	import type { Category } from '$lib/types';
 	import { validateAmount, validateDate, validateRecordName } from '$lib/validation';
@@ -71,8 +72,7 @@
 		loadError = '';
 
 		try {
-			const response = await getCategories({ limit: 1000, offset: 0 });
-			categories = response.categories;
+			categories = await getCategoriesCached();
 		} catch (error) {
 			const apiError = error as ApiError;
 			if (apiError.status === 401) {

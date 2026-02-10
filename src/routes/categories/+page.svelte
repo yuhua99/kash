@@ -2,6 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { Button, Collapsible, Tabs } from 'bits-ui';
 	import { createCategory, deleteCategory, getCategories, updateCategory } from '$lib/api';
+	import {
+		getCategoriesCached,
+		invalidateCategoriesCache,
+		setCategoriesCache
+	} from '$lib/category-cache';
 	import ListRow from '$lib/components/ListRow.svelte';
 	import RowActionsMenu from '$lib/components/RowActionsMenu.svelte';
 	import type { Category } from '$lib/types';
@@ -65,13 +70,18 @@
 		}
 	}
 
-	async function fetchCategories(): Promise<void> {
+	async function fetchCategories(forceRefresh = false): Promise<void> {
 		loading = true;
 		loadError = '';
 
 		try {
-			const response = await getCategories({ limit: 1000, offset: 0 });
-			categories = response.categories;
+			if (forceRefresh) {
+				const response = await getCategories({ limit: 1000, offset: 0 });
+				categories = response.categories;
+				setCategoriesCache(response.categories);
+			} else {
+				categories = await getCategoriesCached();
+			}
 		} catch (error) {
 			const apiError = error as ApiError;
 			if (apiError.status === 401) {
@@ -100,9 +110,10 @@
 		try {
 			const isIncome = createType === 'income';
 			await createCategory({ name: normalizedName, is_income: isIncome });
+			invalidateCategoriesCache();
 			createName = '';
 			successMessage = 'Category created.';
-			await fetchCategories();
+			await fetchCategories(true);
 		} catch (error) {
 			const apiError = error as ApiError;
 			if (apiError.status === 401) {
@@ -146,9 +157,10 @@
 		savingEdit = true;
 		try {
 			await updateCategory(editingId, { name: normalizedName });
+			invalidateCategoriesCache();
 			editingId = null;
 			successMessage = 'Category updated.';
-			await fetchCategories();
+			await fetchCategories(true);
 		} catch (error) {
 			const apiError = error as ApiError;
 			if (apiError.status === 401) {
@@ -171,8 +183,9 @@
 
 		try {
 			await deleteCategory(category.id);
+			invalidateCategoriesCache();
 			successMessage = 'Category deleted.';
-			await fetchCategories();
+			await fetchCategories(true);
 		} catch (error) {
 			const apiError = error as ApiError;
 			if (apiError.status === 401) {

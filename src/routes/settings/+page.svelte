@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { Button } from 'bits-ui';
 	import { logout } from '$lib/api';
+	import { invalidateCategoriesCache } from '$lib/category-cache';
 	import ListRow from '$lib/components/ListRow.svelte';
 
 	export let data: App.PageData;
@@ -15,6 +16,8 @@
 
 		try {
 			await logout();
+			invalidateCategoriesCache();
+			await invalidate('app:auth');
 			await goto('/login');
 		} catch (error) {
 			formError = error instanceof Error ? error.message : 'Unable to logout.';
