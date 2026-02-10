@@ -8,7 +8,6 @@
 		setCategoriesCache
 	} from '$lib/category-cache';
 	import ListRow from '$lib/components/ListRow.svelte';
-	import RowActionsMenu from '$lib/components/RowActionsMenu.svelte';
 	import type { Category } from '$lib/types';
 	import { validateCategoryName, validateSearchTerm } from '$lib/validation';
 	import { onMount } from 'svelte';
@@ -35,6 +34,7 @@
 	let editDialogOpen = false;
 	let savingEdit = false;
 	let deletingId: string | null = null;
+	let activeActionRowId: string | null = null;
 
 	$: editingCategoryName = categories.find((category) => category.id === editingId)?.name ?? '';
 
@@ -55,22 +55,45 @@
 		return error instanceof Error ? error.message : fallbackMessage;
 	}
 
-	function createEditHandler(category: Category): () => void {
-		return function handleEdit(): void {
-			startEdit(category);
-		};
-	}
-
-	function createDeleteHandler(category: Category): () => void {
-		return function handleDelete(): void {
-			void removeCategory(category);
-		};
-	}
-
 	function onCreateTypeChange(nextValue: string): void {
 		if (nextValue === 'income' || nextValue === 'expense') {
 			createType = nextValue;
 		}
+	}
+
+	function toggleRowActions(categoryId: string): void {
+		activeActionRowId = activeActionRowId === categoryId ? null : categoryId;
+	}
+
+	function onRowShellClick(event: MouseEvent, categoryId: string): void {
+		const target = event.target;
+		if (target instanceof HTMLElement && target.closest('.row-action-panel')) {
+			return;
+		}
+
+		toggleRowActions(categoryId);
+	}
+
+	function onMainClick(event: MouseEvent): void {
+		const target = event.target;
+		if (!(target instanceof HTMLElement)) {
+			return;
+		}
+
+		if (target.closest('[data-action-row-shell]')) {
+			return;
+		}
+
+		activeActionRowId = null;
+	}
+
+	function onRowShellKeydown(event: KeyboardEvent, categoryId: string): void {
+		if (event.key !== 'Enter' && event.key !== ' ') {
+			return;
+		}
+
+		event.preventDefault();
+		toggleRowActions(categoryId);
 	}
 
 	async function fetchCategories(forceRefresh = false): Promise<void> {
@@ -130,6 +153,7 @@
 	}
 
 	function startEdit(category: Category): void {
+		activeActionRowId = null;
 		editingId = category.id;
 		editName = category.name;
 		editNameError = '';
@@ -188,6 +212,7 @@
 	}
 
 	async function removeCategory(category: Category): Promise<void> {
+		activeActionRowId = null;
 		if (!confirm(`Delete category "${category.name}"?`)) {
 			return;
 		}
@@ -219,6 +244,8 @@
 		void fetchCategories();
 	});
 </script>
+
+<svelte:window on:click={onMainClick} />
 
 <main>
 	<Collapsible.Root bind:open={createOpen}>
@@ -290,17 +317,38 @@
 					{:else}
 						<div>
 							{#each incomeCategories as category}
-								<ListRow type="income">
-									<span slot="main">{category.name}</span>
-									<div slot="end">
-										<RowActionsMenu
-											ariaLabel={`Actions for ${category.name}`}
-											onEdit={createEditHandler(category)}
-											onDelete={createDeleteHandler(category)}
-											deleting={deletingId === category.id}
-										/>
-									</div>
-								</ListRow>
+								<div
+									data-action-row-shell
+									class="row-action-shell"
+									data-type="income"
+									role="button"
+									tabindex="0"
+									on:click={(event) => onRowShellClick(event, category.id)}
+									on:keydown={(event) => onRowShellKeydown(event, category.id)}
+								>
+									<ListRow type="income">
+										<span slot="main">{category.name}</span>
+									</ListRow>
+									{#if activeActionRowId === category.id}
+										<div class="row-action-panel">
+											<Button.Root
+												class="btn btn--compact"
+												type="button"
+												onclick={() => startEdit(category)}
+											>
+												Edit
+											</Button.Root>
+											<Button.Root
+												class="btn btn--compact"
+												type="button"
+												disabled={deletingId === category.id}
+												onclick={() => void removeCategory(category)}
+											>
+												{deletingId === category.id ? 'Deleting...' : 'Delete'}
+											</Button.Root>
+										</div>
+									{/if}
+								</div>
 							{/each}
 						</div>
 					{/if}
@@ -313,17 +361,38 @@
 					{:else}
 						<div>
 							{#each expenseCategories as category}
-								<ListRow type="expense">
-									<span slot="main">{category.name}</span>
-									<div slot="end">
-										<RowActionsMenu
-											ariaLabel={`Actions for ${category.name}`}
-											onEdit={createEditHandler(category)}
-											onDelete={createDeleteHandler(category)}
-											deleting={deletingId === category.id}
-										/>
-									</div>
-								</ListRow>
+								<div
+									data-action-row-shell
+									class="row-action-shell"
+									data-type="expense"
+									role="button"
+									tabindex="0"
+									on:click={(event) => onRowShellClick(event, category.id)}
+									on:keydown={(event) => onRowShellKeydown(event, category.id)}
+								>
+									<ListRow type="expense">
+										<span slot="main">{category.name}</span>
+									</ListRow>
+									{#if activeActionRowId === category.id}
+										<div class="row-action-panel">
+											<Button.Root
+												class="btn btn--compact"
+												type="button"
+												onclick={() => startEdit(category)}
+											>
+												Edit
+											</Button.Root>
+											<Button.Root
+												class="btn btn--compact"
+												type="button"
+												disabled={deletingId === category.id}
+												onclick={() => void removeCategory(category)}
+											>
+												{deletingId === category.id ? 'Deleting...' : 'Delete'}
+											</Button.Root>
+										</div>
+									{/if}
+								</div>
 							{/each}
 						</div>
 					{/if}

@@ -347,6 +347,50 @@ form .btn {
   color: var(--text-muted);
 }
 
+.row-action-shell {
+  border-left: 2px solid transparent;
+  border-bottom: 1px solid var(--border);
+}
+
+.row-action-shell[data-type='income'] {
+  border-left-color: var(--success);
+}
+
+.row-action-shell[data-type='expense'] {
+  border-left-color: var(--danger);
+}
+
+.row-action-shell .list-row {
+  border-bottom: 0;
+  cursor: pointer;
+}
+
+.row-action-shell .list-row::before {
+  display: none;
+}
+
+.row-action-shell:hover .list-row {
+  background: var(--panel-strong);
+}
+
+.row-action-shell:hover .row-action-panel {
+  background: var(--panel-strong);
+}
+
+.row-action-panel {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 16px 12px;
+  background: var(--surface);
+}
+
+.row-action-panel .btn:hover {
+  background: var(--panel-strong);
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
 .amount {
   text-align: right;
   font-variant-numeric: tabular-nums;

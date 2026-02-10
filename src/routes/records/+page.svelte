@@ -10,7 +10,6 @@
 	import { getCategoriesCached } from '$lib/category-cache';
 	import ListRow from '$lib/components/ListRow.svelte';
 	import PeriodControls from '$lib/components/PeriodControls.svelte';
-	import RowActionsMenu from '$lib/components/RowActionsMenu.svelte';
 	import {
 		dateValueToIso,
 		isoToDateValue,
@@ -32,6 +31,10 @@
 	type SelectOption = {
 		value: string;
 		label: string;
+	};
+	type DateGroup = {
+		date: string;
+		records: RecordItem[];
 	};
 
 	const initialRange = periodFromPreset('month');
@@ -66,6 +69,7 @@
 
 	let savingEdit = false;
 	let deletingId: string | null = null;
+	let activeActionRowId: string | null = null;
 
 	const typeFilterOptions: SelectOption[] = [
 		{ value: 'all', label: 'All' },
@@ -114,6 +118,34 @@
 	$: filteredRecords = records
 		.filter((record) => matchesRecordFilters(record, normalizedSearch))
 		.sort((left, right) => compareRecords(left, right, sortMode, categoryById));
+	$: groupedRecords = groupRecordsByDate(filteredRecords, sortMode);
+
+	function groupRecordsByDate(items: RecordItem[], mode: SortMode): DateGroup[] {
+		const grouped = new Map<string, RecordItem[]>();
+
+		for (const item of items) {
+			const bucket = grouped.get(item.date);
+			if (bucket) {
+				bucket.push(item);
+				continue;
+			}
+
+			grouped.set(item.date, [item]);
+		}
+
+		const dates = [...grouped.keys()].sort((left, right) => {
+			if (mode === 'date_asc') {
+				return left.localeCompare(right);
+			}
+
+			return right.localeCompare(left);
+		});
+
+		return dates.map((date) => ({
+			date,
+			records: grouped.get(date) ?? []
+		}));
+	}
 
 	function matchesRecordFilters(record: RecordItem, normalizedSearchValue: string): boolean {
 		if (normalizedSearchValue && !record.name.toLowerCase().includes(normalizedSearchValue)) {
@@ -158,21 +190,44 @@
 		}
 	}
 
-	function createEditHandler(record: RecordItem): () => void {
-		return function handleEdit(): void {
-			startEdit(record);
-		};
-	}
-
-	function createDeleteHandler(recordId: string): () => void {
-		return function handleDelete(): void {
-			void removeRecord(recordId);
-		};
-	}
-
 	function clearMutationFeedback(): void {
 		mutationError = '';
 		successMessage = '';
+	}
+
+	function toggleRowActions(recordId: string): void {
+		activeActionRowId = activeActionRowId === recordId ? null : recordId;
+	}
+
+	function onRowShellClick(event: MouseEvent, recordId: string): void {
+		const target = event.target;
+		if (target instanceof HTMLElement && target.closest('.row-action-panel')) {
+			return;
+		}
+
+		toggleRowActions(recordId);
+	}
+
+	function onMainClick(event: MouseEvent): void {
+		const target = event.target;
+		if (!(target instanceof HTMLElement)) {
+			return;
+		}
+
+		if (target.closest('[data-action-row-shell]')) {
+			return;
+		}
+
+		activeActionRowId = null;
+	}
+
+	function onRowShellKeydown(event: KeyboardEvent, recordId: string): void {
+		if (event.key !== 'Enter' && event.key !== ' ') {
+			return;
+		}
+
+		event.preventDefault();
+		toggleRowActions(recordId);
 	}
 
 	function getErrorMessage(error: unknown, fallbackMessage: string): string {
@@ -242,6 +297,7 @@
 	}
 
 	function startEdit(record: RecordItem): void {
+		activeActionRowId = null;
 		editingId = record.id;
 		editName = record.name;
 		editAmountInput = String(record.amount);
@@ -332,6 +388,7 @@
 	}
 
 	async function removeRecord(id: string): Promise<void> {
+		activeActionRowId = null;
 		if (!confirm('Delete this record?')) {
 			return;
 		}
@@ -371,6 +428,8 @@
 		void fetchData();
 	});
 </script>
+
+<svelte:window on:click={onMainClick} />
 
 <main>
 	<section>
@@ -507,29 +566,56 @@
 			</p>
 		{:else}
 			<div>
-				{#each filteredRecords as record}
-					<ListRow type={record.amount > 0 ? 'income' : 'expense'}>
-						<div slot="main">{record.name}</div>
-						<div slot="end">
+				{#each groupedRecords as group (group.date)}
+					<section aria-labelledby={`records-date-${group.date}`}>
+						<p id={`records-date-${group.date}`}>{group.date}</p>
+						{#each group.records as record (record.id)}
 							<div
-								class="amount"
-								class:amount--income={record.amount > 0}
-								class:amount--expense={record.amount < 0}
+								data-action-row-shell
+								class="row-action-shell"
+								data-type={record.amount > 0 ? 'income' : 'expense'}
+								role="button"
+								tabindex="0"
+								on:click={(event) => onRowShellClick(event, record.id)}
+								on:keydown={(event) => onRowShellKeydown(event, record.id)}
 							>
-								{record.amount.toFixed(2)}
+								<ListRow type={record.amount > 0 ? 'income' : 'expense'}>
+									<div slot="main">{record.name}</div>
+									<div slot="end">
+										<div
+											class="amount"
+											class:amount--income={record.amount > 0}
+											class:amount--expense={record.amount < 0}
+										>
+											{record.amount.toFixed(2)}
+										</div>
+									</div>
+									<svelte:fragment slot="sub">
+										<span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
+									</svelte:fragment>
+								</ListRow>
+								{#if activeActionRowId === record.id}
+									<div class="row-action-panel">
+										<Button.Root
+											class="btn btn--compact"
+											type="button"
+											onclick={() => startEdit(record)}
+										>
+											Edit
+										</Button.Root>
+										<Button.Root
+											class="btn btn--compact"
+											type="button"
+											disabled={deletingId === record.id}
+											onclick={() => void removeRecord(record.id)}
+										>
+											{deletingId === record.id ? 'Deleting...' : 'Delete'}
+										</Button.Root>
+									</div>
+								{/if}
 							</div>
-							<RowActionsMenu
-								ariaLabel={`Actions for ${record.name}`}
-								onEdit={createEditHandler(record)}
-								onDelete={createDeleteHandler(record.id)}
-								deleting={deletingId === record.id}
-							/>
-						</div>
-						<svelte:fragment slot="sub">
-							<span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
-							<span>{record.date}</span>
-						</svelte:fragment>
-					</ListRow>
+						{/each}
+					</section>
 				{/each}
 			</div>
 
