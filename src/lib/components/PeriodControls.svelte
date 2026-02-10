@@ -1,7 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import { DateRangePicker, Select, type DateRange } from 'bits-ui'
-  import { dateValueToIso, isoToDateValue, periodFromPreset, type PeriodPreset } from '$lib/date'
+  import {
+    dateValueToIso,
+    isoToDateValue,
+    periodFromPreset,
+    type PeriodPreset,
+  } from '$lib/shared/date'
 
   export let preset: PeriodPreset = 'month'
   export let start = ''

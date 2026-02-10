@@ -1,7 +1,7 @@
 export type {
-  CategoriesResponse,
+  User,
   Category,
   RecordItem,
   RecordsResponse,
-  User,
+  CategoriesResponse,
 } from '$lib/core/domain/models'

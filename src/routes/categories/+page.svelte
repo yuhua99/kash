@@ -1,16 +1,21 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
   import { Button, Collapsible, Dialog, Tabs } from 'bits-ui'
-  import { createCategory, deleteCategory, getCategories, updateCategory } from '$lib/api'
+  import {
+    createCategory,
+    deleteCategory,
+    getCategories,
+    updateCategory,
+  } from '$lib/features/categories/api'
   import {
     getCategoriesCached,
     invalidateCategoriesCache,
     setCategoriesCache,
-  } from '$lib/category-cache'
+  } from '$lib/features/categories/cache'
   import ListRow from '$lib/components/ListRow.svelte'
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
-  import type { Category } from '$lib/types'
-  import { validateCategoryName, validateSearchTerm } from '$lib/validation'
+  import type { Category } from '$lib/core/domain/models'
+  import { validateCategoryName, validateSearchTerm } from '$lib/shared/validation'
   import { onMount } from 'svelte'
 
   type ApiError = Error & { status?: number }

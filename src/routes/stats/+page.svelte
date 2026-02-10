@@ -1,11 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import { getRecords } from '$lib/api'
-  import { getCategoriesCached } from '$lib/category-cache'
+  import { getRecords } from '$lib/features/records/api'
+  import { getCategoriesCached } from '$lib/features/categories/cache'
   import ListRow from '$lib/components/ListRow.svelte'
   import PeriodControls from '$lib/components/PeriodControls.svelte'
-  import { periodFromPreset, type PeriodPreset } from '$lib/date'
-  import type { Category, RecordItem } from '$lib/types'
+  import { periodFromPreset, type PeriodPreset } from '$lib/shared/date'
+  import type { Category, RecordItem } from '$lib/core/domain/models'
   import { onMount } from 'svelte'
 
   type ApiError = Error & { status?: number }

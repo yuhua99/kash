@@ -2,19 +2,24 @@
   import { goto } from '$app/navigation'
   import type { DateValue } from '@internationalized/date'
   import { Button, DatePicker, Dialog, Select } from 'bits-ui'
-  import { deleteRecord, getRecords, updateRecord } from '$lib/api'
-  import { getCategoriesCached } from '$lib/category-cache'
+  import { deleteRecord, getRecords, updateRecord } from '$lib/features/records/api'
+  import { getCategoriesCached } from '$lib/features/categories/cache'
   import ListRow from '$lib/components/ListRow.svelte'
   import PeriodControls from '$lib/components/PeriodControls.svelte'
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
-  import { dateValueToIso, isoToDateValue, periodFromPreset, type PeriodPreset } from '$lib/date'
-  import type { Category, RecordItem } from '$lib/types'
+  import {
+    dateValueToIso,
+    isoToDateValue,
+    periodFromPreset,
+    type PeriodPreset,
+  } from '$lib/shared/date'
+  import type { Category, RecordItem } from '$lib/core/domain/models'
   import {
     validateAmount,
     validateDate,
     validateRecordName,
     validateSearchTerm,
-  } from '$lib/validation'
+  } from '$lib/shared/validation'
   import { onMount } from 'svelte'
 
   type ApiError = Error & { status?: number }

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { goto, invalidate } from '$app/navigation'
   import AuthForm from '$lib/components/AuthForm.svelte'
-  import { handleAuthSubmit } from '$lib/auth-form'
-  import { login } from '$lib/api'
-  import { invalidateCategoriesCache } from '$lib/category-cache'
+  import { handleAuthSubmit } from '$lib/features/auth/form-submit'
+  import { login } from '$lib/features/auth/api'
+  import { invalidateCategoriesCache } from '$lib/features/categories/cache'
 
   let username = ''
   let password = ''

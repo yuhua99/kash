@@ -1,4 +1,4 @@
-import type { User } from '$lib/types'
+import type { User } from '$lib/core/domain/models'
 
 declare global {
   namespace App {

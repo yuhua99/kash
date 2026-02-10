@@ -2,11 +2,11 @@
   import { goto } from '$app/navigation'
   import type { DateValue } from '@internationalized/date'
   import { Button, DatePicker, Select, Tabs } from 'bits-ui'
-  import { createRecord } from '$lib/api'
-  import { getCategoriesCached } from '$lib/category-cache'
-  import { dateValueToIso, isoToDateValue, todayIso } from '$lib/date'
-  import type { Category } from '$lib/types'
-  import { validateAmount, validateDate, validateRecordName } from '$lib/validation'
+  import { createRecord } from '$lib/features/records/api'
+  import { getCategoriesCached } from '$lib/features/categories/cache'
+  import { dateValueToIso, isoToDateValue, todayIso } from '$lib/shared/date'
+  import type { Category } from '$lib/core/domain/models'
+  import { validateAmount, validateDate, validateRecordName } from '$lib/shared/validation'
   import { onMount } from 'svelte'
 
   type ApiError = Error & { status?: number }

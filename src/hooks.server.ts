@@ -1,8 +1,7 @@
-import { env } from '$env/dynamic/private'
 import { redirect, type Handle } from '@sveltejs/kit'
-import type { User } from '$lib/types'
-
-const API_BASE_URL = env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+import { createApiClient } from '$lib/core/http/api-client'
+import { getServerApiBaseUrl } from '$lib/core/config/server-env'
+import type { User } from '$lib/core/domain/models'
 
 const PROTECTED_ROUTES = ['/home', '/records', '/categories', '/stats', '/settings']
 const AUTH_ROUTES = ['/login', '/register']
@@ -22,18 +21,16 @@ async function fetchSessionUser(cookieHeader: string): Promise<User | null> {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
-      headers: {
+    const client = createApiClient({
+      fetch,
+      baseUrl: getServerApiBaseUrl(),
+      defaultHeaders: {
         cookie: cookieHeader,
         accept: 'application/json',
       },
     })
 
-    if (!response.ok) {
-      return null
-    }
-
-    return (await response.json()) as User
+    return await client.request<User>('/auth/me')
   } catch {
     return null
   }
