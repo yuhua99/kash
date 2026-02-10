@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Button, Collapsible, Tabs } from 'bits-ui';
+	import { Button, Collapsible, Dialog, Tabs } from 'bits-ui';
 	import { createCategory, deleteCategory, getCategories, updateCategory } from '$lib/api';
 	import {
 		getCategoriesCached,
@@ -32,8 +32,11 @@
 	let editingId: string | null = null;
 	let editName = '';
 	let editNameError = '';
+	let editDialogOpen = false;
 	let savingEdit = false;
 	let deletingId: string | null = null;
+
+	$: editingCategoryName = categories.find((category) => category.id === editingId)?.name ?? '';
 
 	$: searchValidationError = validateSearchTerm(search.trim()) ?? '';
 	$: normalizedSearch = search.trim().toLowerCase();
@@ -130,13 +133,24 @@
 		editingId = category.id;
 		editName = category.name;
 		editNameError = '';
+		editDialogOpen = true;
 		clearMutationFeedback();
 	}
 
 	function cancelEdit(): void {
+		editDialogOpen = false;
 		editingId = null;
 		editName = '';
 		editNameError = '';
+	}
+
+	function onEditDialogOpenChange(nextOpen: boolean): void {
+		if (nextOpen) {
+			editDialogOpen = true;
+			return;
+		}
+
+		cancelEdit();
 	}
 
 	async function saveEdit(): Promise<void> {
@@ -158,7 +172,7 @@
 		try {
 			await updateCategory(editingId, { name: normalizedName });
 			invalidateCategoriesCache();
-			editingId = null;
+			cancelEdit();
 			successMessage = 'Category updated.';
 			await fetchCategories(true);
 		} catch (error) {
@@ -184,6 +198,9 @@
 		try {
 			await deleteCategory(category.id);
 			invalidateCategoriesCache();
+			if (editingId === category.id) {
+				cancelEdit();
+			}
 			successMessage = 'Category deleted.';
 			await fetchCategories(true);
 		} catch (error) {
@@ -273,46 +290,17 @@
 					{:else}
 						<div>
 							{#each incomeCategories as category}
-								{#if editingId === category.id}
-									<ListRow type="income">
-										<div>
-											<label for={`edit-category-${category.id}`}>Name</label>
-											<input
-												id={`edit-category-${category.id}`}
-												type="text"
-												bind:value={editName}
-											/>
-											{#if editNameError}
-												<p role="alert">{editNameError}</p>
-											{/if}
-										</div>
-										<div class="button-row">
-											<Button.Root
-												class="btn btn--primary"
-												type="button"
-												onclick={saveEdit}
-												disabled={savingEdit}
-											>
-												{savingEdit ? 'Saving...' : 'Save'}
-											</Button.Root>
-											<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
-												Cancel
-											</Button.Root>
-										</div>
-									</ListRow>
-								{:else}
-									<ListRow type="income">
-										<span slot="main">{category.name}</span>
-										<div slot="end">
-											<RowActionsMenu
-												ariaLabel={`Actions for ${category.name}`}
-												onEdit={createEditHandler(category)}
-												onDelete={createDeleteHandler(category)}
-												deleting={deletingId === category.id}
-											/>
-										</div>
-									</ListRow>
-								{/if}
+								<ListRow type="income">
+									<span slot="main">{category.name}</span>
+									<div slot="end">
+										<RowActionsMenu
+											ariaLabel={`Actions for ${category.name}`}
+											onEdit={createEditHandler(category)}
+											onDelete={createDeleteHandler(category)}
+											deleting={deletingId === category.id}
+										/>
+									</div>
+								</ListRow>
 							{/each}
 						</div>
 					{/if}
@@ -325,51 +313,53 @@
 					{:else}
 						<div>
 							{#each expenseCategories as category}
-								{#if editingId === category.id}
-									<ListRow type="expense">
-										<div>
-											<label for={`edit-category-${category.id}`}>Name</label>
-											<input
-												id={`edit-category-${category.id}`}
-												type="text"
-												bind:value={editName}
-											/>
-											{#if editNameError}
-												<p role="alert">{editNameError}</p>
-											{/if}
-										</div>
-										<div class="button-row">
-											<Button.Root
-												class="btn btn--primary"
-												type="button"
-												onclick={saveEdit}
-												disabled={savingEdit}
-											>
-												{savingEdit ? 'Saving...' : 'Save'}
-											</Button.Root>
-											<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
-												Cancel
-											</Button.Root>
-										</div>
-									</ListRow>
-								{:else}
-									<ListRow type="expense">
-										<span slot="main">{category.name}</span>
-										<div slot="end">
-											<RowActionsMenu
-												ariaLabel={`Actions for ${category.name}`}
-												onEdit={createEditHandler(category)}
-												onDelete={createDeleteHandler(category)}
-												deleting={deletingId === category.id}
-											/>
-										</div>
-									</ListRow>
-								{/if}
+								<ListRow type="expense">
+									<span slot="main">{category.name}</span>
+									<div slot="end">
+										<RowActionsMenu
+											ariaLabel={`Actions for ${category.name}`}
+											onEdit={createEditHandler(category)}
+											onDelete={createDeleteHandler(category)}
+											deleting={deletingId === category.id}
+										/>
+									</div>
+								</ListRow>
 							{/each}
 						</div>
 					{/if}
 				</section>
 			</div>
+
+			<Dialog.Root open={editDialogOpen} onOpenChange={onEditDialogOpenChange}>
+				<Dialog.Portal>
+					<Dialog.Overlay class="dialog-overlay" />
+					<Dialog.Content class="dialog-content">
+						<Dialog.Title>Edit category</Dialog.Title>
+						<Dialog.Description>
+							{editingCategoryName
+								? `Update "${editingCategoryName}".`
+								: 'Update selected category.'}
+						</Dialog.Description>
+
+						<div>
+							<label for="edit-category-name">Category name</label>
+							<input id="edit-category-name" type="text" bind:value={editName} />
+							{#if editNameError}
+								<p role="alert">{editNameError}</p>
+							{/if}
+						</div>
+
+						<div class="button-row">
+							<Button.Root class="btn btn--primary" type="button" onclick={saveEdit} disabled={savingEdit}>
+								{savingEdit ? 'Saving...' : 'Save changes'}
+							</Button.Root>
+							<Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
+								Cancel
+							</Button.Root>
+						</div>
+					</Dialog.Content>
+				</Dialog.Portal>
+			</Dialog.Root>
 		{/if}
 	</section>
 </main>
