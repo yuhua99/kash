@@ -5,6 +5,7 @@
   import ListRow from '$lib/components/ListRow.svelte'
   import PeriodControls from '$lib/components/PeriodControls.svelte'
   import { periodFromPreset, type PeriodPreset } from '$lib/shared/date'
+  import Block from '$lib/components/Block.svelte'
   import type { Category, RecordItem } from '$lib/core/domain/models'
   import { onMount } from 'svelte'
 
@@ -144,11 +145,7 @@
 </script>
 
 <main>
-  <section>
-    <header>
-      <p>Stats</p>
-    </header>
-
+  <Block title="Stats">
     <PeriodControls
       bind:preset={periodPreset}
       bind:start={startDate}
@@ -156,61 +153,62 @@
       disabled={loading}
       on:change={onPeriodChange}
     />
-  </section>
+  </Block>
 
-  <section aria-live="polite">
-    {#if loading}
-      <p>Loading stats...</p>
-    {:else if loadError}
-      <p role="alert">{loadError}</p>
-    {:else if records.length === 0}
-      <p>
-        No records exist for this period. Change the date range or add entries from
-        <a href="/home">Home</a>.
-      </p>
-    {:else}
-      <div>
-        <p>Net total</p>
-        <p class="amount amount--accent">
-          {netTotal.toFixed(2)}
+  <Block title="Category breakdown">
+    <div aria-live="polite">
+      {#if loading}
+        <p>Loading stats...</p>
+      {:else if loadError}
+        <p role="alert">{loadError}</p>
+      {:else if records.length === 0}
+        <p>
+          No records exist for this period. Change the date range or add entries from
+          <a href="/home">Home</a>.
         </p>
-
+      {:else}
         <div>
+          <p>Net total</p>
+          <p class="amount amount--accent">
+            {netTotal.toFixed(2)}
+          </p>
+
           <div>
-            <span>Income</span>
-            <span class="amount amount--income">{incomeTotal.toFixed(2)}</span>
-          </div>
-          <div>
-            <span>Expense</span>
-            <span class="amount amount--expense">-{expenseTotal.toFixed(2)}</span>
+            <div>
+              <span>Income</span>
+              <span class="amount amount--income">{incomeTotal.toFixed(2)}</span>
+            </div>
+            <div>
+              <span>Expense</span>
+              <span class="amount amount--expense">-{expenseTotal.toFixed(2)}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <p>Category breakdown</p>
-        {#each breakdown as item}
-          <ListRow type={item.total >= 0 ? 'income' : 'expense'}>
-            <svelte:fragment slot="main">
-              <span>{item.name}</span>
-              <span
-                class="amount"
-                class:amount--income={item.total >= 0}
-                class:amount--expense={item.total < 0}
-              >
-                {item.total.toFixed(2)}
-              </span>
-            </svelte:fragment>
-            <svelte:fragment slot="sub">
-              <span>{item.share.toFixed(1)}% of activity</span>
-              <span>{item.isIncome ? 'Income' : 'Expense'}</span>
-            </svelte:fragment>
-            <div aria-hidden="true">
-              <div></div>
-            </div>
-          </ListRow>
-        {/each}
-      </div>
-    {/if}
-  </section>
+        <div>
+          {#each breakdown as item}
+            <ListRow type={item.total >= 0 ? 'income' : 'expense'}>
+              <svelte:fragment slot="main">
+                <span>{item.name}</span>
+                <span
+                  class="amount"
+                  class:amount--income={item.total >= 0}
+                  class:amount--expense={item.total < 0}
+                >
+                  {item.total.toFixed(2)}
+                </span>
+              </svelte:fragment>
+              <svelte:fragment slot="sub">
+                <span>{item.share.toFixed(1)}% of activity</span>
+                <span>{item.isIncome ? 'Income' : 'Expense'}</span>
+              </svelte:fragment>
+              <div aria-hidden="true">
+                <div></div>
+              </div>
+            </ListRow>
+          {/each}
+        </div>
+      {/if}
+    </div>
+  </Block>
 </main>

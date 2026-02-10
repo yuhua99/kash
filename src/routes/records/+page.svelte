@@ -7,6 +7,7 @@
   import ListRow from '$lib/components/ListRow.svelte'
   import PeriodControls from '$lib/components/PeriodControls.svelte'
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
+  import Block from '$lib/components/Block.svelte'
   import {
     dateValueToIso,
     isoToDateValue,
@@ -463,11 +464,7 @@
 <svelte:window on:click={onMainClick} />
 
 <main>
-  <section>
-    <header>
-      <p>Records</p>
-    </header>
-
+  <Block title="Records">
     <PeriodControls
       bind:preset={periodPreset}
       bind:start={startDate}
@@ -575,232 +572,236 @@
         </div>
       </div>
     </div>
-  </section>
+  </Block>
 
-  <section aria-live="polite">
-    {#if successMessage}
-      <p role="status">{successMessage}</p>
-    {/if}
+  <Block title="Records">
+    <div aria-live="polite">
+      {#if successMessage}
+        <p role="status">{successMessage}</p>
+      {/if}
 
-    {#if mutationError}
-      <p role="alert">{mutationError}</p>
-    {/if}
+      {#if mutationError}
+        <p role="alert">{mutationError}</p>
+      {/if}
 
-    {#if loading}
-      <p>Loading records...</p>
-    {:else if loadError}
-      <p role="alert">{loadError}</p>
-    {:else if filteredRecords.length === 0}
-      <p>
-        No matches. Add new records from
-        <a href="/home">Home</a>.
-      </p>
-    {:else}
-      <div>
-        {#each groupedRecords as group (group.date)}
-          <section aria-labelledby={`records-date-${group.date}`}>
-            <p id={`records-date-${group.date}`}>{group.date}</p>
-            {#each group.records as record (record.id)}
-              <div
-                data-action-row-shell
-                class="row-action-shell"
-                data-type={record.amount > 0 ? 'income' : 'expense'}
-                role="button"
-                tabindex="0"
-                on:click={(event) => onRowShellClick(event, record.id)}
-                on:keydown={(event) => onRowShellKeydown(event, record.id)}
-              >
-                <ListRow type={record.amount > 0 ? 'income' : 'expense'}>
-                  <div slot="main">{record.name}</div>
-                  <div slot="end">
-                    <div
-                      class="amount"
-                      class:amount--income={record.amount > 0}
-                      class:amount--expense={record.amount < 0}
-                    >
-                      {record.amount.toFixed(2)}
+      {#if loading}
+        <p>Loading records...</p>
+      {:else if loadError}
+        <p role="alert">{loadError}</p>
+      {:else if filteredRecords.length === 0}
+        <p>
+          No matches. Add new records from
+          <a href="/home">Home</a>.
+        </p>
+      {:else}
+        <div class="section-list">
+          {#each groupedRecords as group (group.date)}
+            <section class="section-compact" aria-labelledby={`records-date-${group.date}`}>
+              <p id={`records-date-${group.date}`}>{group.date}</p>
+              {#each group.records as record (record.id)}
+                <div
+                  data-action-row-shell
+                  class="row-action-shell"
+                  data-type={record.amount > 0 ? 'income' : 'expense'}
+                  role="button"
+                  tabindex="0"
+                  on:click={(event) => onRowShellClick(event, record.id)}
+                  on:keydown={(event) => onRowShellKeydown(event, record.id)}
+                >
+                  <ListRow type={record.amount > 0 ? 'income' : 'expense'}>
+                    <div slot="main">{record.name}</div>
+                    <div slot="end">
+                      <div
+                        class="amount"
+                        class:amount--income={record.amount > 0}
+                        class:amount--expense={record.amount < 0}
+                      >
+                        {record.amount.toFixed(2)}
+                      </div>
                     </div>
-                  </div>
-                  <svelte:fragment slot="sub">
-                    <span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
-                  </svelte:fragment>
-                </ListRow>
-                {#if activeActionRowId === record.id}
-                  <div class="row-action-panel">
-                    <Button.Root
-                      class="btn btn--compact"
-                      type="button"
-                      onclick={() => startEdit(record)}
-                    >
-                      Edit
-                    </Button.Root>
-                    <Button.Root
-                      class="btn btn--compact"
-                      type="button"
-                      disabled={deletingId === record.id}
-                      onclick={() => requestDeleteRecord(record)}
-                    >
-                      {deletingId === record.id ? 'Deleting...' : 'Delete'}
-                    </Button.Root>
-                  </div>
+                    <svelte:fragment slot="sub">
+                      <span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span
+                      >
+                    </svelte:fragment>
+                  </ListRow>
+                  {#if activeActionRowId === record.id}
+                    <div class="row-action-panel">
+                      <Button.Root
+                        class="btn btn--compact"
+                        type="button"
+                        onclick={() => startEdit(record)}
+                      >
+                        Edit
+                      </Button.Root>
+                      <Button.Root
+                        class="btn btn--compact"
+                        type="button"
+                        disabled={deletingId === record.id}
+                        onclick={() => requestDeleteRecord(record)}
+                      >
+                        {deletingId === record.id ? 'Deleting...' : 'Delete'}
+                      </Button.Root>
+                    </div>
+                  {/if}
+                </div>
+              {/each}
+            </section>
+          {/each}
+        </div>
+
+        <Dialog.Root open={editDialogOpen} onOpenChange={onEditDialogOpenChange}>
+          <Dialog.Portal>
+            <Dialog.Overlay class="dialog-overlay" />
+            <Dialog.Content class="dialog-content">
+              <Dialog.Title>Edit record</Dialog.Title>
+              <Dialog.Description>
+                {editRecordName ? `Update "${editRecordName}".` : 'Update selected record.'}
+              </Dialog.Description>
+
+              <div>
+                <label for="edit-record-name">Name</label>
+                <input id="edit-record-name" type="text" bind:value={editName} />
+                {#if editNameError}
+                  <p role="alert">{editNameError}</p>
                 {/if}
               </div>
-            {/each}
-          </section>
-        {/each}
-      </div>
 
-      <Dialog.Root open={editDialogOpen} onOpenChange={onEditDialogOpenChange}>
-        <Dialog.Portal>
-          <Dialog.Overlay class="dialog-overlay" />
-          <Dialog.Content class="dialog-content">
-            <Dialog.Title>Edit record</Dialog.Title>
-            <Dialog.Description>
-              {editRecordName ? `Update "${editRecordName}".` : 'Update selected record.'}
-            </Dialog.Description>
+              <div>
+                <label for="edit-record-amount">Amount</label>
+                <input
+                  id="edit-record-amount"
+                  type="number"
+                  step="0.01"
+                  bind:value={editAmountInput}
+                />
+                {#if editAmountError}
+                  <p role="alert">{editAmountError}</p>
+                {/if}
+              </div>
 
-            <div>
-              <label for="edit-record-name">Name</label>
-              <input id="edit-record-name" type="text" bind:value={editName} />
-              {#if editNameError}
-                <p role="alert">{editNameError}</p>
-              {/if}
-            </div>
-
-            <div>
-              <label for="edit-record-amount">Amount</label>
-              <input
-                id="edit-record-amount"
-                type="number"
-                step="0.01"
-                bind:value={editAmountInput}
-              />
-              {#if editAmountError}
-                <p role="alert">{editAmountError}</p>
-              {/if}
-            </div>
-
-            <div>
-              <label for="edit-record-category">Category</label>
-              <Select.Root
-                type="single"
-                value={editCategoryId}
-                onValueChange={onEditCategoryChange}
-              >
-                <Select.Trigger class="control" id="edit-record-category">
-                  {editCategoryLabel}
-                </Select.Trigger>
-                <Select.Portal>
-                  <Select.Content class="popover" sideOffset={6} align="start">
-                    <Select.Viewport>
-                      <Select.Item value="" label="Choose category">
-                        {#snippet children({ selected })}
-                          <span>Choose category</span>
-                          {#if selected}
-                            <span aria-hidden="true">Selected</span>
-                          {/if}
-                        {/snippet}
-                      </Select.Item>
-                      {#each categories as category}
-                        <Select.Item value={category.id} label={category.name}>
+              <div>
+                <label for="edit-record-category">Category</label>
+                <Select.Root
+                  type="single"
+                  value={editCategoryId}
+                  onValueChange={onEditCategoryChange}
+                >
+                  <Select.Trigger class="control" id="edit-record-category">
+                    {editCategoryLabel}
+                  </Select.Trigger>
+                  <Select.Portal>
+                    <Select.Content class="popover" sideOffset={6} align="start">
+                      <Select.Viewport>
+                        <Select.Item value="" label="Choose category">
                           {#snippet children({ selected })}
-                            <span>{category.name}</span>
+                            <span>Choose category</span>
                             {#if selected}
                               <span aria-hidden="true">Selected</span>
                             {/if}
                           {/snippet}
                         </Select.Item>
-                      {/each}
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select.Portal>
-              </Select.Root>
-              {#if editCategoryError}
-                <p role="alert">{editCategoryError}</p>
-              {/if}
-            </div>
+                        {#each categories as category}
+                          <Select.Item value={category.id} label={category.name}>
+                            {#snippet children({ selected })}
+                              <span>{category.name}</span>
+                              {#if selected}
+                                <span aria-hidden="true">Selected</span>
+                              {/if}
+                            {/snippet}
+                          </Select.Item>
+                        {/each}
+                      </Select.Viewport>
+                    </Select.Content>
+                  </Select.Portal>
+                </Select.Root>
+                {#if editCategoryError}
+                  <p role="alert">{editCategoryError}</p>
+                {/if}
+              </div>
 
-            <div>
-              <label for="edit-record-date">Date</label>
-              <DatePicker.Root value={editDateValue} onValueChange={onEditDateChange}>
-                <DatePicker.Trigger class="control" id="edit-record-date" type="button">
-                  {editDate || 'Pick a date'}
-                </DatePicker.Trigger>
-                <DatePicker.Portal>
-                  <DatePicker.Content class="popover" sideOffset={6} align="start">
-                    <DatePicker.Calendar class="calendar">
-                      {#snippet children({ months, weekdays })}
-                        <DatePicker.Header>
-                          <DatePicker.PrevButton aria-label="Previous month"
-                            >Prev</DatePicker.PrevButton
-                          >
-                          <DatePicker.Heading />
-                          <DatePicker.NextButton aria-label="Next month">Next</DatePicker.NextButton
-                          >
-                        </DatePicker.Header>
-                        <div>
-                          {#each months as month (month.value.toString())}
-                            <DatePicker.Grid>
-                              <DatePicker.GridHead>
-                                <DatePicker.GridRow>
-                                  {#each weekdays as day}
-                                    <DatePicker.HeadCell>{day}</DatePicker.HeadCell>
-                                  {/each}
-                                </DatePicker.GridRow>
-                              </DatePicker.GridHead>
-                              <DatePicker.GridBody>
-                                {#each month.weeks as weekDates}
+              <div>
+                <label for="edit-record-date">Date</label>
+                <DatePicker.Root value={editDateValue} onValueChange={onEditDateChange}>
+                  <DatePicker.Trigger class="control" id="edit-record-date" type="button">
+                    {editDate || 'Pick a date'}
+                  </DatePicker.Trigger>
+                  <DatePicker.Portal>
+                    <DatePicker.Content class="popover" sideOffset={6} align="start">
+                      <DatePicker.Calendar class="calendar">
+                        {#snippet children({ months, weekdays })}
+                          <DatePicker.Header>
+                            <DatePicker.PrevButton aria-label="Previous month"
+                              >Prev</DatePicker.PrevButton
+                            >
+                            <DatePicker.Heading />
+                            <DatePicker.NextButton aria-label="Next month"
+                              >Next</DatePicker.NextButton
+                            >
+                          </DatePicker.Header>
+                          <div>
+                            {#each months as month (month.value.toString())}
+                              <DatePicker.Grid>
+                                <DatePicker.GridHead>
                                   <DatePicker.GridRow>
-                                    {#each weekDates as calendarDate}
-                                      <DatePicker.Cell date={calendarDate} month={month.value}>
-                                        <DatePicker.Day>{calendarDate.day}</DatePicker.Day>
-                                      </DatePicker.Cell>
+                                    {#each weekdays as day}
+                                      <DatePicker.HeadCell>{day}</DatePicker.HeadCell>
                                     {/each}
                                   </DatePicker.GridRow>
-                                {/each}
-                              </DatePicker.GridBody>
-                            </DatePicker.Grid>
-                          {/each}
-                        </div>
-                      {/snippet}
-                    </DatePicker.Calendar>
-                  </DatePicker.Content>
-                </DatePicker.Portal>
-              </DatePicker.Root>
-              {#if editDateError}
-                <p role="alert">{editDateError}</p>
-              {/if}
-            </div>
+                                </DatePicker.GridHead>
+                                <DatePicker.GridBody>
+                                  {#each month.weeks as weekDates}
+                                    <DatePicker.GridRow>
+                                      {#each weekDates as calendarDate}
+                                        <DatePicker.Cell date={calendarDate} month={month.value}>
+                                          <DatePicker.Day>{calendarDate.day}</DatePicker.Day>
+                                        </DatePicker.Cell>
+                                      {/each}
+                                    </DatePicker.GridRow>
+                                  {/each}
+                                </DatePicker.GridBody>
+                              </DatePicker.Grid>
+                            {/each}
+                          </div>
+                        {/snippet}
+                      </DatePicker.Calendar>
+                    </DatePicker.Content>
+                  </DatePicker.Portal>
+                </DatePicker.Root>
+                {#if editDateError}
+                  <p role="alert">{editDateError}</p>
+                {/if}
+              </div>
 
-            <div class="button-row">
-              <Button.Root
-                class="btn btn--primary"
-                type="button"
-                onclick={saveEdit}
-                disabled={savingEdit}
-              >
-                {savingEdit ? 'Saving...' : 'Save changes'}
-              </Button.Root>
-              <Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
-                Cancel
-              </Button.Root>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+              <div class="button-row">
+                <Button.Root
+                  class="btn btn--primary"
+                  type="button"
+                  onclick={saveEdit}
+                  disabled={savingEdit}
+                >
+                  {savingEdit ? 'Saving...' : 'Save changes'}
+                </Button.Root>
+                <Button.Root class="btn btn--secondary" type="button" onclick={cancelEdit}>
+                  Cancel
+                </Button.Root>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
 
-      <ConfirmDialog
-        open={deleteDialogOpen}
-        onOpenChange={onDeleteDialogOpenChange}
-        title="Delete record"
-        description={pendingDeleteRecord
-          ? `Delete record "${pendingDeleteRecord.name}"? This cannot be undone.`
-          : 'Delete selected record? This cannot be undone.'}
-        confirmLabel="Delete"
-        confirmBusyLabel="Deleting..."
-        busy={deletingId === pendingDeleteRecord?.id}
-        onConfirm={confirmDeleteRecord}
-      />
-    {/if}
-  </section>
+        <ConfirmDialog
+          open={deleteDialogOpen}
+          onOpenChange={onDeleteDialogOpenChange}
+          title="Delete record"
+          description={pendingDeleteRecord
+            ? `Delete record "${pendingDeleteRecord.name}"? This cannot be undone.`
+            : 'Delete selected record? This cannot be undone.'}
+          confirmLabel="Delete"
+          confirmBusyLabel="Deleting..."
+          busy={deletingId === pendingDeleteRecord?.id}
+          onConfirm={confirmDeleteRecord}
+        />
+      {/if}
+    </div>
+  </Block>
 </main>

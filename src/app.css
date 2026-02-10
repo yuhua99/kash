@@ -112,12 +112,49 @@ main > header p {
   line-height: 1.2;
 }
 
+.block {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.block__header p {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.block__content {
+  display: grid;
+  gap: 16px;
+}
+
+.section-list {
+  display: grid;
+  gap: 12px;
+}
+
+.section-compact {
+  gap: 8px;
+}
+
 section {
   display: grid;
   gap: 16px;
 }
 
-main > section + section {
+main > section:not(.block) + section:not(.block) {
   border-top: 1px solid var(--border);
   padding-top: 16px;
 }
@@ -258,7 +295,7 @@ form .btn {
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: grid;
-  grid-template-columns: auto repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   z-index: 10;
 }
 

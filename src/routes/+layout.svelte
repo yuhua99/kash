@@ -7,7 +7,7 @@
   export let data: App.PageData
 
   const navItems = [
-    { href: '/home', label: 'Home' },
+    { href: '/home', label: 'KASH!' },
     { href: '/records', label: 'Records' },
     { href: '/categories', label: 'Categories' },
     { href: '/stats', label: 'Stats' },
@@ -43,7 +43,6 @@
 <div class="app" data-shell={isAuthRoute ? 'auth' : 'app'} data-route={pathname}>
   {#if data.user && !isAuthRoute}
     <Menubar.Root class="menubar" aria-label="Primary">
-      <div class="menubar__brand" aria-label="Brand">kash!</div>
       {#each navItems as item}
         <Menubar.Menu value={item.href}>
           <Menubar.Trigger
