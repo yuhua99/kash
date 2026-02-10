@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import { DateRangePicker, Select, type DateRange } from 'bits-ui'
+  import { DateRangePicker, type DateRange } from 'bits-ui'
+  import SelectField from '$lib/components/SelectField.svelte'
   import {
     dateValueToIso,
     isoToDateValue,
@@ -81,31 +82,14 @@
 <section class="period-controls" aria-label="Period controls">
   <div>
     <label for="period-preset">Period</label>
-    <Select.Root
-      type="single"
+    <SelectField
+      id="period-preset"
       value={preset}
+      label={presetLabel}
+      items={presetOptions}
       {disabled}
       onValueChange={onPresetChange}
-      items={presetOptions}
-    >
-      <Select.Trigger class="control" id="period-preset">{presetLabel}</Select.Trigger>
-      <Select.Portal>
-        <Select.Content class="popover" sideOffset={6} align="start">
-          <Select.Viewport>
-            {#each presetOptions as option}
-              <Select.Item value={option.value} label={option.label}>
-                {#snippet children({ selected })}
-                  <span>{option.label}</span>
-                  {#if selected}
-                    <span aria-hidden="true">Selected</span>
-                  {/if}
-                {/snippet}
-              </Select.Item>
-            {/each}
-          </Select.Viewport>
-        </Select.Content>
-      </Select.Portal>
-    </Select.Root>
+    />
   </div>
 
   {#if preset === 'custom'}

@@ -1,13 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
   import type { DateValue } from '@internationalized/date'
-  import { Button, DatePicker, Select, Tabs } from 'bits-ui'
+  import { Button, DatePicker, Tabs } from 'bits-ui'
   import { createRecord } from '$lib/features/records/api'
   import { getCategoriesCached } from '$lib/features/categories/cache'
   import { dateValueToIso, isoToDateValue, todayIso } from '$lib/shared/date'
   import type { Category } from '$lib/core/domain/models'
   import { validateAmount, validateDate, validateRecordName } from '$lib/shared/validation'
   import Block from '$lib/components/Block.svelte'
+  import SelectField from '$lib/components/SelectField.svelte'
   import { onMount } from 'svelte'
 
   type ApiError = Error & { status?: number }
@@ -33,6 +34,10 @@
   $: parsedAmount = Number(amountInput)
   $: isIncome = recordType === 'income'
   $: filteredCategories = categories.filter((category) => category.is_income === isIncome)
+  $: categorySelectItems = filteredCategories.map((category) => ({
+    value: category.id,
+    label: category.name,
+  }))
   $: selectedCategoryLabel =
     filteredCategories.find((category) => category.id === categoryId)?.name ?? 'Choose category'
   $: dateValue = isoToDateValue(date)
@@ -198,27 +203,13 @@
 
         <div>
           <label for="record-category">Category</label>
-          <Select.Root type="single" value={categoryId} onValueChange={onCategoryChange}>
-            <Select.Trigger class="control" id="record-category">
-              {selectedCategoryLabel}
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content class="popover" sideOffset={6} align="start">
-                <Select.Viewport>
-                  {#each filteredCategories as category}
-                    <Select.Item value={category.id} label={category.name}>
-                      {#snippet children({ selected })}
-                        <span>{category.name}</span>
-                        {#if selected}
-                          <span aria-hidden="true">Selected</span>
-                        {/if}
-                      {/snippet}
-                    </Select.Item>
-                  {/each}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
+          <SelectField
+            id="record-category"
+            value={categoryId}
+            label={selectedCategoryLabel}
+            items={categorySelectItems}
+            onValueChange={onCategoryChange}
+          />
           {#if categoryError}
             <p role="alert">{categoryError}</p>
           {/if}

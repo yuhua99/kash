@@ -484,23 +484,6 @@ form .btn {
   font-size: 12px;
 }
 
-.popover [role='option'],
-.popover [role='menuitem'] {
-  padding: 8px 12px;
-  cursor: pointer;
-  color: var(--text);
-}
-
-.popover [role='option'][aria-selected='true'],
-.popover [role='menuitem'][data-highlighted] {
-  background: var(--selection);
-}
-
-.popover [role='option'][data-selected],
-.popover [role='option'][aria-selected='true'] {
-  color: var(--accent);
-}
-
 .menu-trigger {
   display: inline-flex;
   align-items: center;

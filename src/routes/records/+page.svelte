@@ -1,13 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
   import type { DateValue } from '@internationalized/date'
-  import { Button, DatePicker, Dialog, Select } from 'bits-ui'
+  import { Button, DatePicker, Dialog } from 'bits-ui'
   import { deleteRecord, getRecords, updateRecord } from '$lib/features/records/api'
   import { getCategoriesCached } from '$lib/features/categories/cache'
   import ListRow from '$lib/components/ListRow.svelte'
   import PeriodControls from '$lib/components/PeriodControls.svelte'
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
   import Block from '$lib/components/Block.svelte'
+  import SelectField from '$lib/components/SelectField.svelte'
   import {
     dateValueToIso,
     isoToDateValue,
@@ -113,6 +114,14 @@
     sortOptions.find((option) => option.value === sortMode)?.label ?? 'Date (newest)'
   $: editCategoryLabel =
     categories.find((category) => category.id === editCategoryId)?.name ?? 'Choose category'
+  $: categoryFilterItems = [
+    { value: 'all', label: 'All categories' },
+    ...categories.map((category) => ({ value: category.id, label: category.name })),
+  ]
+  $: editCategoryItems = [
+    { value: '', label: 'Choose category' },
+    ...categories.map((category) => ({ value: category.id, label: category.name })),
+  ]
   $: editRecordName = records.find((record) => record.id === editingId)?.name ?? ''
   $: editDateValue = isoToDateValue(editDate)
   $: filteredRecords = records
@@ -490,85 +499,35 @@
       <div>
         <div>
           <label for="records-category-filter">Category</label>
-          <Select.Root type="single" value={categoryFilter} onValueChange={onCategoryFilterChange}>
-            <Select.Trigger class="control" id="records-category-filter">
-              {categoryFilterLabel}
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content class="popover" sideOffset={6} align="start">
-                <Select.Viewport>
-                  <Select.Item value="all" label="All categories">
-                    {#snippet children({ selected })}
-                      <span>All categories</span>
-                      {#if selected}
-                        <span aria-hidden="true">Selected</span>
-                      {/if}
-                    {/snippet}
-                  </Select.Item>
-                  {#each categories as category}
-                    <Select.Item value={category.id} label={category.name}>
-                      {#snippet children({ selected })}
-                        <span>{category.name}</span>
-                        {#if selected}
-                          <span aria-hidden="true">Selected</span>
-                        {/if}
-                      {/snippet}
-                    </Select.Item>
-                  {/each}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
+          <SelectField
+            id="records-category-filter"
+            value={categoryFilter}
+            label={categoryFilterLabel}
+            items={categoryFilterItems}
+            onValueChange={onCategoryFilterChange}
+          />
         </div>
 
         <div>
           <label for="records-type-filter">Type</label>
-          <Select.Root type="single" value={typeFilter} onValueChange={onTypeFilterChange}>
-            <Select.Trigger class="control" id="records-type-filter">
-              {typeFilterLabel}
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content class="popover" sideOffset={6} align="start">
-                <Select.Viewport>
-                  {#each typeFilterOptions as option}
-                    <Select.Item value={option.value} label={option.label}>
-                      {#snippet children({ selected })}
-                        <span>{option.label}</span>
-                        {#if selected}
-                          <span aria-hidden="true">Selected</span>
-                        {/if}
-                      {/snippet}
-                    </Select.Item>
-                  {/each}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
+          <SelectField
+            id="records-type-filter"
+            value={typeFilter}
+            label={typeFilterLabel}
+            items={typeFilterOptions}
+            onValueChange={onTypeFilterChange}
+          />
         </div>
 
         <div>
           <label for="records-sort">Sort</label>
-          <Select.Root type="single" value={sortMode} onValueChange={onSortModeChange}>
-            <Select.Trigger class="control" id="records-sort">
-              {sortModeLabel}
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content class="popover" sideOffset={6} align="start">
-                <Select.Viewport>
-                  {#each sortOptions as option}
-                    <Select.Item value={option.value} label={option.label}>
-                      {#snippet children({ selected })}
-                        <span>{option.label}</span>
-                        {#if selected}
-                          <span aria-hidden="true">Selected</span>
-                        {/if}
-                      {/snippet}
-                    </Select.Item>
-                  {/each}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
+          <SelectField
+            id="records-sort"
+            value={sortMode}
+            label={sortModeLabel}
+            items={sortOptions}
+            onValueChange={onSortModeChange}
+          />
         </div>
       </div>
     </div>
@@ -681,39 +640,13 @@
 
               <div>
                 <label for="edit-record-category">Category</label>
-                <Select.Root
-                  type="single"
+                <SelectField
+                  id="edit-record-category"
                   value={editCategoryId}
+                  label={editCategoryLabel}
+                  items={editCategoryItems}
                   onValueChange={onEditCategoryChange}
-                >
-                  <Select.Trigger class="control" id="edit-record-category">
-                    {editCategoryLabel}
-                  </Select.Trigger>
-                  <Select.Portal>
-                    <Select.Content class="popover" sideOffset={6} align="start">
-                      <Select.Viewport>
-                        <Select.Item value="" label="Choose category">
-                          {#snippet children({ selected })}
-                            <span>Choose category</span>
-                            {#if selected}
-                              <span aria-hidden="true">Selected</span>
-                            {/if}
-                          {/snippet}
-                        </Select.Item>
-                        {#each categories as category}
-                          <Select.Item value={category.id} label={category.name}>
-                            {#snippet children({ selected })}
-                              <span>{category.name}</span>
-                              {#if selected}
-                                <span aria-hidden="true">Selected</span>
-                              {/if}
-                            {/snippet}
-                          </Select.Item>
-                        {/each}
-                      </Select.Viewport>
-                    </Select.Content>
-                  </Select.Portal>
-                </Select.Root>
+                />
                 {#if editCategoryError}
                   <p role="alert">{editCategoryError}</p>
                 {/if}
