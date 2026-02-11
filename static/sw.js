@@ -2,7 +2,15 @@ const SHELL_CACHE = 'kash-shell-v1'
 const STATIC_CACHE = 'kash-static-v1'
 const MAX_STATIC_ENTRIES = 80
 
-const CORE_ASSETS = ['/', '/manifest.webmanifest', '/icons/icon-192.svg', '/icons/icon-512.svg']
+const CORE_ASSETS = [
+  '/',
+  '/manifest.webmanifest',
+  '/apple-touch-icon.png',
+  '/apple-touch-icon-precomposed.png',
+  '/favicon.ico',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
