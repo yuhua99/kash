@@ -1,31 +1,126 @@
 .date-popover {
+  z-index: 50;
   background: var(--panel);
   border: 1px solid var(--border);
-  padding: 8px 0;
+  padding: 8px;
+  width: max-content;
+  max-width: min(100vw - 24px, 320px);
 }
 
 .date-calendar {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 12px;
+  background: transparent;
+  border: 0;
+  padding: 0;
   display: grid;
   gap: 8px;
 }
 
-.date-calendar button {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text);
+.date-calendar header {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-calendar header > :nth-child(2) {
+  text-align: center;
+}
+
+.date-calendar header button {
   height: 32px;
-  width: 32px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
   cursor: pointer;
 }
 
-.date-calendar button[aria-selected='true'] {
-  background: var(--accent);
-  color: var(--bg);
+.date-calendar header button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--panel-strong);
 }
 
-.date-calendar button[aria-current='date'] {
+.date-calendar table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 2px;
+}
+
+.date-calendar th {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 400;
+  height: 28px;
+}
+
+.date-calendar td {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.date-calendar [data-bits-day] {
+  width: 100%;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.date-calendar [data-bits-day]:hover:not([data-disabled]):not([data-unavailable]) {
   border-color: var(--accent);
+  background: var(--selection);
+}
+
+.date-calendar [data-bits-day][data-selected] {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.date-calendar [data-bits-day][data-today]:not([data-selected]) {
+  border-color: var(--accent);
+}
+
+.date-calendar [data-bits-day][data-range-middle] {
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+  color: var(--text);
+}
+
+.date-calendar [data-bits-day][data-range-start],
+.date-calendar [data-bits-day][data-range-end],
+.date-calendar [data-bits-day][data-selection-start],
+.date-calendar [data-bits-day][data-selection-end] {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.date-calendar [data-bits-day][data-outside-month] {
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+.date-calendar [data-bits-day][data-unavailable],
+.date-calendar [data-bits-day][data-disabled],
+.date-calendar header button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.date-calendar [data-bits-day]:focus-visible,
+.date-calendar header button:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (max-width: 719px) {
+  .date-popover {
+    max-width: calc(100vw - 20px);
+  }
 }

@@ -1,11 +1,133 @@
 .period-controls {
-  display: grid;
-  gap: 16px;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  gap: 8px;
 }
 
-@media (min-width: 720px) {
+.period-controls__preset-cell {
+  flex: 0 0 clamp(150px, 18vw, 170px);
+}
+
+.period-controls__value-cell {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.period-controls__preset-cell > *,
+.period-controls__value-cell > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.period-controls__custom {
+  width: 100%;
+}
+
+.period-controls__year-select {
+  width: 100%;
+}
+
+.period-controls__month-picker {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.period-controls__month-trigger {
+  width: 100%;
+}
+
+.period-controls__month-trigger--open {
+  border-color: var(--accent);
+  background: var(--panel-strong);
+}
+
+.period-controls__month-trigger:hover {
+  border-color: var(--accent);
+}
+
+.period-controls__month-menu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 4px);
+  z-index: 50;
+  width: 100%;
+  min-width: 228px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.period-controls__month-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.period-controls__month-menu-year {
+  color: var(--text);
+}
+
+.period-controls__month-year-nav {
+  height: 32px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.period-controls__month-year-nav:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--panel-strong);
+}
+
+.period-controls__month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.period-controls__month-option {
+  height: 34px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.period-controls__month-option:hover:not(:disabled):not(.period-controls__month-option--selected) {
+  border-color: var(--accent);
+  background: var(--selection);
+}
+
+.period-controls__month-option--selected {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.period-controls__month-option:disabled,
+.period-controls__month-year-nav:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 719px) {
   .period-controls {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: end;
+    flex-wrap: wrap;
+  }
+
+  .period-controls__preset-cell,
+  .period-controls__value-cell {
+    flex: 1 1 100%;
+  }
+
+  .period-controls__month-menu {
+    min-width: 0;
   }
 }

@@ -34,6 +34,7 @@
   background: var(--panel);
   border: 1px solid var(--border);
   padding: 4px 0;
+  z-index: 60;
   border-radius: 0;
   width: var(--bits-select-anchor-width);
   min-width: var(--bits-select-anchor-width);

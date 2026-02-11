@@ -20,7 +20,6 @@
 
   type ApiError = Error & { status?: number }
   type SortMode = 'date_desc' | 'date_asc' | 'category_asc' | 'amount_desc' | 'amount_asc'
-  type TypeFilter = 'all' | 'income' | 'expense'
   type SelectOption = {
     value: string
     label: string
@@ -54,7 +53,6 @@
 
   let search = ''
   let categoryFilter = 'all'
-  let typeFilter: TypeFilter = 'all'
   let sortMode: SortMode = 'date_desc'
 
   let editingId: string | null = null
@@ -75,12 +73,6 @@
   let deletingId: string | null = null
   let activeActionRowId: string | null = null
 
-  const typeFilterOptions: SelectOption[] = [
-    { value: 'all', label: 'All' },
-    { value: 'income', label: 'Income' },
-    { value: 'expense', label: 'Expense' },
-  ]
-
   const sortOptions: Array<{ value: SortMode; label: string }> = [
     { value: 'date_desc', label: 'Date (newest)' },
     { value: 'date_asc', label: 'Date (oldest)' },
@@ -88,10 +80,6 @@
     { value: 'amount_desc', label: 'Amount (high to low)' },
     { value: 'amount_asc', label: 'Amount (low to high)' },
   ]
-
-  function isTypeFilter(value: string): value is TypeFilter {
-    return value === 'all' || value === 'income' || value === 'expense'
-  }
 
   function isSortMode(value: string): value is SortMode {
     return (
@@ -111,8 +99,6 @@
     categoryFilter === 'all'
       ? 'All categories'
       : (categories.find((category) => category.id === categoryFilter)?.name ?? 'All categories')
-  $: typeFilterLabel =
-    typeFilterOptions.find((option) => option.value === typeFilter)?.label ?? 'All'
   $: sortModeLabel =
     sortOptions.find((option) => option.value === sortMode)?.label ?? 'Date (newest)'
   $: editCategoryLabel =
@@ -176,14 +162,6 @@
 
     if (categoryFilter !== 'all' && record.category_id !== categoryFilter) {
       return false
-    }
-
-    if (typeFilter === 'income') {
-      return record.amount > 0
-    }
-
-    if (typeFilter === 'expense') {
-      return record.amount < 0
     }
 
     return true
@@ -353,12 +331,6 @@
     categoryFilter = nextCategoryId
   }
 
-  function onTypeFilterChange(nextType: string): void {
-    if (isTypeFilter(nextType)) {
-      typeFilter = nextType
-    }
-  }
-
   function onSortModeChange(nextSortMode: string): void {
     if (isSortMode(nextSortMode)) {
       sortMode = nextSortMode
@@ -493,15 +465,11 @@
       {categoryFilter}
       {categoryFilterLabel}
       {categoryFilterItems}
-      {typeFilter}
-      {typeFilterLabel}
-      {typeFilterOptions}
       {sortMode}
       {sortModeLabel}
       {sortOptions}
       {onPeriodChange}
       {onCategoryFilterChange}
-      {onTypeFilterChange}
       {onSortModeChange}
     />
   </Block>
