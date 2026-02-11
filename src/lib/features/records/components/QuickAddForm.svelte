@@ -5,7 +5,7 @@
   import { createRecord } from '$lib/features/records/api'
   import { invalidateRecordsCache } from '$lib/features/records/cache'
   import { dateValueToIso, isoToDateValue, todayIso } from '$lib/shared/date'
-  import type { Category } from '$lib/core/domain/models'
+  import type { Category, RecordItem } from '$lib/core/domain/models'
   import { validateAmount, validateDate, validateRecordName } from '$lib/shared/validation'
   import Block from '$lib/ui/Block.svelte'
   import Button from '$lib/ui/Button.svelte'
@@ -17,6 +17,7 @@
   type ApiError = Error & { status?: number }
 
   export let categories: Category[] = []
+  export let recentRecords: RecordItem[] = []
   export let loading = false
   export let loadError = ''
 
@@ -35,7 +36,10 @@
   let successMessage = ''
   let submitting = false
 
+  const MAX_NAME_SUGGESTIONS = 5
+
   $: parsedAmount = Number(amountInput)
+  $: absoluteAmount = Math.abs(parsedAmount)
   $: isIncome = recordType === 'income'
   $: filteredCategories = categories.filter((category) => category.is_income === isIncome)
   $: categorySelectItems = filteredCategories.map((category) => ({
@@ -48,6 +52,14 @@
   $: if (categoryId && !filteredCategories.some((category) => category.id === categoryId)) {
     categoryId = ''
   }
+  $: canSuggestNames =
+    Boolean(categoryId) &&
+    Number.isFinite(parsedAmount) &&
+    parsedAmount > 0 &&
+    recentRecords.length > 0
+  $: suggestedNames = canSuggestNames
+    ? getSuggestedRecordNames(recentRecords, categoryId, absoluteAmount, MAX_NAME_SUGGESTIONS)
+    : []
 
   function clearValidationErrors(): void {
     nameError = ''
@@ -75,6 +87,48 @@
   function onDateChange(nextDate: DateValue | undefined): void {
     date = dateValueToIso(nextDate)
     dateError = ''
+  }
+
+  function getSuggestedRecordNames(
+    records: RecordItem[],
+    targetCategoryId: string,
+    targetAbsoluteAmount: number,
+    limit: number,
+  ): string[] {
+    const ranked = records
+      .map((record, index) => ({ record, index }))
+      .filter(({ record }) => record.category_id === targetCategoryId)
+      .map(({ record, index }) => ({
+        name: record.name.trim(),
+        diff: Math.abs(Math.abs(record.amount) - targetAbsoluteAmount),
+        index,
+      }))
+      .filter((item) => item.name.length > 0)
+      .sort((left, right) => left.diff - right.diff || left.index - right.index)
+
+    const seen = new Set<string>()
+    const names: string[] = []
+
+    for (const item of ranked) {
+      const normalized = item.name.toLowerCase()
+      if (seen.has(normalized)) {
+        continue
+      }
+
+      seen.add(normalized)
+      names.push(item.name)
+
+      if (names.length >= limit) {
+        break
+      }
+    }
+
+    return names
+  }
+
+  function onSuggestionClick(suggestedName: string): void {
+    name = suggestedName
+    nameError = ''
   }
 
   async function onSubmit(event: SubmitEvent): Promise<void> {
@@ -249,6 +303,19 @@
       <div>
         <label for="record-name">Record name</label>
         <input id="record-name" type="text" bind:value={name} required />
+        {#if suggestedNames.length > 0}
+          <div class="quick-add-suggestions" aria-label="Record name suggestions">
+            {#each suggestedNames as suggestedName (suggestedName)}
+              <button
+                type="button"
+                class="quick-add-suggestions__capsule"
+                on:click={() => onSuggestionClick(suggestedName)}
+              >
+                {suggestedName}
+              </button>
+            {/each}
+          </div>
+        {/if}
         {#if nameError}
           <p role="alert">{nameError}</p>
         {/if}
@@ -260,3 +327,33 @@
     </form>
   {/if}
 </Block>
+
+<style>
+  .quick-add-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .quick-add-suggestions__capsule {
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .quick-add-suggestions__capsule:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .quick-add-suggestions__capsule:focus-visible {
+    border-color: var(--accent-strong);
+    color: var(--text);
+  }
+</style>
