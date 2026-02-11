@@ -2,11 +2,16 @@
   import { Select } from 'bits-ui'
   import './SelectField.css'
 
-  type SelectFieldItem = {
-    value: string
-    label: string
-    disabled?: boolean
-  }
+  type SelectFieldItem =
+    | {
+        kind?: 'item'
+        value: string
+        label: string
+        disabled?: boolean
+      }
+    | {
+        kind: 'separator'
+      }
 
   export let id: string
   export let value: string
@@ -25,15 +30,19 @@
   <Select.Portal>
     <Select.Content class="select-content" {sideOffset} {align}>
       <Select.Viewport class="select-viewport">
-        {#each items as item (item.value)}
-          <Select.Item
-            class="select-item"
-            value={item.value}
-            label={item.label}
-            disabled={item.disabled}
-          >
-            <span class="select-item__label">{item.label}</span>
-          </Select.Item>
+        {#each items as item, index (`${item.kind ?? 'item'}-${index}`)}
+          {#if item.kind === 'separator'}
+            <div class="select-divider" role="separator" aria-hidden="true"></div>
+          {:else}
+            <Select.Item
+              class="select-item"
+              value={item.value}
+              label={item.label}
+              disabled={item.disabled}
+            >
+              <span class="select-item__label">{item.label}</span>
+            </Select.Item>
+          {/if}
         {/each}
       </Select.Viewport>
     </Select.Content>

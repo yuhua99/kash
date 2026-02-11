@@ -20,11 +20,17 @@
   import type { PageData } from './$types'
 
   type ApiError = Error & { status?: number }
-  type SortMode = 'date_desc' | 'date_asc' | 'category_asc' | 'amount_desc' | 'amount_asc'
-  type SelectOption = {
-    value: string
-    label: string
-  }
+  type SortMode = 'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc'
+  type CategoryFilterMode = 'all_expenses' | 'all_incomes' | `category:${string}`
+  type SelectOption =
+    | {
+        kind?: 'item'
+        value: string
+        label: string
+      }
+    | {
+        kind: 'separator'
+      }
   type DateGroup = {
     date: string
     records: RecordItem[]
@@ -53,7 +59,7 @@
   let endDate = data.endDate
 
   let search = ''
-  let categoryFilter = 'all'
+  let categoryFilter: CategoryFilterMode = 'all_expenses'
   let sortMode: SortMode = 'date_desc'
 
   let editingId: string | null = null
@@ -74,10 +80,32 @@
   let deletingId: string | null = null
   let activeActionRowId: string | null = null
 
+  const CATEGORY_FILTER_ALL_EXPENSES: CategoryFilterMode = 'all_expenses'
+  const CATEGORY_FILTER_ALL_INCOMES: CategoryFilterMode = 'all_incomes'
+
+  function toCategoryFilterValue(categoryId: string): CategoryFilterMode {
+    return `category:${categoryId}`
+  }
+
+  function isCategoryFilterMode(value: string): value is CategoryFilterMode {
+    return (
+      value === CATEGORY_FILTER_ALL_EXPENSES ||
+      value === CATEGORY_FILTER_ALL_INCOMES ||
+      value.startsWith('category:')
+    )
+  }
+
+  function categoryIdFromFilterValue(filterValue: CategoryFilterMode): string | null {
+    if (!filterValue.startsWith('category:')) {
+      return null
+    }
+
+    return filterValue.slice('category:'.length)
+  }
+
   const sortOptions: Array<{ value: SortMode; label: string }> = [
     { value: 'date_desc', label: 'Date (newest)' },
     { value: 'date_asc', label: 'Date (oldest)' },
-    { value: 'category_asc', label: 'Category' },
     { value: 'amount_desc', label: 'Amount (high to low)' },
     { value: 'amount_asc', label: 'Amount (low to high)' },
   ]
@@ -86,7 +114,6 @@
     return (
       value === 'date_desc' ||
       value === 'date_asc' ||
-      value === 'category_asc' ||
       value === 'amount_desc' ||
       value === 'amount_asc'
     )
@@ -96,18 +123,33 @@
   $: searchValidationError = validateSearchTerm(normalizedSearchTerm) ?? ''
   $: normalizedSearch = normalizedSearchTerm.toLowerCase()
   $: categoryById = new Map(categories.map((item) => [item.id, item]))
+  $: expenseCategories = categories.filter((category) => !category.is_income)
+  $: incomeCategories = categories.filter((category) => category.is_income)
+  $: selectedCategoryId = categoryIdFromFilterValue(categoryFilter)
   $: categoryFilterLabel =
-    categoryFilter === 'all'
-      ? 'All categories'
-      : (categories.find((category) => category.id === categoryFilter)?.name ?? 'All categories')
+    categoryFilter === CATEGORY_FILTER_ALL_EXPENSES
+      ? 'All expenses'
+      : categoryFilter === CATEGORY_FILTER_ALL_INCOMES
+        ? 'All incomes'
+        : (categories.find((category) => category.id === selectedCategoryId)?.name ??
+          'All expenses')
   $: sortModeLabel =
     sortOptions.find((option) => option.value === sortMode)?.label ?? 'Date (newest)'
   $: editCategoryLabel =
     categories.find((category) => category.id === editCategoryId)?.name ?? 'Choose category'
   $: categoryFilterItems = [
-    { value: 'all', label: 'All categories' },
-    ...categories.map((category) => ({ value: category.id, label: category.name })),
-  ]
+    { value: CATEGORY_FILTER_ALL_EXPENSES, label: 'All expenses' },
+    ...expenseCategories.map((category) => ({
+      value: toCategoryFilterValue(category.id),
+      label: category.name,
+    })),
+    { kind: 'separator' as const },
+    { value: CATEGORY_FILTER_ALL_INCOMES, label: 'All incomes' },
+    ...incomeCategories.map((category) => ({
+      value: toCategoryFilterValue(category.id),
+      label: category.name,
+    })),
+  ] satisfies SelectOption[]
   $: editCategoryItems = [
     { value: '', label: 'Choose category' },
     ...categories.map((category) => ({ value: category.id, label: category.name })),
@@ -115,9 +157,15 @@
   $: editRecordName = records.find((record) => record.id === editingId)?.name ?? ''
   $: editDateValue = isoToDateValue(editDate)
   $: filteredRecords = records
-    .filter((record) => matchesRecordFilters(record, normalizedSearch))
-    .sort((left, right) => compareRecords(left, right, sortMode, categoryById))
-  $: groupedRecords = groupRecordsByDate(filteredRecords, sortMode)
+    .filter((record) =>
+      matchesRecordFilters(record, {
+        normalizedSearchValue: normalizedSearch,
+        categoryFilterValue: categoryFilter,
+      }),
+    )
+    .sort((left, right) => compareRecords(left, right, sortMode))
+  $: shouldGroupByDate = sortMode === 'date_desc' || sortMode === 'date_asc'
+  $: groupedRecords = shouldGroupByDate ? groupRecordsByDate(filteredRecords, sortMode) : []
 
   $: if (data) {
     records = data.records
@@ -156,37 +204,48 @@
     }))
   }
 
-  function matchesRecordFilters(record: RecordItem, normalizedSearchValue: string): boolean {
+  function matchesRecordFilters(
+    record: RecordItem,
+    {
+      normalizedSearchValue,
+      categoryFilterValue,
+    }: { normalizedSearchValue: string; categoryFilterValue: CategoryFilterMode },
+  ): boolean {
     if (normalizedSearchValue && !record.name.toLowerCase().includes(normalizedSearchValue)) {
       return false
     }
 
-    if (categoryFilter !== 'all' && record.category_id !== categoryFilter) {
+    if (categoryFilterValue === CATEGORY_FILTER_ALL_EXPENSES) {
+      return record.amount < 0
+    }
+
+    if (categoryFilterValue === CATEGORY_FILTER_ALL_INCOMES) {
+      return record.amount > 0
+    }
+
+    const selectedCategoryId = categoryIdFromFilterValue(categoryFilterValue)
+    if (!selectedCategoryId || record.category_id !== selectedCategoryId) {
       return false
     }
 
     return true
   }
 
-  function compareRecords(
-    left: RecordItem,
-    right: RecordItem,
-    mode: SortMode,
-    categoriesById: Map<string, Category>,
-  ): number {
+  function compareRecords(left: RecordItem, right: RecordItem, mode: SortMode): number {
     switch (mode) {
       case 'date_asc':
         return left.date.localeCompare(right.date)
       case 'date_desc':
         return right.date.localeCompare(left.date)
-      case 'amount_asc':
-        return left.amount - right.amount
-      case 'amount_desc':
-        return right.amount - left.amount
-      case 'category_asc': {
-        const leftName = categoriesById.get(left.category_id)?.name ?? ''
-        const rightName = categoriesById.get(right.category_id)?.name ?? ''
-        return leftName.localeCompare(rightName)
+      case 'amount_asc': {
+        const leftAbs = Math.abs(left.amount)
+        const rightAbs = Math.abs(right.amount)
+        return leftAbs - rightAbs || left.amount - right.amount
+      }
+      case 'amount_desc': {
+        const leftAbs = Math.abs(left.amount)
+        const rightAbs = Math.abs(right.amount)
+        return rightAbs - leftAbs || right.amount - left.amount
       }
     }
   }
@@ -329,7 +388,9 @@
   }
 
   function onCategoryFilterChange(nextCategoryId: string): void {
-    categoryFilter = nextCategoryId
+    if (isCategoryFilterMode(nextCategoryId)) {
+      categoryFilter = nextCategoryId
+    }
   }
 
   function onSortModeChange(nextSortMode: string): void {
@@ -485,6 +546,7 @@
       {loadError}
       {filteredRecords}
       {groupedRecords}
+      {shouldGroupByDate}
       {categoryById}
       {activeActionRowId}
       {deletingId}

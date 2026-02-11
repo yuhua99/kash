@@ -17,6 +17,7 @@
   export let loadError = ''
   export let filteredRecords: RecordItem[] = []
   export let groupedRecords: DateGroup[] = []
+  export let shouldGroupByDate = true
   export let categoryById: Map<string, Category> = new Map()
   export let activeActionRowId: string | null = null
   export let deletingId: string | null = null
@@ -46,53 +47,96 @@
     </p>
   {:else}
     <div class="section-list">
-      {#each groupedRecords as group (group.date)}
-        <section class="section-compact" aria-labelledby={`records-date-${group.date}`}>
-          <p id={`records-date-${group.date}`}>{group.date}</p>
-          {#each group.records as record (record.id)}
-            <div
-              data-action-row-shell
-              class="row-action-shell"
-              data-type={record.amount > 0 ? 'income' : 'expense'}
-              role="button"
-              tabindex="0"
-              on:click={(event) => onRowShellClick(event, record.id)}
-              on:keydown={(event) => onRowShellKeydown(event, record.id)}
-            >
-              <ListRow type={record.amount > 0 ? 'income' : 'expense'}>
-                <div slot="main">{record.name}</div>
-                <div slot="end">
-                  <div
-                    class="amount"
-                    class:amount--income={record.amount > 0}
-                    class:amount--expense={record.amount < 0}
-                  >
-                    {record.amount.toFixed(2)}
+      {#if shouldGroupByDate}
+        {#each groupedRecords as group (group.date)}
+          <section class="section-compact" aria-labelledby={`records-date-${group.date}`}>
+            <p id={`records-date-${group.date}`}>{group.date}</p>
+            {#each group.records as record (record.id)}
+              <div
+                data-action-row-shell
+                class="row-action-shell"
+                data-type={record.amount > 0 ? 'income' : 'expense'}
+                role="button"
+                tabindex="0"
+                on:click={(event) => onRowShellClick(event, record.id)}
+                on:keydown={(event) => onRowShellKeydown(event, record.id)}
+              >
+                <ListRow type={record.amount > 0 ? 'income' : 'expense'}>
+                  <div slot="main">{record.name}</div>
+                  <div slot="end">
+                    <div
+                      class="amount"
+                      class:amount--income={record.amount > 0}
+                      class:amount--expense={record.amount < 0}
+                    >
+                      {record.amount.toFixed(2)}
+                    </div>
                   </div>
+                  <svelte:fragment slot="sub">
+                    <span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
+                  </svelte:fragment>
+                </ListRow>
+                {#if activeActionRowId === record.id}
+                  <div class="row-action-panel">
+                    <Button size="compact" type="button" onclick={() => startEdit(record)}>
+                      Edit
+                    </Button>
+                    <Button
+                      size="compact"
+                      type="button"
+                      disabled={deletingId === record.id}
+                      onclick={() => requestDeleteRecord(record)}
+                    >
+                      {deletingId === record.id ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </div>
+                {/if}
+              </div>
+            {/each}
+          </section>
+        {/each}
+      {:else}
+        {#each filteredRecords as record (record.id)}
+          <div
+            data-action-row-shell
+            class="row-action-shell"
+            data-type={record.amount > 0 ? 'income' : 'expense'}
+            role="button"
+            tabindex="0"
+            on:click={(event) => onRowShellClick(event, record.id)}
+            on:keydown={(event) => onRowShellKeydown(event, record.id)}
+          >
+            <ListRow type={record.amount > 0 ? 'income' : 'expense'}>
+              <div slot="main">{record.name}</div>
+              <div slot="end">
+                <div
+                  class="amount"
+                  class:amount--income={record.amount > 0}
+                  class:amount--expense={record.amount < 0}
+                >
+                  {record.amount.toFixed(2)}
                 </div>
-                <svelte:fragment slot="sub">
-                  <span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
-                </svelte:fragment>
-              </ListRow>
-              {#if activeActionRowId === record.id}
-                <div class="row-action-panel">
-                  <Button size="compact" type="button" onclick={() => startEdit(record)}>
-                    Edit
-                  </Button>
-                  <Button
-                    size="compact"
-                    type="button"
-                    disabled={deletingId === record.id}
-                    onclick={() => requestDeleteRecord(record)}
-                  >
-                    {deletingId === record.id ? 'Deleting...' : 'Delete'}
-                  </Button>
-                </div>
-              {/if}
-            </div>
-          {/each}
-        </section>
-      {/each}
+              </div>
+              <svelte:fragment slot="sub">
+                <span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
+              </svelte:fragment>
+            </ListRow>
+            {#if activeActionRowId === record.id}
+              <div class="row-action-panel">
+                <Button size="compact" type="button" onclick={() => startEdit(record)}>Edit</Button>
+                <Button
+                  size="compact"
+                  type="button"
+                  disabled={deletingId === record.id}
+                  onclick={() => requestDeleteRecord(record)}
+                >
+                  {deletingId === record.id ? 'Deleting...' : 'Delete'}
+                </Button>
+              </div>
+            {/if}
+          </div>
+        {/each}
+      {/if}
     </div>
   {/if}
 </div>

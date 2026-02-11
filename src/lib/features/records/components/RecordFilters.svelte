@@ -3,10 +3,16 @@
   import PeriodControls from '$lib/features/periods/components/PeriodControls.svelte'
   import SelectField from '$lib/ui/SelectField.svelte'
 
-  type SelectOption = {
-    value: string
-    label: string
-  }
+  type SelectOption =
+    | {
+        kind?: 'item'
+        value: string
+        label: string
+        disabled?: boolean
+      }
+    | {
+        kind: 'separator'
+      }
 
   export let periodPreset: PeriodPreset
   export let startDate: string
@@ -16,7 +22,7 @@
   export let search = ''
   export let searchValidationError = ''
 
-  export let categoryFilter = 'all'
+  export let categoryFilter = 'all_expenses'
   export let categoryFilterLabel = ''
   export let categoryFilterItems: SelectOption[] = []
 
@@ -49,7 +55,7 @@
     }
   }
 
-  $: hasActiveFilter = categoryFilter !== 'all' || sortMode !== 'date_desc'
+  $: hasActiveFilter = categoryFilter !== 'all_expenses' || sortMode !== 'date_desc'
 </script>
 
 <svelte:window on:click={onWindowClick} on:keydown={onWindowKeydown} />
