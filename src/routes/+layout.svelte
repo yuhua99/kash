@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { dev } from '$app/environment'
   import { goto } from '$app/navigation'
+  import { onMount } from 'svelte'
   import '../app.css'
   import './+layout.css'
   import { page } from '$app/stores'
@@ -29,10 +31,82 @@
       void goto(href)
     }
   }
+
+  onMount(() => {
+    if (dev || !('serviceWorker' in navigator)) {
+      return
+    }
+
+    const hadControllerBeforeRegistration = Boolean(navigator.serviceWorker.controller)
+    let didReloadForUpdate = false
+    let shouldReloadForUpdate = false
+
+    const handleControllerChange = (): void => {
+      if (!shouldReloadForUpdate || didReloadForUpdate) {
+        return
+      }
+
+      didReloadForUpdate = true
+      window.location.reload()
+    }
+
+    const registerServiceWorker = async (): Promise<void> => {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js')
+        await registration.update()
+
+        const postSkipWaiting = (): void => {
+          if (hadControllerBeforeRegistration) {
+            shouldReloadForUpdate = true
+          }
+
+          registration.waiting?.postMessage({ type: 'SKIP_WAITING' })
+        }
+
+        if (registration.waiting) {
+          postSkipWaiting()
+        }
+
+        registration.addEventListener('updatefound', () => {
+          const installingWorker = registration.installing
+
+          if (!installingWorker) {
+            return
+          }
+
+          installingWorker.addEventListener('statechange', () => {
+            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              postSkipWaiting()
+            }
+          })
+        })
+      } catch (error) {
+        console.error('Service worker registration failed', error)
+      }
+    }
+
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
+
+    if (document.readyState === 'complete') {
+      void registerServiceWorker()
+    } else {
+      window.addEventListener('load', registerServiceWorker, { once: true })
+    }
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
+      window.removeEventListener('load', registerServiceWorker)
+    }
+  })
 </script>
 
 <svelte:head>
   <title>Kash</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#101010" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="KASH!" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
   <link
