@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation'
   import type { DateValue } from '@internationalized/date'
   import { deleteRecord, getRecords, updateRecord } from '$lib/features/records/api'
+  import { invalidateRecordsCache } from '$lib/features/records/cache'
   import { getCategoriesCached } from '$lib/features/categories/cache'
   import Block from '$lib/ui/Block.svelte'
   import ConfirmDialog from '$lib/ui/ConfirmDialog.svelte'
@@ -366,6 +367,7 @@
         category_id: editCategoryId,
         date: editDate.trim(),
       })
+      invalidateRecordsCache()
       cancelEdit()
       successMessage = 'Record updated.'
       await fetchData()
@@ -423,6 +425,7 @@
 
     try {
       await deleteRecord(id)
+      invalidateRecordsCache()
       closeDeleteDialog()
       successMessage = 'Record deleted.'
       if (editingId === id) {

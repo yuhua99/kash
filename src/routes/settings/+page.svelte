@@ -3,6 +3,7 @@
   import Button from '$lib/ui/Button.svelte'
   import { logout } from '$lib/features/auth/api'
   import { invalidateCategoriesCache } from '$lib/features/categories/cache'
+  import { invalidateRecordsCache } from '$lib/features/records/cache'
   import Block from '$lib/ui/Block.svelte'
   import ListRow from '$lib/ui/ListRow.svelte'
 
@@ -18,6 +19,7 @@
     try {
       await logout()
       invalidateCategoriesCache()
+      invalidateRecordsCache()
       await invalidate('app:auth')
       await goto('/login')
     } catch (error) {

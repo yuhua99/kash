@@ -4,6 +4,7 @@
   import { handleAuthSubmit } from '$lib/features/auth/form-submit'
   import { login, register } from '$lib/features/auth/api'
   import { invalidateCategoriesCache } from '$lib/features/categories/cache'
+  import { invalidateRecordsCache } from '$lib/features/records/cache'
 
   let username = ''
   let password = ''
@@ -21,6 +22,7 @@
         await register(normalizedUsername, validPassword)
         await login(normalizedUsername, validPassword)
         invalidateCategoriesCache()
+        invalidateRecordsCache()
         await invalidate('app:auth')
         await goto('/home')
       },

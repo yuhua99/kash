@@ -3,6 +3,7 @@
   import type { DateValue } from '@internationalized/date'
   import { DatePicker, Tabs } from 'bits-ui'
   import { createRecord } from '$lib/features/records/api'
+  import { invalidateRecordsCache } from '$lib/features/records/cache'
   import { dateValueToIso, isoToDateValue, todayIso } from '$lib/shared/date'
   import type { Category } from '$lib/core/domain/models'
   import { validateAmount, validateDate, validateRecordName } from '$lib/shared/validation'
@@ -116,6 +117,7 @@
         category_id: categoryId,
         date: normalizedDate,
       })
+      invalidateRecordsCache()
 
       name = ''
       amountInput = ''
