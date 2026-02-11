@@ -33,38 +33,36 @@
           {#if incomeCategories.length === 0}
             <p>No income categories yet.</p>
           {:else}
-            <div>
-              {#each incomeCategories as category}
-                <div
-                  data-action-row-shell
-                  class="row-action-shell"
-                  data-type="income"
-                  role="button"
-                  tabindex="0"
-                  on:click={(event) => onRowShellClick(event, category.id)}
-                  on:keydown={(event) => onRowShellKeydown(event, category.id)}
-                >
-                  <ListRow type="income">
-                    <span slot="main">{category.name}</span>
-                  </ListRow>
-                  {#if activeActionRowId === category.id}
-                    <div class="row-action-panel">
-                      <Button size="compact" type="button" onclick={() => startEdit(category)}>
-                        Edit
-                      </Button>
-                      <Button
-                        size="compact"
-                        type="button"
-                        disabled={deletingId === category.id}
-                        onclick={() => requestDeleteCategory(category)}
-                      >
-                        {deletingId === category.id ? 'Deleting...' : 'Delete'}
-                      </Button>
-                    </div>
-                  {/if}
-                </div>
-              {/each}
-            </div>
+            {#each incomeCategories as category}
+              <div
+                data-action-row-shell
+                class="row-action-shell"
+                data-type="income"
+                role="button"
+                tabindex="0"
+                on:click={(event) => onRowShellClick(event, category.id)}
+                on:keydown={(event) => onRowShellKeydown(event, category.id)}
+              >
+                <ListRow type="income">
+                  <span slot="main">{category.name}</span>
+                </ListRow>
+                {#if activeActionRowId === category.id}
+                  <div class="row-action-panel">
+                    <Button size="compact" type="button" onclick={() => startEdit(category)}>
+                      Edit
+                    </Button>
+                    <Button
+                      size="compact"
+                      type="button"
+                      disabled={deletingId === category.id}
+                      onclick={() => requestDeleteCategory(category)}
+                    >
+                      {deletingId === category.id ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </div>
+                {/if}
+              </div>
+            {/each}
           {/if}
         </section>
 
@@ -73,38 +71,36 @@
           {#if expenseCategories.length === 0}
             <p>No expense categories yet.</p>
           {:else}
-            <div>
-              {#each expenseCategories as category}
-                <div
-                  data-action-row-shell
-                  class="row-action-shell"
-                  data-type="expense"
-                  role="button"
-                  tabindex="0"
-                  on:click={(event) => onRowShellClick(event, category.id)}
-                  on:keydown={(event) => onRowShellKeydown(event, category.id)}
-                >
-                  <ListRow type="expense">
-                    <span slot="main">{category.name}</span>
-                  </ListRow>
-                  {#if activeActionRowId === category.id}
-                    <div class="row-action-panel">
-                      <Button size="compact" type="button" onclick={() => startEdit(category)}>
-                        Edit
-                      </Button>
-                      <Button
-                        size="compact"
-                        type="button"
-                        disabled={deletingId === category.id}
-                        onclick={() => requestDeleteCategory(category)}
-                      >
-                        {deletingId === category.id ? 'Deleting...' : 'Delete'}
-                      </Button>
-                    </div>
-                  {/if}
-                </div>
-              {/each}
-            </div>
+            {#each expenseCategories as category}
+              <div
+                data-action-row-shell
+                class="row-action-shell"
+                data-type="expense"
+                role="button"
+                tabindex="0"
+                on:click={(event) => onRowShellClick(event, category.id)}
+                on:keydown={(event) => onRowShellKeydown(event, category.id)}
+              >
+                <ListRow type="expense">
+                  <span slot="main">{category.name}</span>
+                </ListRow>
+                {#if activeActionRowId === category.id}
+                  <div class="row-action-panel">
+                    <Button size="compact" type="button" onclick={() => startEdit(category)}>
+                      Edit
+                    </Button>
+                    <Button
+                      size="compact"
+                      type="button"
+                      disabled={deletingId === category.id}
+                      onclick={() => requestDeleteCategory(category)}
+                    >
+                      {deletingId === category.id ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </div>
+                {/if}
+              </div>
+            {/each}
           {/if}
         </section>
       </div>
