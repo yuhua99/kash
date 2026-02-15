@@ -7,6 +7,7 @@
   import { dateValueToIso, isoToDateValue, todayIso } from '$lib/shared/date'
   import type { Category, RecordItem } from '$lib/core/domain/models'
   import { validateAmount, validateDate, validateRecordName } from '$lib/shared/validation'
+  import { toast } from '$lib/ui/toast'
   import Block from '$lib/ui/Block.svelte'
   import Button from '$lib/ui/Button.svelte'
   import SelectField from '$lib/ui/SelectField.svelte'
@@ -32,8 +33,6 @@
   let amountError = ''
   let categoryError = ''
   let dateError = ''
-  let formError = ''
-  let successMessage = ''
   let submitting = false
 
   const MAX_NAME_SUGGESTIONS = 5
@@ -133,8 +132,6 @@
 
   async function onSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault()
-    successMessage = ''
-    formError = ''
     clearValidationErrors()
 
     const normalizedName = name.trim()
@@ -177,14 +174,14 @@
       amountInput = ''
       categoryId = ''
       date = todayIso()
-      successMessage = 'Record added successfully.'
+      toast.success('Record added successfully.')
     } catch (error) {
       const apiError = error as ApiError
       if (apiError.status === 401) {
         await goto('/login')
         return
       }
-      formError = getErrorMessage(error, 'Unable to create record.')
+      toast.error(getErrorMessage(error, 'Unable to create record.'))
     } finally {
       submitting = false
     }
@@ -203,14 +200,6 @@
       first.
     </p>
   {:else}
-    {#if successMessage}
-      <p role="status">{successMessage}</p>
-    {/if}
-
-    {#if formError}
-      <p role="alert">{formError}</p>
-    {/if}
-
     <form on:submit={onSubmit} novalidate>
       <div>
         <label for="record-amount">Amount</label>

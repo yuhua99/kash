@@ -11,6 +11,7 @@
     invalidateCategoriesCache,
     setCategoriesCache,
   } from '$lib/features/categories/cache'
+  import { toast } from '$lib/ui/toast'
   import ConfirmDialog from '$lib/ui/ConfirmDialog.svelte'
   import CategoryEditDialog from '$lib/features/categories/components/CategoryEditDialog.svelte'
   import CategoryForm from '$lib/features/categories/components/CategoryForm.svelte'
@@ -27,8 +28,6 @@
   let categories: Category[] = data.categories
   let loading = false
   let loadError = data.loadError ?? ''
-  let mutationError = ''
-  let successMessage = ''
 
   let createName = ''
   let createType: 'expense' | 'income' = 'expense'
@@ -54,11 +53,6 @@
     categories = data.categories
     loadError = data.loadError ?? ''
     loading = false
-  }
-
-  function clearMutationFeedback(): void {
-    mutationError = ''
-    successMessage = ''
   }
 
   function getErrorMessage(error: unknown, fallbackMessage: string): string {
@@ -132,7 +126,6 @@
 
   async function onCreateSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault()
-    clearMutationFeedback()
     createNameError = ''
 
     const normalizedName = createName.trim()
@@ -148,7 +141,7 @@
       await createCategory({ name: normalizedName, is_income: isIncome })
       invalidateCategoriesCache()
       createName = ''
-      successMessage = 'Category created.'
+      toast.success('Category created.')
       await fetchCategories(true)
     } catch (error) {
       const apiError = error as ApiError
@@ -156,7 +149,7 @@
         await goto('/login')
         return
       }
-      mutationError = getErrorMessage(error, 'Unable to create category.')
+      toast.error(getErrorMessage(error, 'Unable to create category.'))
     } finally {
       creating = false
     }
@@ -168,7 +161,6 @@
     editName = category.name
     editNameError = ''
     editDialogOpen = true
-    clearMutationFeedback()
   }
 
   function cancelEdit(): void {
@@ -191,8 +183,6 @@
     if (!editingId) {
       return
     }
-
-    clearMutationFeedback()
     editNameError = ''
 
     const normalizedName = editName.trim()
@@ -207,7 +197,7 @@
       await updateCategory(editingId, { name: normalizedName })
       invalidateCategoriesCache()
       cancelEdit()
-      successMessage = 'Category updated.'
+      toast.success('Category updated.')
       await fetchCategories(true)
     } catch (error) {
       const apiError = error as ApiError
@@ -215,7 +205,7 @@
         await goto('/login')
         return
       }
-      mutationError = getErrorMessage(error, 'Unable to update category.')
+      toast.error(getErrorMessage(error, 'Unable to update category.'))
     } finally {
       savingEdit = false
     }
@@ -226,8 +216,6 @@
     if (deletingId) {
       return
     }
-
-    clearMutationFeedback()
     pendingDeleteCategory = category
     deleteDialogOpen = true
   }
@@ -258,7 +246,6 @@
 
     const category = pendingDeleteCategory
 
-    clearMutationFeedback()
     deletingId = category.id
 
     try {
@@ -268,7 +255,7 @@
         cancelEdit()
       }
       closeDeleteDialog()
-      successMessage = 'Category deleted.'
+      toast.success('Category deleted.')
       await fetchCategories(true)
     } catch (error) {
       const apiError = error as ApiError
@@ -276,7 +263,7 @@
         await goto('/login')
         return
       }
-      mutationError = getErrorMessage(error, 'Unable to delete category.')
+      toast.error(getErrorMessage(error, 'Unable to delete category.'))
     } finally {
       deletingId = null
     }
@@ -287,8 +274,6 @@
 
 <main>
   <CategoryForm
-    {mutationError}
-    {successMessage}
     bind:createName
     {createNameError}
     {createType}

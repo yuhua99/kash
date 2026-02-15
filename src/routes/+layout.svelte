@@ -6,6 +6,7 @@
   import './+layout.css'
   import { page } from '$app/stores'
   import { Menubar } from 'bits-ui'
+  import ToastHost from '$lib/ui/ToastHost.svelte'
 
   export let data: App.PageData
 
@@ -125,6 +126,8 @@
       {/each}
     </Menubar.Root>
   {/if}
+
+  <ToastHost />
 
   <slot />
 </div>

@@ -11,8 +11,6 @@
     records: RecordItem[]
   }
 
-  export let successMessage = ''
-  export let mutationError = ''
   export let loading = false
   export let loadError = ''
   export let filteredRecords: RecordItem[] = []
@@ -28,14 +26,6 @@
 </script>
 
 <div aria-live="polite">
-  {#if successMessage}
-    <p role="status">{successMessage}</p>
-  {/if}
-
-  {#if mutationError}
-    <p role="alert">{mutationError}</p>
-  {/if}
-
   {#if loading}
     <p>Loading records...</p>
   {:else if loadError}

@@ -4,6 +4,7 @@
   import { deleteRecord, getRecords, updateRecord } from '$lib/features/records/api'
   import { invalidateRecordsCache } from '$lib/features/records/cache'
   import { getCategoriesCached } from '$lib/features/categories/cache'
+  import { toast } from '$lib/ui/toast'
   import Block from '$lib/ui/Block.svelte'
   import ConfirmDialog from '$lib/ui/ConfirmDialog.svelte'
   import RecordEditDialog from '$lib/features/records/components/RecordEditDialog.svelte'
@@ -51,8 +52,6 @@
   let categories: Category[] = data.categories
   let loading = false
   let loadError = data.loadError ?? ''
-  let mutationError = ''
-  let successMessage = ''
 
   let periodPreset: PeriodPreset = data.periodPreset
   let startDate = data.startDate
@@ -250,11 +249,6 @@
     }
   }
 
-  function clearMutationFeedback(): void {
-    mutationError = ''
-    successMessage = ''
-  }
-
   function toggleRowActions(recordId: string): void {
     activeActionRowId = activeActionRowId === recordId ? null : recordId
   }
@@ -365,7 +359,6 @@
     editDate = record.date
     editDialogOpen = true
     clearEditErrors()
-    clearMutationFeedback()
   }
 
   function cancelEdit(): void {
@@ -414,8 +407,6 @@
       return
     }
 
-    clearMutationFeedback()
-
     if (!validateEditForm()) {
       return
     }
@@ -430,7 +421,7 @@
       })
       invalidateRecordsCache()
       cancelEdit()
-      successMessage = 'Record updated.'
+      toast.success('Record updated.')
       await fetchData()
     } catch (error) {
       const apiError = error as ApiError
@@ -438,7 +429,7 @@
         await goto('/login')
         return
       }
-      mutationError = getErrorMessage(error, 'Unable to update record.')
+      toast.error(getErrorMessage(error, 'Unable to update record.'))
     } finally {
       savingEdit = false
     }
@@ -449,8 +440,6 @@
     if (deletingId) {
       return
     }
-
-    clearMutationFeedback()
     pendingDeleteRecord = record
     deleteDialogOpen = true
   }
@@ -481,14 +470,13 @@
 
     const id = pendingDeleteRecord.id
 
-    clearMutationFeedback()
     deletingId = id
 
     try {
       await deleteRecord(id)
       invalidateRecordsCache()
       closeDeleteDialog()
-      successMessage = 'Record deleted.'
+      toast.success('Record deleted.')
       if (editingId === id) {
         cancelEdit()
       }
@@ -499,7 +487,7 @@
         await goto('/login')
         return
       }
-      mutationError = getErrorMessage(error, 'Unable to delete record.')
+      toast.error(getErrorMessage(error, 'Unable to delete record.'))
     } finally {
       deletingId = null
     }
@@ -540,8 +528,6 @@
 
   <Block title="Records">
     <RecordList
-      {successMessage}
-      {mutationError}
       {loading}
       {loadError}
       {filteredRecords}

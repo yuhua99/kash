@@ -4,26 +4,26 @@
   import { logout } from '$lib/features/auth/api'
   import { invalidateCategoriesCache } from '$lib/features/categories/cache'
   import { invalidateRecordsCache } from '$lib/features/records/cache'
+  import { toast } from '$lib/ui/toast'
   import Block from '$lib/ui/Block.svelte'
   import ListRow from '$lib/ui/ListRow.svelte'
 
   export let data: App.PageData
 
   let pending = false
-  let formError = ''
 
   async function onLogout(): Promise<void> {
     pending = true
-    formError = ''
 
     try {
       await logout()
       invalidateCategoriesCache()
       invalidateRecordsCache()
       await invalidate('app:auth')
+      toast.success('Signed out.')
       await goto('/login')
     } catch (error) {
-      formError = error instanceof Error ? error.message : 'Unable to logout.'
+      toast.error(error instanceof Error ? error.message : 'Unable to logout.')
     } finally {
       pending = false
     }
@@ -38,10 +38,6 @@
         <span>{data.user?.username ?? 'Unknown'}</span>
       </svelte:fragment>
     </ListRow>
-
-    {#if formError}
-      <p role="alert">{formError}</p>
-    {/if}
 
     <Button variant="destructive" type="button" onclick={onLogout} disabled={pending}>
       {pending ? 'Signing out...' : 'Log out'}

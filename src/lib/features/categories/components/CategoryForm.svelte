@@ -4,8 +4,6 @@
   import Button from '$lib/ui/Button.svelte'
   import '$lib/ui/Tabs.css'
 
-  export let mutationError = ''
-  export let successMessage = ''
   export let createName = ''
   export let createNameError = ''
   export let createType: 'expense' | 'income' = 'expense'
@@ -15,14 +13,6 @@
 </script>
 
 <Block title="Add category">
-  {#if mutationError}
-    <p role="alert">{mutationError}</p>
-  {/if}
-
-  {#if successMessage}
-    <p role="status">{successMessage}</p>
-  {/if}
-
   <form on:submit={onCreateSubmit} novalidate>
     <div>
       <label for="create-category-name">Category name</label>
