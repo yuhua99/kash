@@ -1,5 +1,5 @@
-const SHELL_CACHE = 'kash-shell-v1'
-const STATIC_CACHE = 'kash-static-v1'
+const SHELL_CACHE = 'kash-shell-v2'
+const STATIC_CACHE = 'kash-static-v2'
 const MAX_STATIC_ENTRIES = 80
 
 const CORE_ASSETS = [

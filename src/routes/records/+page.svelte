@@ -10,6 +10,7 @@
   import RecordEditDialog from '$lib/features/records/components/RecordEditDialog.svelte'
   import RecordFilters from '$lib/features/records/components/RecordFilters.svelte'
   import RecordList from '$lib/features/records/components/RecordList.svelte'
+  import PendingRecordSection from '$lib/features/records/components/PendingRecordSection.svelte'
   import { dateValueToIso, isoToDateValue, type PeriodPreset } from '$lib/shared/date'
   import type { Category, RecordItem } from '$lib/core/domain/models'
   import {
@@ -22,7 +23,7 @@
 
   type ApiError = Error & { status?: number }
   type SortMode = 'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc'
-  type CategoryFilterMode = 'all_expenses' | 'all_incomes' | `category:${string}`
+  type CategoryFilterMode = 'all_expenses' | 'all_incomes' | 'pending' | `category:${string}`
   type SelectOption =
     | {
         kind?: 'item'
@@ -81,6 +82,7 @@
 
   const CATEGORY_FILTER_ALL_EXPENSES: CategoryFilterMode = 'all_expenses'
   const CATEGORY_FILTER_ALL_INCOMES: CategoryFilterMode = 'all_incomes'
+  const CATEGORY_FILTER_PENDING: CategoryFilterMode = 'pending'
 
   function toCategoryFilterValue(categoryId: string): CategoryFilterMode {
     return `category:${categoryId}`
@@ -90,6 +92,7 @@
     return (
       value === CATEGORY_FILTER_ALL_EXPENSES ||
       value === CATEGORY_FILTER_ALL_INCOMES ||
+      value === CATEGORY_FILTER_PENDING ||
       value.startsWith('category:')
     )
   }
@@ -126,17 +129,20 @@
   $: incomeCategories = categories.filter((category) => category.is_income)
   $: selectedCategoryId = categoryIdFromFilterValue(categoryFilter)
   $: categoryFilterLabel =
-    categoryFilter === CATEGORY_FILTER_ALL_EXPENSES
-      ? 'All expenses'
-      : categoryFilter === CATEGORY_FILTER_ALL_INCOMES
-        ? 'All incomes'
-        : (categories.find((category) => category.id === selectedCategoryId)?.name ??
-          'All expenses')
+    categoryFilter === CATEGORY_FILTER_PENDING
+      ? 'You owe'
+      : categoryFilter === CATEGORY_FILTER_ALL_EXPENSES
+        ? 'All expenses'
+        : categoryFilter === CATEGORY_FILTER_ALL_INCOMES
+          ? 'All incomes'
+          : (categories.find((category) => category.id === selectedCategoryId)?.name ??
+            'All expenses')
   $: sortModeLabel =
     sortOptions.find((option) => option.value === sortMode)?.label ?? 'Date (newest)'
   $: editCategoryLabel =
     categories.find((category) => category.id === editCategoryId)?.name ?? 'Choose category'
   $: categoryFilterItems = [
+    { value: CATEGORY_FILTER_PENDING, label: 'You owe' },
     { value: CATEGORY_FILTER_ALL_EXPENSES, label: 'All expenses' },
     ...expenseCategories.map((category) => ({
       value: toCategoryFilterValue(category.id),
@@ -155,6 +161,7 @@
   ]
   $: editRecordName = records.find((record) => record.id === editingId)?.name ?? ''
   $: editDateValue = isoToDateValue(editDate)
+  $: pendingRecords = records.filter((record) => record.pending)
   $: filteredRecords = records
     .filter((record) =>
       matchesRecordFilters(record, {
@@ -216,6 +223,10 @@
 
     if (categoryFilterValue === CATEGORY_FILTER_ALL_EXPENSES) {
       return record.amount < 0
+    }
+
+    if (categoryFilterValue === CATEGORY_FILTER_PENDING) {
+      return record.pending === true
     }
 
     if (categoryFilterValue === CATEGORY_FILTER_ALL_INCOMES) {
@@ -506,6 +517,12 @@
 <svelte:window on:click={onMainClick} />
 
 <main>
+  {#if pendingRecords.length > 0}
+    <Block title="You owe">
+      <PendingRecordSection {pendingRecords} {categoryById} />
+    </Block>
+  {/if}
+
   <Block title="Records">
     <RecordFilters
       bind:periodPreset

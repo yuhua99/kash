@@ -1,6 +1,6 @@
 export type ApiError = Error & { status?: number }
 
-type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 type RequestOptions = {
   method?: RequestMethod

@@ -4,6 +4,7 @@
   import { logout } from '$lib/features/auth/api'
   import { invalidateCategoriesCache } from '$lib/features/categories/cache'
   import { invalidateRecordsCache } from '$lib/features/records/cache'
+  import { invalidateFriendsCache } from '$lib/features/friends/cache'
   import { toast } from '$lib/ui/toast'
   import Block from '$lib/ui/Block.svelte'
   import ListRow from '$lib/ui/ListRow.svelte'
@@ -19,6 +20,7 @@
       await logout()
       invalidateCategoriesCache()
       invalidateRecordsCache()
+      invalidateFriendsCache()
       await invalidate('app:auth')
       toast.success('Signed out.')
       await goto('/login')
@@ -32,6 +34,13 @@
 
 <main>
   <Block title="Settings">
+    <a href="/settings/friends" class="list-row list-row--link">
+      <div class="list-row-main">
+        <span>Friends</span>
+        <span class="list-row-chevron">›</span>
+      </div>
+    </a>
+
     <ListRow>
       <svelte:fragment slot="main">
         <span>Username</span>
@@ -44,3 +53,21 @@
     </Button>
   </Block>
 </main>
+
+<style>
+  a.list-row {
+    text-decoration: none;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  a.list-row:hover {
+    background: var(--surface-hover, var(--surface));
+    filter: brightness(1.1);
+  }
+
+  .list-row-chevron {
+    color: var(--text-muted);
+    font-size: 18px;
+  }
+</style>

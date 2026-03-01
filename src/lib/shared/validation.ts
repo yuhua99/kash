@@ -61,3 +61,38 @@ export function validateAmount(value: number): string | null {
   }
   return null
 }
+
+export function validateNickname(value: string): string | null {
+  if (value.length > 50) {
+    return 'Nickname must be 50 characters or fewer.'
+  }
+  return null
+}
+
+export function validateFriendSearchQuery(value: string): string | null {
+  const trimmed = value.trim()
+  if (trimmed.length < 1) {
+    return 'Search query is required.'
+  }
+  if (trimmed.length > 50) {
+    return 'Search query must be 50 characters or fewer.'
+  }
+  return null
+}
+
+export function validateSplitParticipantAmount(value: number): string | null {
+  if (!Number.isFinite(value) || value <= 0) {
+    return 'Amount must be greater than 0.'
+  }
+  return null
+}
+
+export function validateSplitTotals(totalAmount: number, participantSum: number): string | null {
+  // Convert to cents for exact comparison
+  const totalCents = Math.round(totalAmount * 100)
+  const sumCents = Math.round(participantSum * 100)
+  if (sumCents > totalCents) {
+    return 'Participant shares cannot exceed total amount.'
+  }
+  return null
+}
