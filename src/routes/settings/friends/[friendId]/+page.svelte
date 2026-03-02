@@ -319,10 +319,6 @@
           {removingFriend ? 'Removing...' : 'Remove friend'}
         </Button>
       </div>
-
-      <p class="friend-settings-help">
-        Clear the nickname input and save to restore the default name.
-      </p>
     {/if}
   </Block>
 </main>
@@ -358,10 +354,5 @@
   .friend-settings-actions {
     display: flex;
     gap: 8px;
-  }
-
-  .friend-settings-help {
-    color: var(--text-muted);
-    margin: 0;
   }
 </style>

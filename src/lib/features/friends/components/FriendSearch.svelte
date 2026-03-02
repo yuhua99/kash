@@ -127,7 +127,7 @@
     <input id="friend-query" type="text" bind:value={query} placeholder="Search by username" />
   </div>
 
-  {#if normalizedQuery.length < 3}
+  {#if normalizedQuery.length === 0}{:else if normalizedQuery.length < 3}
     <p>Type at least 3 characters to search users.</p>
   {:else if searchLoading}
     <p>Loading...</p>
