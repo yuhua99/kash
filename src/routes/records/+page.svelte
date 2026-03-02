@@ -1,8 +1,9 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
   import type { DateValue } from '@internationalized/date'
-  import { deleteRecord, getRecords, updateRecord } from '$lib/features/records/api'
+  import { deleteRecord, updateRecord } from '$lib/features/records/api'
   import { invalidateRecordsCache } from '$lib/features/records/cache'
+  import { getAllRecordsByDateRange } from '$lib/features/records/query'
   import { getCategoriesCached } from '$lib/features/categories/cache'
   import { toast } from '$lib/ui/toast'
   import Block from '$lib/ui/Block.svelte'
@@ -341,17 +342,15 @@
     loadError = ''
 
     try {
-      const [recordsResponse, cachedCategories] = await Promise.all([
-        getRecords({
-          start_date: startDate,
-          end_date: endDate,
-          limit: 1000,
-          offset: 0,
+      const [nextRecords, cachedCategories] = await Promise.all([
+        getAllRecordsByDateRange({
+          startDate,
+          endDate,
         }),
         getCategoriesCached(),
       ])
 
-      records = recordsResponse.records
+      records = nextRecords
       categories = cachedCategories
     } catch (error) {
       const apiError = error as ApiError

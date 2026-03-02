@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit'
 import { getCategoriesCached } from '$lib/features/categories/cache'
-import { filterRecordsByDateRange, getRecentRecordsCached } from '$lib/features/records/cache'
+import { getAllRecordsByDateRange } from '$lib/features/records/query'
 import { periodFromPreset } from '$lib/shared/date'
 import type { ApiError } from '$lib/core/http/api-client'
 import type { PageLoad } from './$types'
@@ -9,16 +9,13 @@ export const load: PageLoad = async function load() {
   const initialRange = periodFromPreset('month')
 
   try {
-    const [cachedRecords, cachedCategories] = await Promise.all([
-      getRecentRecordsCached(),
+    const [initialRecords, cachedCategories] = await Promise.all([
+      getAllRecordsByDateRange({
+        startDate: initialRange.start,
+        endDate: initialRange.end,
+      }),
       getCategoriesCached(),
     ])
-
-    const initialRecords = filterRecordsByDateRange(
-      cachedRecords,
-      initialRange.start,
-      initialRange.end,
-    )
 
     return {
       periodPreset: 'month',

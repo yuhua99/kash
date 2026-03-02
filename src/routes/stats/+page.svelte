@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import { getRecords } from '$lib/features/records/api'
+  import { getAllRecordsByDateRange } from '$lib/features/records/query'
   import { getCategoriesCached } from '$lib/features/categories/cache'
   import PeriodControls from '$lib/features/periods/components/PeriodControls.svelte'
   import StatsBreakdown from '$lib/features/stats/components/StatsBreakdown.svelte'
@@ -125,17 +125,15 @@
     loadError = ''
 
     try {
-      const [recordsResponse, cachedCategories] = await Promise.all([
-        getRecords({
-          start_date: startDate,
-          end_date: endDate,
-          limit: 1000,
-          offset: 0,
+      const [nextRecords, cachedCategories] = await Promise.all([
+        getAllRecordsByDateRange({
+          startDate,
+          endDate,
         }),
         getCategoriesCached(),
       ])
 
-      records = recordsResponse.records
+      records = nextRecords
       categories = cachedCategories
     } catch (error) {
       const apiError = error as ApiError

@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit'
 import { getCategoriesCached } from '$lib/features/categories/cache'
-import { filterRecordsByDateRange, getRecentRecordsCached } from '$lib/features/records/cache'
+import { getAllRecordsByDateRange } from '$lib/features/records/query'
 import { periodFromPreset, type PeriodPreset } from '$lib/shared/date'
 import { validateDate } from '$lib/shared/validation'
 import type { ApiError } from '$lib/core/http/api-client'
@@ -94,8 +94,11 @@ export const load: PageLoad = async function load({ url }) {
   const sortMode = resolveSortModeFromQuery(url.searchParams.get('sort'))
 
   try {
-    const [cachedRecords, cachedCategories] = await Promise.all([
-      getRecentRecordsCached(),
+    const [initialRecords, cachedCategories] = await Promise.all([
+      getAllRecordsByDateRange({
+        startDate,
+        endDate,
+      }),
       getCategoriesCached(),
     ])
 
@@ -103,8 +106,6 @@ export const load: PageLoad = async function load({ url }) {
       url.searchParams.get('category'),
       cachedCategories,
     )
-
-    const initialRecords = filterRecordsByDateRange(cachedRecords, startDate, endDate)
 
     return {
       periodPreset,
