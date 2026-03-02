@@ -20,6 +20,10 @@
     outline-color 150ms ease-out;
 }
 
+.select-trigger:hover:not([aria-disabled='true']) {
+  border-color: var(--accent);
+}
+
 .select-trigger[aria-disabled='true'] {
   opacity: 0.6;
   cursor: not-allowed;

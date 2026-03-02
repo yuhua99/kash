@@ -714,7 +714,7 @@
   }
 
   .participant-row:hover {
-    background: var(--panel);
+    background: var(--panel-strong);
   }
 
   .participant-row--selected {

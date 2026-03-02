@@ -37,7 +37,7 @@
 
 .date-calendar header button:hover:not(:disabled) {
   border-color: var(--accent);
-  background: var(--panel-strong);
+  color: var(--text);
 }
 
 .date-calendar table {
@@ -73,7 +73,7 @@
 
 .date-calendar [data-bits-day]:hover:not([data-disabled]):not([data-unavailable]) {
   border-color: var(--accent);
-  background: var(--selection);
+  color: var(--text);
 }
 
 .date-calendar [data-bits-day][data-selected] {

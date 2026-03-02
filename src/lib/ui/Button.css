@@ -18,6 +18,20 @@
     outline-color 150ms ease-out;
 }
 
+.btn:hover:not(:disabled):not([aria-disabled='true']) {
+  border-color: var(--accent);
+}
+
+.btn--primary:hover:not(:disabled):not([aria-disabled='true']) {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.btn--secondary:hover:not(:disabled):not([aria-disabled='true']) {
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+}
+
 .btn:disabled,
 .btn[aria-disabled='true'] {
   opacity: 0.6;

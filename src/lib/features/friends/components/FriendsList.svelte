@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from '$app/navigation'
   import Block from '$lib/ui/Block.svelte'
   import Button from '$lib/ui/Button.svelte'
   import ListRow from '$lib/ui/ListRow.svelte'
@@ -72,12 +73,15 @@
         <p>No friends yet.</p>
       {:else}
         {#each friends as relation (relation.id)}
-          <a href={`/settings/friends/${relation.user_id}`} class="list-row list-row--link">
+          <button
+            class="list-row list-row--link"
+            onclick={() => goto(`/settings/friends/${relation.user_id}`)}
+          >
             <div class="list-row-main">
               <span>{relationLabel(relation)}</span>
               <span class="list-row-chevron">›</span>
             </div>
-          </a>
+          </button>
         {/each}
       {/if}
     </section>
@@ -87,17 +91,6 @@
 <style>
   section {
     gap: 8px;
-  }
-
-  a.list-row {
-    text-decoration: none;
-    color: var(--text);
-    cursor: pointer;
-  }
-
-  a.list-row:hover {
-    background: var(--surface-hover, var(--surface));
-    filter: brightness(1.1);
   }
 
   .list-row-chevron {

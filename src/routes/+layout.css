@@ -30,9 +30,8 @@
 }
 
 .menubar__trigger:hover {
-  color: var(--accent-strong);
-  background: var(--panel-strong);
-  border-bottom-color: var(--accent-strong);
+  color: var(--text);
+  border-bottom-color: var(--accent);
 }
 
 .menubar__trigger.is-active {

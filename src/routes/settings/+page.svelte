@@ -34,12 +34,12 @@
 
 <main>
   <Block title="Settings">
-    <a href="/settings/friends" class="list-row list-row--link">
+    <button class="list-row list-row--link" onclick={() => goto('/settings/friends')}>
       <div class="list-row-main">
         <span>Friends</span>
         <span class="list-row-chevron">›</span>
       </div>
-    </a>
+    </button>
 
     <ListRow>
       <svelte:fragment slot="main">
@@ -55,17 +55,6 @@
 </main>
 
 <style>
-  a.list-row {
-    text-decoration: none;
-    color: var(--text);
-    cursor: pointer;
-  }
-
-  a.list-row:hover {
-    background: var(--surface-hover, var(--surface));
-    filter: brightness(1.1);
-  }
-
   .list-row-chevron {
     color: var(--text-muted);
     font-size: 18px;

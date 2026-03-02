@@ -45,6 +45,7 @@
 
 .period-controls__month-trigger:hover {
   border-color: var(--accent);
+  color: var(--text);
 }
 
 .period-controls__month-menu {
@@ -83,7 +84,7 @@
 
 .period-controls__month-year-nav:hover:not(:disabled) {
   border-color: var(--accent);
-  background: var(--panel-strong);
+  color: var(--text);
 }
 
 .period-controls__month-grid {
@@ -102,7 +103,7 @@
 
 .period-controls__month-option:hover:not(:disabled):not(.period-controls__month-option--selected) {
   border-color: var(--accent);
-  background: var(--selection);
+  color: var(--text);
 }
 
 .period-controls__month-option--selected {

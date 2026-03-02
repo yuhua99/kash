@@ -37,7 +37,6 @@
 }
 
 .row-action-panel .btn:hover {
-  background: var(--panel-strong);
-  border-color: var(--text-muted);
+  border-color: var(--accent);
   color: var(--text);
 }

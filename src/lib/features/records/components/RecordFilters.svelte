@@ -193,6 +193,7 @@
 
   .record-filters__dropdown-trigger:hover {
     color: var(--text);
+    border-color: var(--accent);
   }
 
   .record-filters__dropdown-trigger--open {
