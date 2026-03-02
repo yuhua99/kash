@@ -157,6 +157,18 @@
     endDate = event.detail.end
     await fetchStats()
   }
+
+  function buildCategoryLinkHref(categoryId: string): string {
+    const query = new URLSearchParams({
+      preset: periodPreset,
+      start: startDate,
+      end: endDate,
+      category: `category:${categoryId}`,
+      sort: 'amount_desc',
+    })
+
+    return `/records?${query.toString()}`
+  }
 </script>
 
 <main>
@@ -178,5 +190,6 @@
     {incomeTotal}
     {expenseTotal}
     {breakdown}
+    {buildCategoryLinkHref}
   />
 </main>

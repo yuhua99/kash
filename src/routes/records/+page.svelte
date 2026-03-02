@@ -44,6 +44,8 @@
     periodPreset: PeriodPreset
     startDate: string
     endDate: string
+    categoryFilter: CategoryFilterMode
+    sortMode: SortMode
     loadError?: string
   }
 
@@ -59,8 +61,8 @@
   let endDate = data.endDate
 
   let search = ''
-  let categoryFilter: CategoryFilterMode = 'all_expenses'
-  let sortMode: SortMode = 'date_desc'
+  let categoryFilter: CategoryFilterMode = data.categoryFilter
+  let sortMode: SortMode = data.sortMode
 
   let editingId: string | null = null
   let editName = ''
@@ -179,6 +181,8 @@
     periodPreset = data.periodPreset
     startDate = data.startDate
     endDate = data.endDate
+    categoryFilter = data.categoryFilter
+    sortMode = data.sortMode
     loadError = data.loadError ?? ''
     loading = false
   }

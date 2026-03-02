@@ -4,6 +4,7 @@
   import '$lib/ui/Amount.css'
 
   type BreakdownItem = {
+    categoryId: string
     name: string
     total: number
     share: number
@@ -17,6 +18,7 @@
   export let incomeTotal = 0
   export let expenseTotal = 0
   export let breakdown: BreakdownItem[] = []
+  export let buildCategoryLinkHref: (categoryId: string) => string = () => '/records'
 </script>
 
 <Block title="Category breakdown">
@@ -55,30 +57,32 @@
 
       <div class="stats-list">
         {#each breakdown as item}
-          <ListRow type={item.total >= 0 ? 'income' : 'expense'}>
-            <svelte:fragment slot="main">
-              <span>{item.name}</span>
-              <span
-                class="amount"
-                class:amount--income={item.total >= 0}
-                class:amount--expense={item.total < 0}
-              >
-                {item.total.toFixed(2)}
-              </span>
-            </svelte:fragment>
-            <svelte:fragment slot="sub">
-              <span>{item.share.toFixed(1)}% of activity</span>
-              <span>{item.isIncome ? 'Income' : 'Expense'}</span>
-            </svelte:fragment>
-            <div aria-hidden="true" class="breakdown-bar">
-              <div
-                class="breakdown-bar__fill"
-                class:breakdown-bar__fill--income={item.total >= 0}
-                class:breakdown-bar__fill--expense={item.total < 0}
-                style="width: {item.share}%"
-              ></div>
-            </div>
-          </ListRow>
+          <a class="stats-row-link" href={buildCategoryLinkHref(item.categoryId)}>
+            <ListRow type={item.total >= 0 ? 'income' : 'expense'}>
+              <svelte:fragment slot="main">
+                <span>{item.name}</span>
+                <span
+                  class="amount"
+                  class:amount--income={item.total >= 0}
+                  class:amount--expense={item.total < 0}
+                >
+                  {item.total.toFixed(2)}
+                </span>
+              </svelte:fragment>
+              <svelte:fragment slot="sub">
+                <span>{item.share.toFixed(1)}% of activity</span>
+                <span>{item.isIncome ? 'Income' : 'Expense'}</span>
+              </svelte:fragment>
+              <div aria-hidden="true" class="breakdown-bar">
+                <div
+                  class="breakdown-bar__fill"
+                  class:breakdown-bar__fill--income={item.total >= 0}
+                  class:breakdown-bar__fill--expense={item.total < 0}
+                  style="width: {item.share}%"
+                ></div>
+              </div>
+            </ListRow>
+          </a>
         {/each}
       </div>
     {/if}
@@ -120,6 +124,25 @@
   .stats-list {
     display: grid;
     gap: 8px;
+  }
+
+  .stats-row-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .stats-row-link:hover :global(.list-row) {
+    background: var(--panel-strong);
+  }
+
+  .stats-row-link:focus-visible {
+    outline: none;
+  }
+
+  .stats-row-link:focus-visible :global(.list-row) {
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
   }
 
   .breakdown-bar {
