@@ -445,7 +445,7 @@
   {:else if categories.length === 0}
     <p>
       You do not have categories yet. Create one in
-      <a href="/categories">Categories</a>
+      <a class="text-link" href="/categories">Categories</a>
       first.
     </p>
   {:else}

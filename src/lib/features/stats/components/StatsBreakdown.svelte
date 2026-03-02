@@ -30,7 +30,7 @@
     {:else if recordCount === 0}
       <p>
         No records exist for this period. Change the date range or add entries from
-        <a href="/home">Home</a>.
+        <a class="text-link" href="/home">Home</a>.
       </p>
     {:else}
       <div class="stats-summary">

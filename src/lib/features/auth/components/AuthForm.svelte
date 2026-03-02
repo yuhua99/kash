@@ -66,6 +66,6 @@
 
   <p>
     {footerText}
-    <a href={footerHref}>{footerLinkText}</a>
+    <a class="text-link" href={footerHref}>{footerLinkText}</a>
   </p>
 </main>

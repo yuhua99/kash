@@ -104,11 +104,7 @@ export const load: PageLoad = async function load({ url }) {
       cachedCategories,
     )
 
-    const initialRecords = filterRecordsByDateRange(
-      cachedRecords,
-      startDate,
-      endDate,
-    )
+    const initialRecords = filterRecordsByDateRange(cachedRecords, startDate, endDate)
 
     return {
       periodPreset,

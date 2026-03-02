@@ -33,7 +33,7 @@
   {:else if filteredRecords.length === 0}
     <p>
       No matches. Add new records from
-      <a href="/home">Home</a>.
+      <a class="text-link" href="/home">Home</a>.
     </p>
   {:else}
     <div class="section-list">
