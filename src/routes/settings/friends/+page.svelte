@@ -76,10 +76,3 @@
 
   <FriendsList {friends} {loading} {loadError} />
 </main>
-
-<style>
-  .friends-hint {
-    color: var(--text-muted);
-    margin-top: 8px;
-  }
-</style>
