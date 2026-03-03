@@ -1,3 +1,19 @@
+.app[data-shell='app'] {
+  overflow-x: hidden;
+}
+
+.swipe-content {
+  transform: translate3d(var(--swipe-offset-x, 0px), 0, 0);
+  transition: transform var(--swipe-transition-ms, 0ms) cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+@media (max-width: 719px) {
+  .swipe-content {
+    touch-action: pan-y;
+  }
+}
+
 .menubar {
   position: fixed;
   bottom: 0;
