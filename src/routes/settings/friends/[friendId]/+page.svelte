@@ -14,6 +14,7 @@
   import ListRow from '$lib/ui/ListRow.svelte'
   import { toast } from '$lib/ui/toast'
   import '$lib/ui/Amount.css'
+  import { amountDisplayMode, formatSignedAmount } from '$lib/shared/amount-display'
 
   const unsettledQuery = {
     limit: 1000,
@@ -67,20 +68,6 @@
     }
 
     return 'amount--accent'
-  }
-
-  function formatSignedAmount(value: number): string {
-    const formatted = Math.abs(value).toFixed(2)
-
-    if (value > 0) {
-      return `+${formatted}`
-    }
-
-    if (value < 0) {
-      return `-${formatted}`
-    }
-
-    return '0.00'
   }
 
   function sortByDateDesc(left: SplitListItem, right: SplitListItem): number {
@@ -250,7 +237,9 @@
       <ListRow type={netAmount >= 0 ? 'income' : 'expense'}>
         <svelte:fragment slot="main">
           <span>Total</span>
-          <span class={`amount ${amountClass(netAmount)}`}>{formatSignedAmount(netAmount)}</span>
+          <span class={`amount ${amountClass(netAmount)}`}
+            >{formatSignedAmount(netAmount, $amountDisplayMode)}</span
+          >
         </svelte:fragment>
       </ListRow>
 
@@ -280,7 +269,10 @@
             <span
               class={`amount ${item.direction === 'you_owe' ? 'amount--expense' : 'amount--income'}`}
             >
-              {item.direction === 'you_owe' ? '-' : '+'}{item.amount.toFixed(2)}
+              {formatSignedAmount(
+                item.direction === 'you_owe' ? -item.amount : item.amount,
+                $amountDisplayMode,
+              )}
             </span>
           </svelte:fragment>
           <svelte:fragment slot="sub">

@@ -21,6 +21,7 @@
   import ToastHost from '$lib/ui/ToastHost.svelte'
   import { toast } from '$lib/ui/toast'
   import '$lib/ui/Dialog.css'
+  import { amountDisplayMode, formatAmount } from '$lib/shared/amount-display'
 
   export let data: App.PageData
 
@@ -833,7 +834,11 @@
             <p><span>From</span><strong>{activePendingSplit.requested_by_name}</strong></p>
             <p><span>Name</span><strong>{activePendingSplit.description}</strong></p>
             <p><span>Date</span><strong>{activePendingSplit.date}</strong></p>
-            <p><span>Amount</span><strong>{activePendingSplit.amount.toFixed(2)}</strong></p>
+            <p>
+              <span>Amount</span><strong
+                >{formatAmount(activePendingSplit.amount, $amountDisplayMode)}</strong
+              >
+            </p>
           </div>
 
           <div class="pending-split-category">

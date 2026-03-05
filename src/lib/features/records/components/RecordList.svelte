@@ -5,6 +5,7 @@
   import '$lib/ui/ActionRow.css'
   import '$lib/ui/Amount.css'
   import '$lib/ui/SectionList.css'
+  import { amountDisplayMode, formatAmount } from '$lib/shared/amount-display'
 
   type DateGroup = {
     date: string
@@ -59,7 +60,7 @@
                       class:amount--income={record.amount > 0}
                       class:amount--expense={record.amount < 0}
                     >
-                      {record.amount.toFixed(2)}
+                      {formatAmount(record.amount, $amountDisplayMode)}
                     </div>
                   </div>
                   <svelte:fragment slot="sub">
@@ -104,7 +105,7 @@
                   class:amount--income={record.amount > 0}
                   class:amount--expense={record.amount < 0}
                 >
-                  {record.amount.toFixed(2)}
+                  {formatAmount(record.amount, $amountDisplayMode)}
                 </div>
               </div>
               <svelte:fragment slot="sub">

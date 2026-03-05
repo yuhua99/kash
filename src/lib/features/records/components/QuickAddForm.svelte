@@ -9,6 +9,7 @@
   import { dateValueToIso, isoToDateValue, todayIso } from '$lib/shared/date'
   import type { Category, RecordItem } from '$lib/core/domain/models'
   import { validateAmount, validateDate, validateRecordName } from '$lib/shared/validation'
+  import { amountDisplayMode, formatAmount } from '$lib/shared/amount-display'
   import { toast } from '$lib/ui/toast'
   import Block from '$lib/ui/Block.svelte'
   import Button from '$lib/ui/Button.svelte'
@@ -124,7 +125,7 @@
     return Math.round(value * 100) / 100
   }
 
-  function formatAmount(value: number): string {
+  function formatInputValue(value: number): string {
     return value.toFixed(2)
   }
 
@@ -181,7 +182,7 @@
     const nextInputs = { ...participantAmountInputs }
 
     for (const id of unlockedIds) {
-      const suggested = formatAmount(sharePerPerson)
+      const suggested = formatInputValue(sharePerPerson)
       if (nextInputs[id] !== suggested) {
         nextInputs[id] = suggested
         changed = true
@@ -605,7 +606,10 @@
 
             {#if selectedParticipantIds.length > 0}
               <p class="split-footer">
-                Friends: {formatAmount(participantSum)} · Your share: {formatAmount(yourShare)}
+                Friends: {formatAmount(participantSum, $amountDisplayMode)} · Your share: {formatAmount(
+                  yourShare,
+                  $amountDisplayMode,
+                )}
               </p>
             {/if}
           </div>

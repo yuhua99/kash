@@ -2,6 +2,7 @@
   import Block from '$lib/ui/Block.svelte'
   import ListRow from '$lib/ui/ListRow.svelte'
   import '$lib/ui/Amount.css'
+  import { amountDisplayMode, formatAmount, formatSignedAmount } from '$lib/shared/amount-display'
 
   type BreakdownItem = {
     categoryId: string
@@ -41,16 +42,20 @@
             class:amount--income={netTotal > 0}
             class:amount--expense={netTotal < 0}
           >
-            {netTotal.toFixed(2)}
+            {formatAmount(netTotal, $amountDisplayMode)}
           </span>
         </div>
 
         <div class="stats-summary__row">
           <span class="stats-summary__label">Income/Expense</span>
           <span class="stats-summary__pair">
-            <span class="amount amount--income">{incomeTotal.toFixed(2)}</span>
+            <span class="amount amount--income"
+              >{formatAmount(incomeTotal, $amountDisplayMode)}</span
+            >
             <span class="stats-summary__slash">/</span>
-            <span class="amount amount--expense">-{expenseTotal.toFixed(2)}</span>
+            <span class="amount amount--expense"
+              >{formatSignedAmount(-expenseTotal, $amountDisplayMode)}</span
+            >
           </span>
         </div>
       </div>
@@ -66,7 +71,7 @@
                   class:amount--income={item.total >= 0}
                   class:amount--expense={item.total < 0}
                 >
-                  {item.total.toFixed(2)}
+                  {formatAmount(item.total, $amountDisplayMode)}
                 </span>
               </svelte:fragment>
               <svelte:fragment slot="sub">

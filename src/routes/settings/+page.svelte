@@ -8,10 +8,15 @@
   import { toast } from '$lib/ui/toast'
   import Block from '$lib/ui/Block.svelte'
   import ListRow from '$lib/ui/ListRow.svelte'
+  import { amountDisplayMode, setAmountDisplayMode } from '$lib/shared/amount-display'
 
   export let data: App.PageData
 
   let pending = false
+
+  function toggleDisplayMode(): void {
+    setAmountDisplayMode($amountDisplayMode === 'cents' ? 'whole' : 'cents')
+  }
 
   async function onLogout(): Promise<void> {
     pending = true
@@ -48,6 +53,15 @@
       </svelte:fragment>
     </ListRow>
 
+    <ListRow>
+      <svelte:fragment slot="main">
+        <span>Amount format</span>
+        <button class="format-toggle" type="button" onclick={toggleDisplayMode}>
+          {$amountDisplayMode === 'cents' ? '123.45' : '123'}
+        </button>
+      </svelte:fragment>
+    </ListRow>
+
     <Button variant="destructive" type="button" onclick={onLogout} disabled={pending}>
       {pending ? 'Signing out...' : 'Log out'}
     </Button>
@@ -58,5 +72,17 @@
   .list-row-chevron {
     color: var(--text-muted);
     font-size: 18px;
+  }
+
+  .format-toggle {
+    background: var(--panel-strong);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 8px;
+    cursor: pointer;
+  }
+
+  .format-toggle:hover {
+    border-color: var(--accent);
   }
 </style>
