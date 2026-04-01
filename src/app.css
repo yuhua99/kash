@@ -89,6 +89,10 @@ p {
   padding: 24px 16px;
 }
 
+[data-shell='auth'] .swipe-content {
+  width: 100%;
+}
+
 main {
   width: min(100%, 720px);
   margin: 0 auto;
