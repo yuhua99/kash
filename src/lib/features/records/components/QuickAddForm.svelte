@@ -266,6 +266,34 @@
     participantsError = ''
   }
 
+  function assignAllToFriends(): void {
+    if (
+      selectedParticipantIds.length === 0 ||
+      !Number.isFinite(parsedAmount) ||
+      parsedAmount <= 0
+    ) {
+      return
+    }
+
+    const unit = $amountDisplayMode === 'whole' ? 1 : 100
+    const totalUnits = Math.round(parsedAmount * unit)
+    const baseUnits = Math.floor(totalUnits / selectedParticipantIds.length)
+    const remainderUnits = totalUnits % selectedParticipantIds.length
+
+    const nextInputs = { ...participantAmountInputs }
+    const nextTouched = { ...participantTouched }
+
+    for (const [index, userId] of selectedParticipantIds.entries()) {
+      const allocatedUnits = baseUnits + (index < remainderUnits ? 1 : 0)
+      nextInputs[userId] = formatInputValue(allocatedUnits / unit)
+      nextTouched[userId] = true
+    }
+
+    participantAmountInputs = nextInputs
+    participantTouched = nextTouched
+    participantsError = ''
+  }
+
   function onAmountInput(event: Event): void {
     amountInput = normalizeAmountInputValue((event.currentTarget as HTMLInputElement).value)
     amountError = ''
@@ -653,12 +681,24 @@
             {/if}
 
             {#if selectedParticipantIds.length > 0}
-              <p class="split-footer">
-                Friends: {formatAmount(participantSum, $amountDisplayMode)} · Your share: {formatAmount(
-                  yourShare,
-                  $amountDisplayMode,
-                )}
-              </p>
+              <div class="split-footer">
+                <p>
+                  Friends: {formatAmount(participantSum, $amountDisplayMode)} · Your share: {formatAmount(
+                    yourShare,
+                    $amountDisplayMode,
+                  )}
+                </p>
+                <Button
+                  variant="secondary"
+                  size="compact"
+                  type="button"
+                  className="split-footer__action"
+                  onclick={assignAllToFriends}
+                  disabled={!Number.isFinite(parsedAmount) || parsedAmount <= 0}
+                >
+                  Max
+                </Button>
+              </div>
             {/if}
           </div>
         </Collapsible.Content>
@@ -820,10 +860,26 @@
   }
 
   .split-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
     padding: 10px 16px;
     border-top: 1px solid var(--border);
     background: var(--panel);
     color: var(--text-muted);
     font-size: 12px;
+  }
+
+  .split-footer p {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .split-footer :global(.btn.split-footer__action) {
+    width: auto;
+    flex-shrink: 0;
+    margin-left: auto;
   }
 </style>
