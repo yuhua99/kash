@@ -117,7 +117,7 @@
   $: if (activePendingSplit && activeSplitRecordId !== activePendingSplit.record_id) {
     activeSplitRecordId = activePendingSplit.record_id
     splitCategoryError = ''
-    splitCategoryId = splitCategoryItems[0]?.value ?? ''
+    splitCategoryId = ''
 
     if (!splitCategoryItems.length && !splitCategoryLoading) {
       void loadSplitCategories()
@@ -173,8 +173,8 @@
         return
       }
 
-      if (!splitCategoryItems.some((item) => item.value === splitCategoryId)) {
-        splitCategoryId = splitCategoryItems[0]?.value ?? ''
+      if (splitCategoryId && !splitCategoryItems.some((item) => item.value === splitCategoryId)) {
+        splitCategoryId = ''
       }
     } catch (error) {
       splitCategoryItems = []
