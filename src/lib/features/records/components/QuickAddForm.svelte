@@ -99,6 +99,28 @@
     }
   }
 
+  $: if ($amountDisplayMode === 'whole') {
+    const normalizedAmountInput = normalizeAmountInputValue(amountInput)
+    if (normalizedAmountInput !== amountInput) {
+      amountInput = normalizedAmountInput
+    }
+
+    const normalizedParticipantInputs = Object.fromEntries(
+      Object.entries(participantAmountInputs).map(([userId, value]) => [
+        userId,
+        normalizeAmountInputValue(value),
+      ]),
+    )
+
+    if (
+      Object.keys(normalizedParticipantInputs).some(
+        (userId) => normalizedParticipantInputs[userId] !== participantAmountInputs[userId],
+      )
+    ) {
+      participantAmountInputs = normalizedParticipantInputs
+    }
+  }
+
   $: participantSplits = buildParticipantSplits(selectedParticipantIds, participantAmountInputs)
   $: participantSum = roundToCents(participantSplits.reduce((sum, p) => sum + p.amount, 0))
   $: yourShare = roundToCents((Number.isFinite(parsedAmount) ? parsedAmount : 0) - participantSum)
@@ -126,7 +148,24 @@
   }
 
   function formatInputValue(value: number): string {
+    if ($amountDisplayMode === 'whole') {
+      return String(Math.trunc(value))
+    }
+
     return value.toFixed(2)
+  }
+
+  function normalizeAmountInputValue(value: string): string {
+    if ($amountDisplayMode !== 'whole' || value === '') {
+      return value
+    }
+
+    const parsedValue = Number(value)
+    if (!Number.isFinite(parsedValue)) {
+      return value
+    }
+
+    return String(Math.trunc(parsedValue))
   }
 
   function getFriendLabel(friend: FriendRelation): string {
@@ -161,7 +200,7 @@
    * Recompute auto shares.
    * - locked friends (participantTouched) keep their amount
    * - remaining total is split equally among unlocked friends
-   * - rounding cents go to the payer (not distributed to friends)
+   * - any remainder stays with the payer (not distributed to friends)
    */
   function applyAutoShares(selectedIds: string[], total: number): void {
     if (selectedIds.length === 0) return
@@ -176,7 +215,10 @@
     const remaining = total - lockedTotal
     // +1 accounts for the payer (user) as one of the equal-share participants
     const poolCount = unlockedIds.length + 1
-    const sharePerPerson = Math.floor((remaining / poolCount) * 100) / 100
+    const sharePerPerson =
+      $amountDisplayMode === 'whole'
+        ? Math.floor(remaining / poolCount)
+        : Math.floor((remaining / poolCount) * 100) / 100
 
     let changed = false
     const nextInputs = { ...participantAmountInputs }
@@ -218,10 +260,15 @@
   }
 
   function onParticipantAmountInput(event: Event, userId: string): void {
-    const value = (event.currentTarget as HTMLInputElement).value
+    const value = normalizeAmountInputValue((event.currentTarget as HTMLInputElement).value)
     participantAmountInputs = { ...participantAmountInputs, [userId]: value }
     participantTouched = { ...participantTouched, [userId]: true }
     participantsError = ''
+  }
+
+  function onAmountInput(event: Event): void {
+    amountInput = normalizeAmountInputValue((event.currentTarget as HTMLInputElement).value)
+    amountError = ''
   }
 
   function onAmountInputClick(event: MouseEvent): void {
@@ -456,9 +503,10 @@
         <input
           id="record-amount"
           type="number"
-          step="0.01"
+          step={$amountDisplayMode === 'whole' ? '1' : '0.01'}
           min="0"
           bind:value={amountInput}
+          on:input={onAmountInput}
           required
         />
         {#if amountError}
@@ -589,7 +637,7 @@
                     <input
                       type="number"
                       class="participant-amount"
-                      step="0.01"
+                      step={$amountDisplayMode === 'whole' ? '1' : '0.01'}
                       min="0"
                       value={participantAmountInputs[friend.user_id] ?? ''}
                       on:input={(e) => onParticipantAmountInput(e, friend.user_id)}

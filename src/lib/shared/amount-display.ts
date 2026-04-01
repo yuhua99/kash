@@ -21,15 +21,10 @@ export function setAmountDisplayMode(mode: AmountDisplayMode): void {
   if (browser) localStorage.setItem(STORAGE_KEY, mode)
 }
 
-function formatTinyNonZero(value: number): string {
-  return value.toFixed(2).replace(/\.?0+$/, '')
-}
-
 /**
  * Single shared formatter for all amount displays in the app.
  * - 'cents': two decimal places, e.g. "123.45"
- * - 'whole': truncated integer for |value| >= 1, e.g. "123"
- *            keeps tiny non-zero values as-is, e.g. "0.75", "-0.4"
+ * - 'whole': truncated integer, e.g. "123"
  *
  * Sign is preserved in both modes: formatAmount(-123.9, 'whole') → "-123"
  */
@@ -37,10 +32,6 @@ export function formatAmount(value: number, mode: AmountDisplayMode): string {
   const normalizedValue = value === 0 ? 0 : value
 
   if (mode === 'whole') {
-    if (Math.abs(normalizedValue) < 1 && normalizedValue !== 0) {
-      return formatTinyNonZero(normalizedValue)
-    }
-
     return String(Math.trunc(normalizedValue))
   }
 
