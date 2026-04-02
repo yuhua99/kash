@@ -7,7 +7,12 @@
   import { getAcceptedFriendsCached } from '$lib/features/friends/cache'
   import { createSplit, generateIdempotencyKey } from '$lib/features/splits/api'
   import { dateValueToIso, isoToDateValue, todayIso } from '$lib/shared/date'
-  import type { Category, RecordItem } from '$lib/core/domain/models'
+  import type { Category, CreateSplitPayload, RecordItem } from '$lib/core/domain/models'
+  import {
+    DEFAULT_CURRENCY_CODE,
+    SUPPORTED_CURRENCIES,
+    type SupportedCurrencyCode,
+  } from '$lib/shared/currency'
   import { validateAmount, validateDate, validateRecordName } from '$lib/shared/validation'
   import { amountDisplayMode, formatAmount } from '$lib/shared/amount-display'
   import { toast } from '$lib/ui/toast'
@@ -22,17 +27,10 @@
   type ApiError = Error & { status?: number }
   type FriendRelation = { id: string; user_id: string; pending: boolean; nickname: string | null }
   type SplitParticipant = { user_id: string; amount: number }
-  type CreateSplitPayload = {
-    idempotency_key: string
-    total_amount: number
-    description: string
-    date: string
-    category_id: string
-    splits: SplitParticipant[]
-  }
 
   export let categories: Category[] = []
   export let recentRecords: RecordItem[] = []
+  export let mainCurrencyCode: string | undefined = undefined
   export let loading = false
   export let loadError = ''
 
@@ -40,6 +38,7 @@
   let amountInput = ''
   let categoryId = ''
   let date = todayIso()
+  let currencyCode: SupportedCurrencyCode = DEFAULT_CURRENCY_CODE
   let recordType: 'expense' | 'income' = 'expense'
   let isIncome = false
 
@@ -67,6 +66,10 @@
   $: absoluteAmount = Math.abs(parsedAmount)
   $: isIncome = recordType === 'income'
   $: filteredCategories = categories.filter((category) => category.is_income === isIncome)
+  $: currencyItems = SUPPORTED_CURRENCIES.map((currency) => ({
+    value: currency.code,
+    label: currency.code,
+  }))
   $: categorySelectItems = filteredCategories.map((category) => ({
     value: category.id,
     label: category.name,
@@ -85,6 +88,9 @@
   $: suggestedNames = canSuggestNames
     ? getSuggestedRecordNames(recentRecords, categoryId, absoluteAmount, MAX_NAME_SUGGESTIONS)
     : []
+  $: if (mainCurrencyCode && currencyCode === DEFAULT_CURRENCY_CODE) {
+    currencyCode = mainCurrencyCode as SupportedCurrencyCode
+  }
 
   $: selectedParticipantIds = friends
     .filter((friend) => participantIncluded[friend.user_id])
@@ -299,6 +305,10 @@
     amountError = ''
   }
 
+  function onCurrencyChange(value: string): void {
+    currencyCode = value as SupportedCurrencyCode
+  }
+
   function onAmountInputClick(event: MouseEvent): void {
     // Prevent row click from toggling selection when clicking inside input
     event.stopPropagation()
@@ -459,6 +469,7 @@
         const splitPayload: CreateSplitPayload = {
           idempotency_key: splitIdempotencyKey,
           total_amount: parsedAmount,
+          currency_code: currencyCode,
           description: normalizedName,
           date: normalizedDate,
           category_id: categoryId,
@@ -471,6 +482,7 @@
         await createRecord({
           name: normalizedName,
           amount: normalizedAmount,
+          currency_code: currencyCode,
           category_id: categoryId,
           date: normalizedDate,
         })
@@ -482,6 +494,7 @@
       amountInput = ''
       categoryId = ''
       date = todayIso()
+      currencyCode = (mainCurrencyCode as SupportedCurrencyCode | undefined) ?? DEFAULT_CURRENCY_CODE
       if (splitEnabled) {
         splitEnabled = false
         splitIdempotencyKey = generateIdempotencyKey()
@@ -540,6 +553,17 @@
         {#if amountError}
           <p role="alert">{amountError}</p>
         {/if}
+      </div>
+
+      <div>
+        <label for="record-currency">Currency</label>
+        <SelectField
+          id="record-currency"
+          value={currencyCode}
+          label={currencyCode}
+          items={currencyItems}
+          onValueChange={onCurrencyChange}
+        />
       </div>
 
       <div>

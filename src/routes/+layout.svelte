@@ -836,7 +836,7 @@
             <p><span>Date</span><strong>{activePendingSplit.date}</strong></p>
             <p>
               <span>Amount</span><strong
-                >{formatAmount(activePendingSplit.amount, $amountDisplayMode)}</strong
+                >{formatAmount(activePendingSplit.amount, $amountDisplayMode)} {activePendingSplit.currency_code}</strong
               >
             </p>
           </div>

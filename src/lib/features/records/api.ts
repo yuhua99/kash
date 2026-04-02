@@ -14,6 +14,7 @@ type RecordQueryParams = {
 type CreateRecordPayload = {
   name: string
   amount: number
+  currency_code: string
   category_id: string
   date: string
 }

@@ -16,7 +16,7 @@
         <div slot="main">{record.name}</div>
         <div slot="end">
           <div class="amount amount--expense">
-            {formatAmount(record.amount, $amountDisplayMode)}
+            {formatAmount(record.amount, $amountDisplayMode)} {record.currency_code}
           </div>
         </div>
         <svelte:fragment slot="sub">

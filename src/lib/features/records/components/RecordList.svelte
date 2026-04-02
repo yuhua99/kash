@@ -60,7 +60,7 @@
                       class:amount--income={record.amount > 0}
                       class:amount--expense={record.amount < 0}
                     >
-                      {formatAmount(record.amount, $amountDisplayMode)}
+                      {formatAmount(record.amount, $amountDisplayMode)} {record.currency_code}
                     </div>
                   </div>
                   <svelte:fragment slot="sub">
@@ -105,7 +105,7 @@
                   class:amount--income={record.amount > 0}
                   class:amount--expense={record.amount < 0}
                 >
-                  {formatAmount(record.amount, $amountDisplayMode)}
+                  {formatAmount(record.amount, $amountDisplayMode)} {record.currency_code}
                 </div>
               </div>
               <svelte:fragment slot="sub">

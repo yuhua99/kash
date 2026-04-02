@@ -272,7 +272,7 @@
               {formatSignedAmount(
                 item.direction === 'you_owe' ? -item.amount : item.amount,
                 $amountDisplayMode,
-              )}
+              )} {item.currency_code}
             </span>
           </svelte:fragment>
           <svelte:fragment slot="sub">
