@@ -3,6 +3,10 @@ export type User = {
   username: string
 }
 
+export type UserSettings = {
+  main_currency_code: string
+}
+
 export type Category = {
   id: string
   name: string
