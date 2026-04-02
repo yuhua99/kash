@@ -16,11 +16,11 @@
         <div slot="main">{record.name}</div>
         <div slot="end">
           <div class="amount amount--expense">
-            {formatAmount(record.amount, $amountDisplayMode)} {record.currency_code}
+            {formatAmount(record.amount, $amountDisplayMode)} {record.currency}
           </div>
         </div>
         <svelte:fragment slot="sub">
-          <span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
+          <span>{record.category_id ? categoryById.get(record.category_id)?.name ?? 'Unknown category' : 'Unknown category'}</span>
           <span aria-hidden="true">-</span>
           <span>{record.date}</span>
           <span class="pending-chip">PENDING</span>

@@ -4,7 +4,7 @@ export type User = {
 }
 
 export type UserSettings = {
-  main_currency_code: string
+  main_currency: string
 }
 
 export type Category = {
@@ -17,8 +17,8 @@ export type RecordItem = {
   id: string
   name: string
   amount: number
-  currency_code: string
-  category_id: string
+  currency: string
+  category_id: string | null
   date: string
   pending?: boolean
 }
@@ -66,7 +66,7 @@ export type SplitParticipant = {
 export type CreateSplitPayload = {
   idempotency_key: string
   total_amount: number
-  currency_code: string
+  currency: string
   description: string
   date: string
   category_id: string
@@ -85,7 +85,7 @@ export type SplitListItem = {
   description: string
   date: string
   amount: number
-  currency_code: string
+  currency: string
   debtor_user_id: string
   creditor_user_id: string
   counterparty_user_id: string

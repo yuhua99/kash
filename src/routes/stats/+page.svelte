@@ -90,6 +90,10 @@
     const totals = new Map<string, number>()
 
     for (const item of items) {
+      if (!item.category_id) {
+        continue
+      }
+
       totals.set(item.category_id, (totals.get(item.category_id) ?? 0) + item.amount)
     }
 

@@ -15,7 +15,7 @@ export function updateSettings(mainCurrencyCode: string): Promise<UserSettings> 
   return client.request<UserSettings>('/settings', {
     method: 'PUT',
     body: {
-      main_currency_code: mainCurrencyCode,
+      main_currency: mainCurrencyCode,
     },
   })
 }

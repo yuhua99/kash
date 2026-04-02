@@ -469,7 +469,7 @@
         const splitPayload: CreateSplitPayload = {
           idempotency_key: splitIdempotencyKey,
           total_amount: parsedAmount,
-          currency_code: currencyCode,
+          currency: currencyCode,
           description: normalizedName,
           date: normalizedDate,
           category_id: categoryId,
@@ -482,7 +482,7 @@
         await createRecord({
           name: normalizedName,
           amount: normalizedAmount,
-          currency_code: currencyCode,
+          currency: currencyCode,
           category_id: categoryId,
           date: normalizedDate,
         })

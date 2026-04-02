@@ -369,7 +369,7 @@
     editingId = record.id
     editName = record.name
     editAmountInput = String(record.amount)
-    editCategoryId = record.category_id
+    editCategoryId = record.category_id ?? ''
     editDate = record.date
     editDialogOpen = true
     clearEditErrors()

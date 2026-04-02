@@ -60,11 +60,11 @@
                       class:amount--income={record.amount > 0}
                       class:amount--expense={record.amount < 0}
                     >
-                      {formatAmount(record.amount, $amountDisplayMode)} {record.currency_code}
+                      {formatAmount(record.amount, $amountDisplayMode)} {record.currency}
                     </div>
                   </div>
                   <svelte:fragment slot="sub">
-                    <span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
+                    <span>{record.category_id ? categoryById.get(record.category_id)?.name ?? 'Unknown category' : 'Unknown category'}</span>
                   </svelte:fragment>
                 </ListRow>
                 {#if activeActionRowId === record.id}
@@ -105,11 +105,11 @@
                   class:amount--income={record.amount > 0}
                   class:amount--expense={record.amount < 0}
                 >
-                  {formatAmount(record.amount, $amountDisplayMode)} {record.currency_code}
+                  {formatAmount(record.amount, $amountDisplayMode)} {record.currency}
                 </div>
               </div>
               <svelte:fragment slot="sub">
-                <span>{categoryById.get(record.category_id)?.name ?? 'Unknown category'}</span>
+                <span>{record.category_id ? categoryById.get(record.category_id)?.name ?? 'Unknown category' : 'Unknown category'}</span>
               </svelte:fragment>
             </ListRow>
             {#if activeActionRowId === record.id}

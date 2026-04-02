@@ -29,7 +29,7 @@
   <QuickAddForm
     {categories}
     {recentRecords}
-    mainCurrencyCode={settings?.main_currency_code}
+    mainCurrencyCode={settings?.main_currency}
     {loadError}
   />
 </main>

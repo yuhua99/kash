@@ -29,7 +29,7 @@
   let pending = false
   let savingMainCurrency = false
   let mainCurrencyCode: SupportedCurrencyCode =
-    (data.settings?.main_currency_code as SupportedCurrencyCode | undefined) ?? DEFAULT_CURRENCY_CODE
+    (data.settings?.main_currency as SupportedCurrencyCode | undefined) ?? DEFAULT_CURRENCY_CODE
   let settingsLoadError = data.loadError ?? ''
 
   const currencyItems = SUPPORTED_CURRENCIES.map((currency) => ({
@@ -37,8 +37,8 @@
     label: currency.code,
   }))
 
-  $: if (data.settings?.main_currency_code && !savingMainCurrency) {
-    mainCurrencyCode = data.settings.main_currency_code as SupportedCurrencyCode
+  $: if (data.settings?.main_currency && !savingMainCurrency) {
+    mainCurrencyCode = data.settings.main_currency as SupportedCurrencyCode
   }
 
   $: settingsLoadError = data.loadError ?? ''
@@ -58,7 +58,7 @@
 
     try {
       const settings = await updateSettings(mainCurrencyCode)
-      mainCurrencyCode = settings.main_currency_code as SupportedCurrencyCode
+      mainCurrencyCode = settings.main_currency as SupportedCurrencyCode
       settingsLoadError = ''
       await invalidate('app:settings')
       toast.success('Main currency updated.')
