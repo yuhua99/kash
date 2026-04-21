@@ -178,7 +178,7 @@
         categoryFilterValue: categoryFilter,
       }),
     )
-    .sort((left, right) => compareRecords(left, right, sortMode))
+    .sort((left, right) => compareRecords(left, right, sortMode, convertedAmountById))
   $: shouldGroupByDate = sortMode === 'date_desc' || sortMode === 'date_asc'
   $: groupedRecords = shouldGroupByDate ? groupRecordsByDate(filteredRecords, sortMode) : []
 
@@ -260,22 +260,22 @@
     return true
   }
 
-  function compareRecords(left: RecordItem, right: RecordItem, mode: SortMode): number {
+  function compareRecords(left: RecordItem, right: RecordItem, mode: SortMode, convertedAmounts: Map<string, number>): number {
     switch (mode) {
       case 'date_asc':
         return left.date.localeCompare(right.date)
       case 'date_desc':
         return right.date.localeCompare(left.date)
       case 'amount_asc': {
-        const leftAmount = convertedAmountById.get(left.id) ?? left.amount
-        const rightAmount = convertedAmountById.get(right.id) ?? right.amount
+        const leftAmount = convertedAmounts.get(left.id) ?? left.amount
+        const rightAmount = convertedAmounts.get(right.id) ?? right.amount
         const leftAbs = Math.abs(leftAmount)
         const rightAbs = Math.abs(rightAmount)
         return leftAbs - rightAbs || leftAmount - rightAmount
       }
       case 'amount_desc': {
-        const leftAmount = convertedAmountById.get(left.id) ?? left.amount
-        const rightAmount = convertedAmountById.get(right.id) ?? right.amount
+        const leftAmount = convertedAmounts.get(left.id) ?? left.amount
+        const rightAmount = convertedAmounts.get(right.id) ?? right.amount
         const leftAbs = Math.abs(leftAmount)
         const rightAbs = Math.abs(rightAmount)
         return rightAbs - leftAbs || rightAmount - leftAmount
