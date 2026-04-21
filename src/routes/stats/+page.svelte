@@ -66,8 +66,9 @@
   let endDate = data.endDate
 
   $: mainCurrencyCode = settings?.main_currency ?? 'TWD'
-  $: totals = calculateTotals(convertedRecords)
-  $: breakdown = buildBreakdown(convertedRecords, categories)
+  $: nonZeroConvertedRecords = convertedRecords.filter((record) => record.amount !== 0)
+  $: totals = calculateTotals(nonZeroConvertedRecords)
+  $: breakdown = buildBreakdown(nonZeroConvertedRecords, categories)
   $: convertedSummary =
     records.length > 0 && convertedRecords.length > 0
       ? {
@@ -290,7 +291,7 @@
   <StatsBreakdown
     {loading}
     {loadError}
-    recordCount={records.length}
+    recordCount={records.filter((r) => r.amount !== 0).length}
     {currencySubtotals}
     {convertedSummary}
     conversionMessage={records.length > 0 ? conversionMessage : ''}

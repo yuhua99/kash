@@ -166,6 +166,7 @@
   $: editDateValue = isoToDateValue(editDate)
   $: pendingRecords = records.filter((record) => record.pending)
   $: filteredRecords = records
+    .filter((record) => record.amount !== 0)
     .filter((record) =>
       matchesRecordFilters(record, {
         normalizedSearchValue: normalizedSearch,
