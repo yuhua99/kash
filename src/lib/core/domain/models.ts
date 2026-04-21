@@ -7,6 +7,16 @@ export type UserSettings = {
   main_currency: string
 }
 
+export type ExchangeRateRow = {
+  date: string
+  currency: string
+  rate: number
+}
+
+export type FxRatesResponse = {
+  rates: ExchangeRateRow[]
+}
+
 export type Category = {
   id: string
   name: string

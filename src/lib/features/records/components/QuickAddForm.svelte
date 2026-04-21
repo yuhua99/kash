@@ -9,10 +9,9 @@
   import { dateValueToIso, isoToDateValue, todayIso } from '$lib/shared/date'
   import type { Category, CreateSplitPayload, RecordItem } from '$lib/core/domain/models'
   import {
-    DEFAULT_CURRENCY_CODE,
-    SUPPORTED_CURRENCIES,
-    type SupportedCurrencyCode,
-  } from '$lib/shared/currency'
+    currentCurrency,
+    initializeCurrentCurrency,
+  } from '$lib/shared/current-currency'
   import { validateAmount, validateDate, validateRecordName } from '$lib/shared/validation'
   import { amountDisplayMode, formatAmount } from '$lib/shared/amount-display'
   import { toast } from '$lib/ui/toast'
@@ -38,7 +37,6 @@
   let amountInput = ''
   let categoryId = ''
   let date = todayIso()
-  let currencyCode: SupportedCurrencyCode = DEFAULT_CURRENCY_CODE
   let recordType: 'expense' | 'income' = 'expense'
   let isIncome = false
 
@@ -66,10 +64,6 @@
   $: absoluteAmount = Math.abs(parsedAmount)
   $: isIncome = recordType === 'income'
   $: filteredCategories = categories.filter((category) => category.is_income === isIncome)
-  $: currencyItems = SUPPORTED_CURRENCIES.map((currency) => ({
-    value: currency.code,
-    label: currency.code,
-  }))
   $: categorySelectItems = filteredCategories.map((category) => ({
     value: category.id,
     label: category.name,
@@ -88,8 +82,8 @@
   $: suggestedNames = canSuggestNames
     ? getSuggestedRecordNames(recentRecords, categoryId, absoluteAmount, MAX_NAME_SUGGESTIONS)
     : []
-  $: if (mainCurrencyCode && currencyCode === DEFAULT_CURRENCY_CODE) {
-    currencyCode = mainCurrencyCode as SupportedCurrencyCode
+  $: if (mainCurrencyCode) {
+    initializeCurrentCurrency(mainCurrencyCode)
   }
 
   $: selectedParticipantIds = friends
@@ -305,10 +299,6 @@
     amountError = ''
   }
 
-  function onCurrencyChange(value: string): void {
-    currencyCode = value as SupportedCurrencyCode
-  }
-
   function onAmountInputClick(event: MouseEvent): void {
     // Prevent row click from toggling selection when clicking inside input
     event.stopPropagation()
@@ -469,7 +459,7 @@
         const splitPayload: CreateSplitPayload = {
           idempotency_key: splitIdempotencyKey,
           total_amount: parsedAmount,
-          currency: currencyCode,
+          currency: $currentCurrency,
           description: normalizedName,
           date: normalizedDate,
           category_id: categoryId,
@@ -482,7 +472,7 @@
         await createRecord({
           name: normalizedName,
           amount: normalizedAmount,
-          currency: currencyCode,
+          currency: $currentCurrency,
           category_id: categoryId,
           date: normalizedDate,
         })
@@ -494,7 +484,6 @@
       amountInput = ''
       categoryId = ''
       date = todayIso()
-      currencyCode = (mainCurrencyCode as SupportedCurrencyCode | undefined) ?? DEFAULT_CURRENCY_CODE
       if (splitEnabled) {
         splitEnabled = false
         splitIdempotencyKey = generateIdempotencyKey()
@@ -553,17 +542,6 @@
         {#if amountError}
           <p role="alert">{amountError}</p>
         {/if}
-      </div>
-
-      <div>
-        <label for="record-currency">Currency</label>
-        <SelectField
-          id="record-currency"
-          value={currencyCode}
-          label={currencyCode}
-          items={currencyItems}
-          onValueChange={onCurrencyChange}
-        />
       </div>
 
       <div>

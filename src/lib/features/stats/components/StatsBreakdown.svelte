@@ -3,6 +3,7 @@
   import ListRow from '$lib/ui/ListRow.svelte'
   import '$lib/ui/Amount.css'
   import { amountDisplayMode, formatAmount, formatSignedAmount } from '$lib/shared/amount-display'
+  import type { CurrencySubtotal } from '$lib/shared/fx'
 
   type BreakdownItem = {
     categoryId: string
@@ -11,14 +12,20 @@
     share: number
     isIncome: boolean
   }
+  type ConvertedSummary = {
+    netTotal: number
+    incomeTotal: number
+    expenseTotal: number
+    breakdown: BreakdownItem[]
+    mainCurrencyCode: string
+  }
 
   export let loading = false
   export let loadError = ''
+  export let conversionMessage = ''
   export let recordCount = 0
-  export let netTotal = 0
-  export let incomeTotal = 0
-  export let expenseTotal = 0
-  export let breakdown: BreakdownItem[] = []
+  export let currencySubtotals: CurrencySubtotal[] = []
+  export let convertedSummary: ConvertedSummary | null = null
   export let buildCategoryLinkHref: (categoryId: string) => string = () => '/records'
 </script>
 
@@ -34,62 +41,85 @@
         <a class="text-link" href="/home">Home</a>.
       </p>
     {:else}
-      <div class="stats-summary">
-        <div class="stats-summary__row">
-          <span class="stats-summary__label">Net total</span>
-          <span
-            class="amount"
-            class:amount--income={netTotal > 0}
-            class:amount--expense={netTotal < 0}
-          >
-            {formatAmount(netTotal, $amountDisplayMode)}
-          </span>
-        </div>
+        <div class="stats-summary">
+          {#each currencySubtotals as item}
+            <div class="stats-summary__row">
+              <span class="stats-summary__label">{item.currency}</span>
+              <span
+                class="amount"
+                class:amount--income={item.total > 0}
+                class:amount--expense={item.total < 0}
+              >
+                {formatSignedAmount(item.total, $amountDisplayMode)}
+              </span>
+            </div>
+          {/each}
 
-        <div class="stats-summary__row">
-          <span class="stats-summary__label">Income/Expense</span>
-          <span class="stats-summary__pair">
-            <span class="amount amount--income"
-              >{formatAmount(incomeTotal, $amountDisplayMode)}</span
-            >
-            <span class="stats-summary__slash">/</span>
-            <span class="amount amount--expense"
-              >{formatSignedAmount(-expenseTotal, $amountDisplayMode)}</span
-            >
-          </span>
-        </div>
-      </div>
+          {#if conversionMessage}
+            <p class="stats-conversion-note" role="status">{conversionMessage}</p>
+          {/if}
 
-      <div class="stats-list">
-        {#each breakdown as item}
-          <a class="stats-row-link" href={buildCategoryLinkHref(item.categoryId)}>
-            <ListRow type={item.total >= 0 ? 'income' : 'expense'}>
-              <svelte:fragment slot="main">
-                <span>{item.name}</span>
-                <span
-                  class="amount"
-                  class:amount--income={item.total >= 0}
-                  class:amount--expense={item.total < 0}
+          {#if convertedSummary}
+            <div class="stats-summary__row">
+              <span class="stats-summary__label">Total</span>
+              <span
+                class="amount"
+                class:amount--income={convertedSummary.netTotal > 0}
+                class:amount--expense={convertedSummary.netTotal < 0}
+              >
+                {formatSignedAmount(convertedSummary.netTotal, $amountDisplayMode)}
+              </span>
+            </div>
+
+            <div class="stats-summary__row">
+              <span class="stats-summary__label"
+                >Income/Expense ({convertedSummary.mainCurrencyCode})</span
+              >
+              <span class="stats-summary__pair">
+                <span class="amount amount--income"
+                  >{formatAmount(convertedSummary.incomeTotal, $amountDisplayMode)}</span
                 >
-                  {formatAmount(item.total, $amountDisplayMode)}
-                </span>
-              </svelte:fragment>
-              <svelte:fragment slot="sub">
-                <span>{item.share.toFixed(1)}% of activity</span>
-                <span>{item.isIncome ? 'Income' : 'Expense'}</span>
-              </svelte:fragment>
-              <div aria-hidden="true" class="breakdown-bar">
-                <div
-                  class="breakdown-bar__fill"
-                  class:breakdown-bar__fill--income={item.total >= 0}
-                  class:breakdown-bar__fill--expense={item.total < 0}
-                  style="width: {item.share}%"
-                ></div>
-              </div>
-            </ListRow>
-          </a>
-        {/each}
-      </div>
+                <span class="stats-summary__slash">/</span>
+                <span class="amount amount--expense"
+                  >{formatSignedAmount(-convertedSummary.expenseTotal, $amountDisplayMode)}</span
+                >
+              </span>
+            </div>
+          {/if}
+        </div>
+
+        {#if convertedSummary}
+          <div class="stats-list">
+            {#each convertedSummary.breakdown as item}
+              <a class="stats-row-link" href={buildCategoryLinkHref(item.categoryId)}>
+                <ListRow type={item.total >= 0 ? 'income' : 'expense'}>
+                  <svelte:fragment slot="main">
+                    <span>{item.name}</span>
+                    <span
+                      class="amount"
+                      class:amount--income={item.total >= 0}
+                      class:amount--expense={item.total < 0}
+                    >
+                      {formatAmount(item.total, $amountDisplayMode)} {convertedSummary.mainCurrencyCode}
+                    </span>
+                  </svelte:fragment>
+                  <svelte:fragment slot="sub">
+                    <span>{item.share.toFixed(1)}% of activity</span>
+                    <span>{item.isIncome ? 'Income' : 'Expense'}</span>
+                  </svelte:fragment>
+                  <div aria-hidden="true" class="breakdown-bar">
+                    <div
+                      class="breakdown-bar__fill"
+                      class:breakdown-bar__fill--income={item.total >= 0}
+                      class:breakdown-bar__fill--expense={item.total < 0}
+                      style="width: {item.share}%"
+                    ></div>
+                  </div>
+                </ListRow>
+              </a>
+            {/each}
+          </div>
+        {/if}
     {/if}
   </div>
 </Block>
@@ -123,6 +153,12 @@
   }
 
   .stats-summary__slash {
+    color: var(--text-muted);
+  }
+
+  .stats-conversion-note {
+    margin: 0;
+    font-size: 12px;
     color: var(--text-muted);
   }
 

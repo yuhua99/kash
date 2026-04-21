@@ -4,10 +4,18 @@
   import { page } from '$app/stores'
   import type { ApiError } from '$lib/core/http/api-client'
   import type { FriendRelation, SplitListItem } from '$lib/core/domain/models'
+  import { getFxRates } from '$lib/features/fx/api'
   import { listFriends, removeFriend, updateNickname } from '$lib/features/friends/api'
   import { invalidateFriendsCache } from '$lib/features/friends/cache'
   import { invalidateRecordsCache } from '$lib/features/records/cache'
+  import { getSettings } from '$lib/features/settings/api'
   import { listUnsettledSplits, settleAllUnsettledWithFriend } from '$lib/features/splits/api'
+  import {
+    buildCurrencySubtotals,
+    buildRateLookup,
+    convertAmountToMainCurrency,
+    type CurrencySubtotal,
+  } from '$lib/shared/fx'
   import Block from '$lib/ui/Block.svelte'
   import Button from '$lib/ui/Button.svelte'
   import ConfirmDialog from '$lib/ui/ConfirmDialog.svelte'
@@ -25,6 +33,11 @@
   let loadError = ''
   let friend: FriendRelation | null = null
   let splits: SplitListItem[] = []
+  let currencySubtotals: CurrencySubtotal[] = []
+  let mainCurrencyCode = 'TWD'
+  let netAmount = 0
+  let conversionError = ''
+  let conversionLoading = false
   let loadedFriendId = ''
 
   let nicknameValue = ''
@@ -37,14 +50,6 @@
   let removingFriend = false
 
   $: friendId = $page.params.friendId ?? ''
-  $: youOweTotal = splits
-    .filter((item) => item.direction === 'you_owe')
-    .reduce((sum, item) => sum + item.amount, 0)
-  $: theyOweYouTotal = splits
-    .filter((item) => item.direction === 'they_owe_you')
-    .reduce((sum, item) => sum + item.amount, 0)
-  $: netAmount = theyOweYouTotal - youOweTotal
-
   $: if (browser && friendId && loadedFriendId !== friendId) {
     loadedFriendId = friendId
     void fetchFriendUnsettled()
@@ -74,6 +79,49 @@
     return right.date.localeCompare(left.date)
   }
 
+  async function refreshBalanceSummary(items: SplitListItem[]): Promise<void> {
+    const signedItems = items.map((item) => ({
+      amount: item.direction === 'you_owe' ? -item.amount : item.amount,
+      currency: item.currency,
+      date: item.date,
+    }))
+
+    currencySubtotals = buildCurrencySubtotals(signedItems)
+    conversionError = ''
+
+    if (signedItems.length === 0) {
+      netAmount = 0
+      return
+    }
+
+    conversionLoading = true
+
+    try {
+      const settings = await getSettings()
+      mainCurrencyCode = settings.main_currency
+
+      const dates = signedItems.map((item) => item.date)
+      const response = await getFxRates({
+        from: dates.reduce((min, date) => (date < min ? date : min)),
+        to: dates.reduce((max, date) => (date > max ? date : max)),
+        quotes: Array.from(new Set([...signedItems.map((item) => item.currency), mainCurrencyCode])),
+      })
+      const rates = buildRateLookup(response.rates)
+
+      netAmount = signedItems.reduce(
+        (sum, item) =>
+          sum +
+          convertAmountToMainCurrency(item.amount, item.currency, mainCurrencyCode, item.date, rates),
+        0,
+      )
+    } catch (error) {
+      netAmount = 0
+      conversionError = getErrorMessage(error, 'Unable to load converted total.')
+    } finally {
+      conversionLoading = false
+    }
+  }
+
   async function fetchFriendUnsettled(): Promise<void> {
     if (!friendId) {
       return
@@ -93,6 +141,8 @@
       if (!matchedFriend) {
         friend = null
         splits = []
+        currencySubtotals = []
+        netAmount = 0
         nicknameValue = ''
         loadError = 'Friend not found.'
         return
@@ -101,6 +151,13 @@
       friend = matchedFriend
       nicknameValue = matchedFriend.nickname
       splits = unsettledResponse.splits.slice().sort(sortByDateDesc)
+      currencySubtotals = buildCurrencySubtotals(
+        splits.map((item) => ({
+          amount: item.direction === 'you_owe' ? -item.amount : item.amount,
+          currency: item.currency,
+        })),
+      )
+      await refreshBalanceSummary(splits)
     } catch (error) {
       const apiError = error as ApiError
       if (apiError.status === 401) {
@@ -109,6 +166,9 @@
       }
 
       loadError = getErrorMessage(error, 'Unable to load friend unsettled records.')
+      currencySubtotals = []
+      conversionError = ''
+      netAmount = 0
       toast.error(loadError)
     } finally {
       loading = false
@@ -234,14 +294,34 @@
     {:else if loadError}
       <p role="alert">{loadError}</p>
     {:else if friend}
-      <ListRow type={netAmount >= 0 ? 'income' : 'expense'}>
-        <svelte:fragment slot="main">
-          <span>Total</span>
-          <span class={`amount ${amountClass(netAmount)}`}
-            >{formatSignedAmount(netAmount, $amountDisplayMode)}</span
-          >
-        </svelte:fragment>
-      </ListRow>
+      {#each currencySubtotals as item (item.currency)}
+        <ListRow type={item.total >= 0 ? 'income' : 'expense'}>
+          <svelte:fragment slot="main">
+            <span>{item.currency}</span>
+            <span class={`amount ${amountClass(item.total)}`}
+              >{formatSignedAmount(item.total, $amountDisplayMode)}</span
+            >
+          </svelte:fragment>
+        </ListRow>
+      {/each}
+
+      {#if conversionLoading}
+        <p>Loading converted total...</p>
+      {:else if conversionError}
+        <p role="status">{conversionError}</p>
+      {:else}
+        <ListRow type={netAmount >= 0 ? 'income' : 'expense'}>
+          <svelte:fragment slot="main">
+            <span>Total</span>
+            <span class={`amount ${amountClass(netAmount)}`}
+              >{formatSignedAmount(netAmount, $amountDisplayMode)}</span
+            >
+          </svelte:fragment>
+          <svelte:fragment slot="sub">
+            <span>{mainCurrencyCode}</span>
+          </svelte:fragment>
+        </ListRow>
+      {/if}
 
       <Button
         variant="primary"

@@ -1,12 +1,20 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
+  import type { Category, RecordItem, UserSettings } from '$lib/core/domain/models'
+  import { getFxRates } from '$lib/features/fx/api'
   import { getAllRecordsByDateRange } from '$lib/features/records/query'
   import { getCategoriesCached } from '$lib/features/categories/cache'
+  import { getSettings } from '$lib/features/settings/api'
+  import {
+    buildCurrencySubtotals,
+    buildRateLookup,
+    convertAmountToMainCurrency,
+    type CurrencySubtotal,
+  } from '$lib/shared/fx'
   import PeriodControls from '$lib/features/periods/components/PeriodControls.svelte'
   import StatsBreakdown from '$lib/features/stats/components/StatsBreakdown.svelte'
   import { type PeriodPreset } from '$lib/shared/date'
   import Block from '$lib/ui/Block.svelte'
-  import type { Category, RecordItem } from '$lib/core/domain/models'
   import type { PageData } from './$types'
 
   type ApiError = Error & { status?: number }
@@ -23,10 +31,18 @@
     incomeTotal: number
     expenseTotal: number
   }
+  type ConvertedSummary = {
+    netTotal: number
+    incomeTotal: number
+    expenseTotal: number
+    breakdown: BreakdownItem[]
+    mainCurrencyCode: string
+  }
 
   type StatsPageData = PageData & {
     records: RecordItem[]
     categories: Category[]
+    settings: UserSettings | null
     periodPreset: PeriodPreset
     startDate: string
     endDate: string
@@ -37,27 +53,45 @@
 
   let records: RecordItem[] = data.records
   let categories: Category[] = data.categories
+  let settings: UserSettings | null = data.settings
   let loading = false
   let loadError = data.loadError ?? ''
+  let conversionMessage = ''
+  let currencySubtotals: CurrencySubtotal[] = []
+  let convertedRecords: RecordItem[] = []
+  let convertedSummary: ConvertedSummary | null = null
 
   let periodPreset: PeriodPreset = data.periodPreset
   let startDate = data.startDate
   let endDate = data.endDate
 
-  $: totals = calculateTotals(records)
-  $: netTotal = totals.netTotal
-  $: incomeTotal = totals.incomeTotal
-  $: expenseTotal = totals.expenseTotal
-  $: breakdown = buildBreakdown(records, categories)
+  $: mainCurrencyCode = settings?.main_currency ?? 'TWD'
+  $: totals = calculateTotals(convertedRecords)
+  $: breakdown = buildBreakdown(convertedRecords, categories)
+  $: convertedSummary =
+    records.length > 0 && convertedRecords.length > 0
+      ? {
+          netTotal: totals.netTotal,
+          incomeTotal: totals.incomeTotal,
+          expenseTotal: totals.expenseTotal,
+          breakdown,
+          mainCurrencyCode,
+        }
+      : null
 
   $: if (data) {
     records = data.records
     categories = data.categories
+    settings = data.settings
     periodPreset = data.periodPreset
     startDate = data.startDate
     endDate = data.endDate
     loadError = data.loadError ?? ''
     loading = false
+  }
+
+  $: if (data) {
+    void refreshConvertedStats()
   }
 
   function calculateTotals(items: RecordItem[]): Totals {
@@ -124,21 +158,90 @@
     return error instanceof Error ? error.message : fallbackMessage
   }
 
+  async function ensureSettings(): Promise<UserSettings | null> {
+    if (settings) {
+      return settings
+    }
+
+    try {
+      settings = await getSettings()
+      return settings
+    } catch (error) {
+      const apiError = error as ApiError
+      if (apiError.status === 401) {
+        await goto('/login')
+        return null
+      }
+
+      return null
+    }
+  }
+
+  async function refreshConvertedStats(): Promise<void> {
+    currencySubtotals = buildCurrencySubtotals(records)
+
+    if (records.length === 0) {
+      convertedRecords = []
+      conversionMessage = ''
+      return
+    }
+
+    conversionMessage = 'Loading converted totals...'
+
+    const currentSettings = await ensureSettings()
+    if (!currentSettings) {
+      convertedRecords = []
+      conversionMessage = 'Unable to load settings.'
+      return
+    }
+
+    try {
+      const currencies = Array.from(
+        new Set([...records.map((record) => record.currency), currentSettings.main_currency]),
+      )
+      const response = await getFxRates({
+        from: startDate,
+        to: endDate,
+        quotes: currencies,
+      })
+      const rates = buildRateLookup(response.rates)
+
+      convertedRecords = records.map((record) => ({
+        ...record,
+        amount: convertAmountToMainCurrency(
+          record.amount,
+          record.currency,
+          currentSettings.main_currency,
+          record.date,
+          rates,
+        ),
+        currency: currentSettings.main_currency,
+      }))
+      conversionMessage = ''
+    } catch (error) {
+      convertedRecords = []
+      conversionMessage = getErrorMessage(error, 'Unable to load exchange rates.')
+    }
+  }
+
   async function fetchStats(): Promise<void> {
     loading = true
     loadError = ''
 
     try {
-      const [nextRecords, cachedCategories] = await Promise.all([
+      const [nextRecords, cachedCategories, nextSettings] = await Promise.all([
         getAllRecordsByDateRange({
           startDate,
           endDate,
         }),
         getCategoriesCached(),
+        getSettings().catch(() => null),
       ])
 
       records = nextRecords
       categories = cachedCategories
+      settings = nextSettings
+      await refreshConvertedStats()
     } catch (error) {
       const apiError = error as ApiError
       if (apiError.status === 401) {
@@ -188,10 +291,9 @@
     {loading}
     {loadError}
     recordCount={records.length}
-    {netTotal}
-    {incomeTotal}
-    {expenseTotal}
-    {breakdown}
+    {currencySubtotals}
+    {convertedSummary}
+    conversionMessage={records.length > 0 ? conversionMessage : ''}
     {buildCategoryLinkHref}
   />
 </main>

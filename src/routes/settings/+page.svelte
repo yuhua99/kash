@@ -12,6 +12,11 @@
     SUPPORTED_CURRENCIES,
     type SupportedCurrencyCode,
   } from '$lib/shared/currency'
+  import {
+    currentCurrency,
+    initializeCurrentCurrency,
+    setCurrentCurrency,
+  } from '$lib/shared/current-currency'
   import { toast } from '$lib/ui/toast'
   import Block from '$lib/ui/Block.svelte'
   import ListRow from '$lib/ui/ListRow.svelte'
@@ -41,10 +46,18 @@
     mainCurrencyCode = data.settings.main_currency as SupportedCurrencyCode
   }
 
+  $: if (data.settings?.main_currency) {
+    initializeCurrentCurrency(data.settings.main_currency)
+  }
+
   $: settingsLoadError = data.loadError ?? ''
 
   function toggleDisplayMode(): void {
     setAmountDisplayMode($amountDisplayMode === 'cents' ? 'whole' : 'cents')
+  }
+
+  function onCurrentCurrencyChange(value: string): void {
+    setCurrentCurrency(value as SupportedCurrencyCode)
   }
 
   async function onMainCurrencyChange(value: string): Promise<void> {
@@ -119,15 +132,35 @@
         <span>Main currency</span>
       </svelte:fragment>
       <svelte:fragment slot="end">
-        <SelectField
-          id="main-currency"
-          value={mainCurrencyCode}
-          label={mainCurrencyCode}
-          items={currencyItems}
-          disabled={savingMainCurrency || !data.settings}
-          align="end"
-          onValueChange={onMainCurrencyChange}
-        />
+        <div class="settings-inline-select">
+          <SelectField
+            id="main-currency"
+            value={mainCurrencyCode}
+            label={mainCurrencyCode}
+            items={currencyItems}
+            disabled={savingMainCurrency || !data.settings}
+            align="end"
+            onValueChange={onMainCurrencyChange}
+          />
+        </div>
+      </svelte:fragment>
+    </ListRow>
+
+    <ListRow>
+      <svelte:fragment slot="main">
+        <span>Current currency</span>
+      </svelte:fragment>
+      <svelte:fragment slot="end">
+        <div class="settings-inline-select">
+          <SelectField
+            id="current-currency"
+            value={$currentCurrency}
+            label={$currentCurrency}
+            items={currencyItems}
+            align="end"
+            onValueChange={onCurrentCurrencyChange}
+          />
+        </div>
       </svelte:fragment>
     </ListRow>
 
@@ -162,5 +195,15 @@
   .settings-error {
     color: var(--danger);
     margin: 0;
+  }
+
+  .settings-inline-select {
+    min-width: 84px;
+  }
+
+  .settings-inline-select :global(.select-trigger) {
+    height: 28px;
+    padding: 0 8px;
+    background: var(--panel-strong);
   }
 </style>
