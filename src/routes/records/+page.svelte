@@ -5,7 +5,10 @@
   import { invalidateRecordsCache } from '$lib/features/records/cache'
   import { getAllRecordsByDateRange } from '$lib/features/records/query'
   import { getCategoriesCached } from '$lib/features/categories/cache'
+  import { getFxRates } from '$lib/features/fx/api'
   import { toast } from '$lib/ui/toast'
+  import { getSettings } from '$lib/features/settings/api'
+  import { buildRateLookup, convertAmountToMainCurrency } from '$lib/shared/fx'
   import Block from '$lib/ui/Block.svelte'
   import ConfirmDialog from '$lib/ui/ConfirmDialog.svelte'
   import RecordEditDialog from '$lib/features/records/components/RecordEditDialog.svelte'
@@ -64,6 +67,8 @@
   let search = ''
   let categoryFilter: CategoryFilterMode = data.categoryFilter
   let sortMode: SortMode = data.sortMode
+  let convertedAmountById: Map<string, number> = new Map()
+  let refreshSeq = 0
 
   let editingId: string | null = null
   let editName = ''
@@ -189,6 +194,14 @@
     loading = false
   }
 
+  $: {
+    records
+    startDate
+    endDate
+    sortMode
+    void refreshConvertedAmounts()
+  }
+
   function groupRecordsByDate(items: RecordItem[], mode: SortMode): DateGroup[] {
     const grouped = new Map<string, RecordItem[]>()
 
@@ -254,15 +267,65 @@
       case 'date_desc':
         return right.date.localeCompare(left.date)
       case 'amount_asc': {
-        const leftAbs = Math.abs(left.amount)
-        const rightAbs = Math.abs(right.amount)
-        return leftAbs - rightAbs || left.amount - right.amount
+        const leftAmount = convertedAmountById.get(left.id) ?? left.amount
+        const rightAmount = convertedAmountById.get(right.id) ?? right.amount
+        const leftAbs = Math.abs(leftAmount)
+        const rightAbs = Math.abs(rightAmount)
+        return leftAbs - rightAbs || leftAmount - rightAmount
       }
       case 'amount_desc': {
-        const leftAbs = Math.abs(left.amount)
-        const rightAbs = Math.abs(right.amount)
-        return rightAbs - leftAbs || right.amount - left.amount
+        const leftAmount = convertedAmountById.get(left.id) ?? left.amount
+        const rightAmount = convertedAmountById.get(right.id) ?? right.amount
+        const leftAbs = Math.abs(leftAmount)
+        const rightAbs = Math.abs(rightAmount)
+        return rightAbs - leftAbs || rightAmount - leftAmount
       }
+    }
+  }
+
+  async function refreshConvertedAmounts(): Promise<void> {
+    const seq = ++refreshSeq
+
+    if (sortMode !== 'amount_desc' && sortMode !== 'amount_asc') {
+      if (seq !== refreshSeq) return
+      convertedAmountById = new Map()
+      return
+    }
+
+    if (records.length === 0) {
+      if (seq !== refreshSeq) return
+      convertedAmountById = new Map()
+      return
+    }
+
+    try {
+      const settings = await getSettings()
+      const currencies = Array.from(
+        new Set([...records.map((record) => record.currency), settings.main_currency]),
+      )
+      const response = await getFxRates({
+        from: startDate,
+        to: endDate,
+        quotes: currencies,
+      })
+      const rates = buildRateLookup(response.rates)
+
+      if (seq !== refreshSeq) return
+      convertedAmountById = new Map(
+        records.map((record) => [
+          record.id,
+          convertAmountToMainCurrency(
+            record.amount,
+            record.currency,
+            settings.main_currency,
+            record.date,
+            rates,
+          ),
+        ]),
+      )
+    } catch {
+      if (seq !== refreshSeq) return
+      convertedAmountById = new Map()
     }
   }
 
