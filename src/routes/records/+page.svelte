@@ -326,13 +326,8 @@
     if (dateValidation) editDateError = dateValidation
     if (!selectedCategory) editCategoryError = 'Choose a category.'
 
-    if (
-      selectedCategory &&
-      parsedAmount !== 0 &&
-      ((parsedAmount > 0 && !selectedCategory.is_income) ||
-        (parsedAmount < 0 && selectedCategory.is_income))
-    ) {
-      editCategoryError = 'Selected category does not match amount type.'
+    if (parsedAmount < 0) {
+      editAmountError = 'Amount cannot be negative.'
     }
 
     return !(editNameError || editAmountError || editCategoryError || editDateError)
@@ -369,7 +364,7 @@
     activeActionRowId = null
     editingId = record.id
     editName = record.name
-    editAmountInput = String(record.amount)
+    editAmountInput = String(Math.abs(record.amount))
     editCategoryId = record.category_id ?? ''
     editDate = record.date
     editDialogOpen = true
@@ -428,9 +423,12 @@
 
     savingEdit = true
     try {
+      const selectedCategory = categories.find((item) => item.id === editCategoryId)
+      const absoluteAmount = Math.abs(Number(editAmountInput))
+      const signedAmount = selectedCategory?.is_income ? absoluteAmount : -absoluteAmount
       await updateRecord(editingId, {
         name: editName.trim(),
-        amount: Number(editAmountInput),
+        amount: signedAmount,
         category_id: editCategoryId,
         date: editDate.trim(),
       })
