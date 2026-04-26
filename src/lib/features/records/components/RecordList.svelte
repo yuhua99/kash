@@ -10,6 +10,7 @@
   type DateGroup = {
     date: string
     records: RecordItem[]
+    spendSummaries: Array<{ currency: string; amount: number }>
   }
 
   export let loading = false
@@ -41,7 +42,19 @@
       {#if shouldGroupByDate}
         {#each groupedRecords as group (group.date)}
           <section class="section-compact" aria-labelledby={`records-date-${group.date}`}>
-            <p id={`records-date-${group.date}`}>{group.date}</p>
+            <p id={`records-date-${group.date}`}>
+              {group.date}
+              {#if group.spendSummaries.length > 0}
+                <span aria-label="Daily spend total">
+                  (
+                  {#each group.spendSummaries as summary, index (summary.currency)}
+                    {#if index > 0}<span aria-hidden="true">, </span>{/if}
+                    <span>{formatAmount(summary.amount, $amountDisplayMode)} {summary.currency}</span>
+                  {/each}
+                  )
+                </span>
+              {/if}
+            </p>
             {#each group.records as record (record.id)}
               <div
                 data-action-row-shell

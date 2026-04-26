@@ -40,6 +40,7 @@
   type DateGroup = {
     date: string
     records: RecordItem[]
+    spendSummaries: Array<{ currency: string; amount: number }>
   }
 
   type RecordsPageData = PageData & {
@@ -68,6 +69,8 @@
   let categoryFilter: CategoryFilterMode = data.categoryFilter
   let sortMode: SortMode = data.sortMode
   let convertedAmountById: Map<string, number> = new Map()
+  let convertedSpendAmountById: Map<string, number> = new Map()
+  let mainCurrency = ''
   let refreshSeq = 0
 
   let editingId: string | null = null
@@ -180,7 +183,9 @@
     )
     .sort((left, right) => compareRecords(left, right, sortMode, convertedAmountById))
   $: shouldGroupByDate = sortMode === 'date_desc' || sortMode === 'date_asc'
-  $: groupedRecords = shouldGroupByDate ? groupRecordsByDate(filteredRecords, sortMode) : []
+  $: groupedRecords = shouldGroupByDate
+    ? groupRecordsByDate(filteredRecords, sortMode, convertedSpendAmountById, mainCurrency)
+    : []
 
   $: if (data) {
     records = data.records
@@ -202,7 +207,12 @@
     void refreshConvertedAmounts()
   }
 
-  function groupRecordsByDate(items: RecordItem[], mode: SortMode): DateGroup[] {
+  function groupRecordsByDate(
+    items: RecordItem[],
+    mode: SortMode,
+    convertedSpendAmounts: Map<string, number>,
+    convertedCurrency: string,
+  ): DateGroup[] {
     const grouped = new Map<string, RecordItem[]>()
 
     for (const item of items) {
@@ -223,10 +233,47 @@
       return right.localeCompare(left)
     })
 
-    return dates.map((date) => ({
-      date,
-      records: grouped.get(date) ?? [],
-    }))
+    return dates.map((date) => {
+      const dateRecords = grouped.get(date) ?? []
+
+      return {
+        date,
+        records: dateRecords,
+        spendSummaries: summarizeDailySpend(dateRecords, convertedSpendAmounts, convertedCurrency),
+      }
+    })
+  }
+
+  function summarizeDailySpend(
+    items: RecordItem[],
+    convertedSpendAmounts: Map<string, number>,
+    convertedCurrency: string,
+  ): Array<{ currency: string; amount: number }> {
+    if (convertedCurrency) {
+      const convertedTotal = items.reduce(
+        (total, item) => total + (convertedSpendAmounts.get(item.id) ?? 0),
+        0,
+      )
+
+      return convertedTotal > 0 ? [{ currency: convertedCurrency, amount: convertedTotal }] : []
+    }
+
+    const totalsByCurrency = new Map<string, number>()
+
+    for (const item of items) {
+      if (item.amount >= 0) {
+        continue
+      }
+
+      totalsByCurrency.set(
+        item.currency,
+        (totalsByCurrency.get(item.currency) ?? 0) + Math.abs(item.amount),
+      )
+    }
+
+    return [...totalsByCurrency.entries()]
+      .sort(([leftCurrency], [rightCurrency]) => leftCurrency.localeCompare(rightCurrency))
+      .map(([currency, amount]) => ({ currency, amount }))
   }
 
   function matchesRecordFilters(
@@ -285,16 +332,22 @@
 
   async function refreshConvertedAmounts(): Promise<void> {
     const seq = ++refreshSeq
+    const needsAmountConversion = sortMode === 'amount_desc' || sortMode === 'amount_asc'
+    const needsSpendConversion = sortMode === 'date_desc' || sortMode === 'date_asc'
 
-    if (sortMode !== 'amount_desc' && sortMode !== 'amount_asc') {
+    if (!needsAmountConversion && !needsSpendConversion) {
       if (seq !== refreshSeq) return
       convertedAmountById = new Map()
+      convertedSpendAmountById = new Map()
+      mainCurrency = ''
       return
     }
 
     if (records.length === 0) {
       if (seq !== refreshSeq) return
       convertedAmountById = new Map()
+      convertedSpendAmountById = new Map()
+      mainCurrency = ''
       return
     }
 
@@ -310,22 +363,33 @@
       })
       const rates = buildRateLookup(response.rates)
 
+      function convertRecordAmount(record: RecordItem): number {
+        return convertAmountToMainCurrency(
+          record.amount,
+          record.currency,
+          settings.main_currency,
+          record.date,
+          rates,
+        )
+      }
+
       if (seq !== refreshSeq) return
-      convertedAmountById = new Map(
-        records.map((record) => [
-          record.id,
-          convertAmountToMainCurrency(
-            record.amount,
-            record.currency,
-            settings.main_currency,
-            record.date,
-            rates,
-          ),
-        ]),
-      )
+      mainCurrency = settings.main_currency
+      convertedAmountById = needsAmountConversion
+        ? new Map(records.map((record) => [record.id, convertRecordAmount(record)]))
+        : new Map()
+      convertedSpendAmountById = needsSpendConversion
+        ? new Map(
+            records
+              .filter((record) => record.amount < 0)
+              .map((record) => [record.id, Math.abs(convertRecordAmount(record))]),
+          )
+        : new Map()
     } catch {
       if (seq !== refreshSeq) return
       convertedAmountById = new Map()
+      convertedSpendAmountById = new Map()
+      mainCurrency = ''
     }
   }
 
