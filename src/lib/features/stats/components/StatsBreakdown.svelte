@@ -50,7 +50,7 @@
                 class:amount--income={item.total > 0}
                 class:amount--expense={item.total < 0}
               >
-                {formatSignedAmount(item.total, $amountDisplayMode)}
+                {formatSignedAmount(item.total, $amountDisplayMode, item.currency)}
               </span>
             </div>
           {/each}
@@ -67,7 +67,11 @@
                 class:amount--income={convertedSummary.netTotal > 0}
                 class:amount--expense={convertedSummary.netTotal < 0}
               >
-                {formatSignedAmount(convertedSummary.netTotal, $amountDisplayMode)}
+                {formatSignedAmount(
+                  convertedSummary.netTotal,
+                  $amountDisplayMode,
+                  convertedSummary.mainCurrencyCode,
+                )}
               </span>
             </div>
 
@@ -77,11 +81,19 @@
               >
               <span class="stats-summary__pair">
                 <span class="amount amount--income"
-                  >{formatAmount(convertedSummary.incomeTotal, $amountDisplayMode)}</span
+                  >{formatAmount(
+                    convertedSummary.incomeTotal,
+                    $amountDisplayMode,
+                    convertedSummary.mainCurrencyCode,
+                  )}</span
                 >
                 <span class="stats-summary__slash">/</span>
                 <span class="amount amount--expense"
-                  >{formatSignedAmount(-convertedSummary.expenseTotal, $amountDisplayMode)}</span
+                  >{formatSignedAmount(
+                    -convertedSummary.expenseTotal,
+                    $amountDisplayMode,
+                    convertedSummary.mainCurrencyCode,
+                  )}</span
                 >
               </span>
             </div>
@@ -100,7 +112,11 @@
                       class:amount--income={item.total >= 0}
                       class:amount--expense={item.total < 0}
                     >
-                      {formatAmount(item.total, $amountDisplayMode)} {convertedSummary.mainCurrencyCode}
+                      {formatAmount(
+                        item.total,
+                        $amountDisplayMode,
+                        convertedSummary.mainCurrencyCode,
+                      )} {convertedSummary.mainCurrencyCode}
                     </span>
                   </svelte:fragment>
                   <svelte:fragment slot="sub">

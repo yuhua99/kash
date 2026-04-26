@@ -49,7 +49,7 @@
                   (
                   {#each group.spendSummaries as summary, index (summary.currency)}
                     {#if index > 0}<span aria-hidden="true">, </span>{/if}
-                    <span>{formatAmount(summary.amount, $amountDisplayMode)} {summary.currency}</span>
+                    <span>{formatAmount(summary.amount, $amountDisplayMode, summary.currency)} {summary.currency}</span>
                   {/each}
                   )
                 </span>
@@ -73,7 +73,7 @@
                       class:amount--income={record.amount > 0}
                       class:amount--expense={record.amount < 0}
                     >
-                      {formatAmount(record.amount, $amountDisplayMode)} {record.currency}
+                      {formatAmount(record.amount, $amountDisplayMode, record.currency)} {record.currency}
                     </div>
                   </div>
                   <svelte:fragment slot="sub">
@@ -118,7 +118,7 @@
                   class:amount--income={record.amount > 0}
                   class:amount--expense={record.amount < 0}
                 >
-                  {formatAmount(record.amount, $amountDisplayMode)} {record.currency}
+                  {formatAmount(record.amount, $amountDisplayMode, record.currency)} {record.currency}
                 </div>
               </div>
               <svelte:fragment slot="sub">

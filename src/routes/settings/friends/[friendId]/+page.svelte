@@ -299,7 +299,7 @@
           <svelte:fragment slot="main">
             <span>{item.currency}</span>
             <span class={`amount ${amountClass(item.total)}`}
-              >{formatSignedAmount(item.total, $amountDisplayMode)}</span
+              >{formatSignedAmount(item.total, $amountDisplayMode, item.currency)}</span
             >
           </svelte:fragment>
         </ListRow>
@@ -314,7 +314,7 @@
           <svelte:fragment slot="main">
             <span>Total</span>
             <span class={`amount ${amountClass(netAmount)}`}
-              >{formatSignedAmount(netAmount, $amountDisplayMode)}</span
+              >{formatSignedAmount(netAmount, $amountDisplayMode, mainCurrencyCode)}</span
             >
           </svelte:fragment>
           <svelte:fragment slot="sub">
@@ -352,6 +352,7 @@
               {formatSignedAmount(
                 item.direction === 'you_owe' ? -item.amount : item.amount,
                 $amountDisplayMode,
+                item.currency,
               )} {item.currency}
             </span>
           </svelte:fragment>

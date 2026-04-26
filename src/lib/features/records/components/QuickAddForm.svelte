@@ -685,9 +685,10 @@
             {#if selectedParticipantIds.length > 0}
               <div class="split-footer">
                 <p>
-                  Friends: {formatAmount(participantSum, $amountDisplayMode)} · Your share: {formatAmount(
+                  Friends: {formatAmount(participantSum, $amountDisplayMode, $currentCurrency)} · Your share: {formatAmount(
                     yourShare,
                     $amountDisplayMode,
+                    $currentCurrency,
                   )}
                 </p>
                 <Button

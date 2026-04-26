@@ -4,6 +4,7 @@ import { writable } from 'svelte/store'
 export type AmountDisplayMode = 'cents' | 'whole'
 
 const STORAGE_KEY = 'kash_amount_display_mode'
+const ZERO_DECIMAL_CURRENCIES = new Set(['IDR', 'JPY', 'KRW', 'TWD', 'VND'])
 
 function loadMode(): AmountDisplayMode {
   if (!browser) return 'cents'
@@ -23,29 +24,43 @@ export function setAmountDisplayMode(mode: AmountDisplayMode): void {
 
 /**
  * Single shared formatter for all amount displays in the app.
- * - 'cents': two decimal places, e.g. "123.45"
+ * - 'cents': currency decimals, e.g. "123.45" or "123" for TWD/JPY
  * - 'whole': truncated integer, e.g. "123"
  *
  * Sign is preserved in both modes: formatAmount(-123.9, 'whole') → "-123"
  */
-export function formatAmount(value: number, mode: AmountDisplayMode): string {
-  const normalizedValue = value === 0 ? 0 : value
-
+export function formatAmount(value: number, mode: AmountDisplayMode, currency?: string): string {
   if (mode === 'whole') {
-    return String(Math.trunc(normalizedValue))
+    return String(Math.trunc(value))
   }
 
-  return normalizedValue.toFixed(2)
+  return value.toFixed(getCurrencyFractionDigits(currency))
 }
 
-export function formatSignedAmount(value: number, mode: AmountDisplayMode): string {
+export function formatSignedAmount(
+  value: number,
+  mode: AmountDisplayMode,
+  currency?: string,
+): string {
   if (value > 0) {
-    return `+${formatAmount(Math.abs(value), mode)}`
+    return `+${formatAmount(Math.abs(value), mode, currency)}`
   }
 
   if (value < 0) {
-    return `-${formatAmount(Math.abs(value), mode)}`
+    return `-${formatAmount(Math.abs(value), mode, currency)}`
   }
 
-  return formatAmount(0, mode)
+  return formatAmount(0, mode, currency)
+}
+
+function getCurrencyFractionDigits(currency?: string): number {
+  if (!currency) {
+    return 2
+  }
+
+  if (ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase())) {
+    return 0
+  }
+
+  return 2
 }
